@@ -1,0 +1,14 @@
+**/node_modules
+**/.env
+**/.env.*
+.git
+.expo
+android
+app
+assets
+prototype
+src
+docs
+backend/dist
+backend/storage
+backend/coverage
