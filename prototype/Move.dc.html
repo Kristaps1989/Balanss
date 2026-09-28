@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<title>Balanss — Kustība</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+html,body{overflow:hidden;width:390px;height:844px}
+body{margin:0;background:#F7F3EE;color:#26231F;font-family:'Figtree',-apple-system,'Segoe UI',sans-serif}
+a{color:#A9502A;text-decoration:none}a:hover{color:#8A3F1F}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.d{font-family:'Bricolage Grotesque','Figtree',-apple-system,sans-serif;letter-spacing:-0.02em}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sc{scrollbar-width:none}.sc::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+<main style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F7F3EE">
+<div class="sc" style="scrollbar-width: none; overflow-x: hidden; position: absolute; top: 0; left: 0; right: 0; bottom: 86px; overflow-y: auto; padding: 56px 20px 28px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<h1 class="d" style="margin: 0; font-size: 30px; font-weight: 700">Kustība</h1>
+<a href="Me.dc.html" aria-label="Mans profils" class="d" style="width: 44px; height: 44px; border-radius: 22px; background: #E9E1D5; color: #26231F; font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0">I</a>
+</div>
+
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end">
+<div>
+<div style="font-size: 14px; color: #5E5850">Soļi šodien</div>
+<div><span class="d" style="font-size: 36px; font-weight: 700">6 430</span><span style="font-size: 15px; color: #5E5850"> / 8 000</span></div>
+</div>
+<div style="font-size: 14px; color: #5E5850; padding-bottom: 6px">310 aktīvās kcal</div>
+</div>
+<div style="height: 10px; border-radius: 5px; background: #E3EEE7"><div style="width: 80%; height: 10px; border-radius: 5px; background: #5E8C74"></div></div>
+<div style="position: relative; height: 96px; margin-top: 6px">
+<div style="position: absolute; left: 0; right: 0; top: 26px; border-top: 1.5px dashed #8C857B"></div>
+<div style="position: absolute; inset: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; align-items: end">
+<sc-for list="{{steps}}" as="b" hint-placeholder-count="7">
+<div style="border-radius: 6px 6px 3px 3px; height: {{b.h}}; background: {{b.c}}" title="{{b.t}}"></div>
+</sc-for>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; font-size: 12px; font-weight: 600; color: #5E5850; text-align: center">
+<span>P</span><span>O</span><span>T</span><span>C</span><span>Pk</span><span>S</span><span style="color: #26231F">Sv</span>
+</div>
+<div style="font-size: 12px; color: #6F685E">Dati no Apple Health</div>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 13px; color: #5E5850">Miera pulss</div>
+<div><span class="d" style="font-size: 28px; font-weight: 700">61</span><span style="font-size: 13px; color: #5E5850"> sit./min</span></div>
+<svg viewBox="0 0 130 40" style="width: 100%; height: 40px" aria-label="Miera pulss 7 dienās: stabils">
+<polyline points="{{hrPts}}" style="fill: none; stroke: #C2475E; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"></polyline>
+</svg>
+<div style="font-size: 12px; color: #6F685E">7 dienas · stabils</div>
+</section>
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 13px; color: #5E5850">Sirds ritma mainība</div>
+<div><span class="d" style="font-size: 28px; font-weight: 700">42</span><span style="font-size: 13px; color: #5E5850"> ms</span></div>
+<svg viewBox="0 0 130 40" style="width: 100%; height: 40px" aria-label="HRV 7 dienās">
+<polyline points="{{hrvPts}}" style="fill: none; stroke: #56679A; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"></polyline>
+</svg>
+<div style="font-size: 12px; color: #6F685E">7 dienas · tavā ierastajā robežā</div>
+</section>
+</div>
+
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 24px; padding: 8px 18px; display: flex; flex-direction: column">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700; padding: 10px 0 6px">Treniņi</h2>
+<sc-for list="{{workouts}}" as="w" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 12px; min-height: 68px; border-top: 1px solid #F0EAE1">
+<div style="width: 44px; height: 44px; border-radius: 14px; background: #E6EFE9; color: #2F6049; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" style="width: 22px; height: 22px"><path d="M3 12.5h4l2.5-6 5 12 2.5-6H21"></path></svg></div>
+<div style="flex-grow: 1">
+<div style="font-size: 15px; font-weight: 700">{{w.name}}</div>
+<div style="font-size: 13px; color: #5E5850">{{w.meta}}</div>
+</div>
+<div style="text-align: right">
+<div style="font-size: 15px; font-weight: 700">{{w.hr}}</div>
+<div style="font-size: 12px; color: #6F685E">vid. pulss</div>
+</div>
+</div>
+</sc-for>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div>
+<h2 style="margin: 0; font-size: 17px; font-weight: 700">Pulsa zonas</h2>
+<div style="font-size: 13px; color: #5E5850">Nūjošana, šodien · 42 min</div>
+</div>
+<sc-for list="{{zones}}" as="z" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 92px minmax(0, 1fr) 48px; gap: 10px; align-items: center">
+<div style="font-size: 13px; font-weight: 600">{{z.name}}</div>
+<div style="height: 12px; border-radius: 6px; background: #F2ECE3"><div style="height: 12px; border-radius: 6px; background: {{z.c}}; width: {{z.w}}"></div></div>
+<div style="font-size: 13px; font-weight: 700; text-align: right">{{z.min}}</div>
+</div>
+</sc-for>
+<div style="font-size: 12px; color: #6F685E">Dati no Apple Health · Polar H10</div>
+</section>
+</div>
+
+<nav aria-label="Galvenā navigācija" style="position: absolute; left: 0; right: 0; bottom: 0; height: 86px; padding: 6px 8px 0; background: #FFFFFF; border-top: 1px solid #ECE5DA; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: start; justify-items: center">
+<a href="Home.dc.html" style="width: 100%; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600; color: #6F685E"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"></path></svg>Šodiena</a>
+<a href="Food-Log.dc.html" style="width: 100%; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600; color: #6F685E"><svg class="i" viewBox="0 0 24 24"><path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z"></path><path d="M9 8c0-1.5 1.2-1.8 1.2-3.3M13.5 8c0-1.5 1.2-1.8 1.2-3.3"></path></svg>Uzturs</a>
+<a href="Add-Sheet.dc.html" aria-label="Pievienot" style="width: 60px; height: 60px; margin-top: -24px; border-radius: 30px; background: #D9693C; color: #FFFFFF; border: 4px solid #F7F3EE; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(217,105,60,0.30)"><svg class="i" viewBox="0 0 24 24" style="width: 26px; height: 26px; stroke-width: 2.4"><path d="M12 5v14M5 12h14"></path></svg></a>
+<a href="Move.dc.html" aria-current="page" style="width: 100%; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 700; color: #A9502A"><svg class="i" viewBox="0 0 24 24"><path d="M3 12.5h4l2.5-6 5 12 2.5-6H21"></path></svg>Kustība</a>
+<a href="Sleep.dc.html" style="width: 100%; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600; color: #6F685E"><svg class="i" viewBox="0 0 24 24"><path d="M19.5 14.2A7.8 7.8 0 1 1 9.8 4.5a6.2 6.2 0 0 0 9.7 9.7z"></path></svg>Miegs</a>
+</nav>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const S = [7820, 9140, 5600, 8310, 7050, 10220, 6430];
+    const spark = (vals, lo, hi) => vals.map((v, i) => (4 + i * 20.3).toFixed(1) + ',' + (36 - (v - lo) / (hi - lo) * 32).toFixed(1)).join(' ');
+    const zmax = 21;
+    const zone = (name, min, c) => ({ name, min: min + ' min', c, w: (min / zmax * 100).toFixed(0) + '%' });
+    return {
+      steps: S.map((v, i) => ({ h: (v / 11000 * 96).toFixed(0) + 'px', c: i === 6 ? '#5E8C74' : '#C9D9CF', t: v + ' soļi' })),
+      hrPts: spark([63, 62, 62, 60, 61, 62, 61], 57, 66),
+      hrvPts: spark([38, 41, 40, 44, 39, 43, 42], 34, 48),
+      workouts: [
+        { name: 'Nūjošana', meta: 'Šodien 09:30 · 42 min · Polar H10', hr: '112' },
+        { name: 'Joga', meta: 'Piektdien · 30 min · Apple Watch', hr: '88' },
+        { name: 'Pastaiga', meta: 'Ceturtdien · 55 min · Apple Watch', hr: '98' }
+      ],
+      zones: [
+        zone('1 · Ļoti viegli', 9, '#CBD3EA'),
+        zone('2 · Viegli', 21, '#8494C6'),
+        zone('3 · Vidēji', 10, '#5E8C74'),
+        zone('4 · Intensīvi', 2, '#C08A2E'),
+        zone('5 · Maksimāli', 0, '#D9693C')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

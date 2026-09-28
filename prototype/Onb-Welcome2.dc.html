@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<title>Balanss — sveiciens 2</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+html,body{overflow:hidden;width:390px;height:844px}
+body{margin:0;background:#F7F3EE;color:#26231F;font-family:'Figtree',-apple-system,'Segoe UI',sans-serif}
+a{color:#A9502A;text-decoration:none}a:hover{color:#8A3F1F}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.d{font-family:'Bricolage Grotesque','Figtree',-apple-system,sans-serif;letter-spacing:-0.02em}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+</style>
+</helmet>
+<main style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F7F3EE; display: flex; flex-direction: column; padding: 56px 24px 40px">
+<div style="display: flex; justify-content: space-between; align-items: center; height: 44px">
+<a href="Main.dc.html" aria-label="Atpakaļ" style="width: 44px; height: 44px; display: flex; align-items: center; color: #26231F"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"></path></svg></a>
+<a href="Onb-Login.dc.html" style="font-size: 16px; font-weight: 600; color: #6F685E; padding: 12px 4px">Izlaist</a>
+</div>
+<div style="flex-grow: 1; display: flex; align-items: center; justify-content: center">
+<div style="width: 300px; height: 300px; border-radius: 150px; background: #E9EEF6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px">
+<div style="display: flex; gap: 12px">
+<div style="width: 64px; height: 64px; border-radius: 20px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; color: #56679A"><svg class="i" viewBox="0 0 24 24" style="width: 30px; height: 30px"><rect x="7" y="6" width="10" height="12" rx="3"></rect><path d="M9 6l.7-3h4.6l.7 3M9 18l.7 3h4.6l.7-3"></path></svg></div>
+<div style="width: 64px; height: 64px; border-radius: 20px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; color: #56679A"><svg class="i" viewBox="0 0 24 24" style="width: 30px; height: 30px"><circle cx="12" cy="12" r="6.5"></circle><circle cx="12" cy="12" r="3"></circle></svg></div>
+<div style="width: 64px; height: 64px; border-radius: 20px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; color: #56679A"><svg class="i" viewBox="0 0 24 24" style="width: 30px; height: 30px"><path d="M3 12h4M17 12h4"></path><rect x="7" y="9" width="10" height="6" rx="3"></rect></svg></div>
+</div>
+<svg class="i" viewBox="0 0 24 24" style="width: 28px; height: 28px; color: #56679A"><path d="M12 4v16M6 14l6 6 6-6"></path></svg>
+<div style="height: 64px; padding: 0 22px; border-radius: 20px; background: #FFFFFF; display: flex; align-items: center; gap: 10px">
+<svg viewBox="0 0 48 48" role="img" aria-label="Balanss" style="width: 36px; height: 36px; flex-shrink: 0"><rect x="0" y="0" width="48" height="48" rx="14.7" style="fill: #D9693C"></rect><circle cx="24" cy="24" r="13" style="fill: none; stroke: #FFFFFF; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 64 82; transform: rotate(-50deg); transform-origin: 24px 24px"></circle><path d="M16.5 24H31.5" style="stroke: #FFFFFF; stroke-width: 3; stroke-linecap: round"></path><circle cx="24" cy="24" r="4.2" style="fill: #FFFFFF"></circle></svg>
+<div class="d" style="font-size: 18px; font-weight: 600">Balanss</div>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 28px">
+<h1 class="d" style="margin: 0; font-size: 32px; line-height: 1.1; font-weight: 700">Tavs pulkstenis jau zina daudz</h1>
+<p style="margin: 0; font-size: 17px; line-height: 1.5; color: #5E5850">Soļus, pulsu un miegu nolasām no Apple Health vai Health Connect — nekas papildus nav jāvalkā.</p>
+</div>
+<div style="display: flex; gap: 8px; padding-bottom: 24px" aria-label="2. no 3 slaidiem">
+<span style="width: 8px; height: 8px; border-radius: 4px; background: #D8D0C4"></span>
+<span style="width: 22px; height: 8px; border-radius: 4px; background: #26231F"></span>
+<span style="width: 8px; height: 8px; border-radius: 4px; background: #D8D0C4"></span>
+</div>
+<a href="Onb-Welcome3.dc.html" style="height: 56px; border-radius: 28px; background: #26231F; color: #FFFFFF; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center">Tālāk</a>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

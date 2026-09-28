@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<title>Balanss — personības testa ievads</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+html,body{overflow:hidden;width:390px;height:844px}
+body{margin:0;background:#F7F3EE;color:#26231F;font-family:'Figtree',-apple-system,'Segoe UI',sans-serif}
+a{color:#A9502A;text-decoration:none}a:hover{color:#8A3F1F}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.d{font-family:'Bricolage Grotesque','Figtree',-apple-system,sans-serif;letter-spacing:-0.02em}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+</style>
+</helmet>
+<main style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F7F3EE">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 150px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 56px 20px 16px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 12px; height: 44px">
+<a href="Onb-Goals.dc.html" aria-label="Atpakaļ" style="width: 44px; height: 44px; display: flex; align-items: center; color: #26231F"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"></path></svg></a>
+<div style="flex-grow: 1; height: 6px; border-radius: 3px; background: #E6DED3; overflow: hidden"><div style="width: 71%; height: 6px; background: #26231F"></div></div>
+<div style="font-size: 13px; font-weight: 600; color: #6F685E">5/7</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 class="d" style="margin: 0; font-size: 28px; line-height: 1.12; font-weight: 700">Mērķi ir vieglāk sasniegt, ja zini, kāds esi</h1>
+<p style="margin: 0; font-size: 16px; line-height: 1.45; color: #5E5850">2 minūtes, 20 apgalvojumi. Uzzināsi savu stilu, un mēs ieteiksim, atgādināsim un pajautāsim tieši tā, kā tev der.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #6F685E">Piemēram</div>
+<sc-for list="{{examples}}" as="e" hint-placeholder-count="3">
+<div style="background: #FFFFFF; border: 1px solid #EDE6DB; border-radius: 20px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+<span style="align-self: flex-start; height: 26px; padding: 0 10px; border-radius: 13px; font-size: 12px; font-weight: 700; display: flex; align-items: center; background: {{e.bg}}; color: {{e.fg}}">{{e.trait}}</span>
+<div style="font-size: 15px; line-height: 1.4; color: #26231F">{{e.say}}</div>
+</div>
+</sc-for>
+</div>
+<button onClick="{{toggle}}" aria-pressed="{{onStr}}" style="display: flex; align-items: flex-start; gap: 12px; text-align: left; padding: 4px 2px">
+<span style="width: 24px; height: 24px; border-radius: 7px; flex-shrink: 0; border: 2px solid {{bd}}; background: {{fill}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" style="width: 16px; height: 16px; stroke-width: 3"><path d="{{check}}"></path></svg></span>
+<span style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 15px; font-weight: 600">Atļauju izmantot rezultātu ieteikumu pielāgošanai</span>
+<span style="font-size: 13px; color: #6F685E">Vari mainīt vai dzēst jebkurā brīdī sadaļā “Es”.</span>
+</span>
+</button>
+</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 20px 36px; background: #F7F3EE; display: flex; flex-direction: column; gap: 4px">
+<a href="Onb-Test.dc.html" style="height: 56px; border-radius: 28px; background: #26231F; color: #FFFFFF; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center">Uzzināt savu stilu</a>
+<a href="Home.dc.html" style="height: 44px; font-size: 16px; font-weight: 600; color: #5E5850; display: flex; align-items: center; justify-content: center">Izlaist — pielāgošu vēlāk</a>
+</div>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { ok: true }; }
+  renderVals() {
+    const on = this.state.ok;
+    return {
+      examples: [
+        { trait: 'Ja tev patīk jaunais', bg: '#F6E7CF', fg: '#5E420F', say: 'Ko jaunu šonedēļ izmēģināji? Ideja: lēcu zupa ar ciedru riekstiem.' },
+        { trait: 'Ja tev patīk plāns', bg: '#EEF0F8', fg: '#2E3B66', say: 'Šodien trūkst 42 g olbaltumvielu. Plāns: biezpiens brokastīs (+18 g).' },
+        { trait: 'Ja viegli satraucies', bg: '#E6EFE9', fg: '#24503B', say: 'Miegs bija īsāks, tas ir normāli. Šodien — bez spiediena.' }
+      ],
+      onStr: on ? 'true' : 'false',
+      bd: on ? '#D9693C' : '#B8AFA3', fill: on ? '#D9693C' : '#FFFFFF', check: on ? 'M5 12.5l4.5 4.5L19 7.5' : '',
+      toggle: () => this.setState({ ok: !on })
+    };
+  }
+}
+</script>
+</body>
+</html>

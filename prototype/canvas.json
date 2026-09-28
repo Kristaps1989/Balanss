@@ -1,0 +1,278 @@
+{
+ "v": 3,
+ "attachments": {},
+ "boards": {
+  "Add-Sheet.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "1 + Pievienot",
+   "w": 390,
+   "x": 470,
+   "y": 1264
+  },
+  "Food-Add.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "2c Citi ievades veidi",
+   "w": 390,
+   "x": 2820,
+   "y": 1264
+  },
+  "Food-Analyzing.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "2b Foto · analizēju",
+   "w": 390,
+   "x": 1880,
+   "y": 1264
+  },
+  "Food-Camera.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "2b Foto · kamera",
+   "w": 390,
+   "x": 1410,
+   "y": 1264
+  },
+  "Food-Log.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "2a Uzturs · dienas žurnāls",
+   "w": 390,
+   "x": 940,
+   "y": 1264
+  },
+  "Food-Result.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "2b Foto · rezultāts",
+   "w": 390,
+   "x": 2350,
+   "y": 1264
+  },
+  "Food-Trends.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "2d Tendences",
+   "w": 390,
+   "x": 3290,
+   "y": 1264
+  },
+  "Home.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "1 Šodiena",
+   "w": 390,
+   "x": 0,
+   "y": 1264
+  },
+  "Main.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "0.1 Sveiciens · 1/3",
+   "w": 390,
+   "x": 0,
+   "y": 0
+  },
+  "Me.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "5 Es",
+   "w": 390,
+   "x": 940,
+   "y": 2528
+  },
+  "Move.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "3 Kustība",
+   "w": 390,
+   "x": 0,
+   "y": 2528
+  },
+  "Notif-Explore.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "7 Paziņojumi · augsta atvērtība",
+   "w": 390,
+   "x": 2350,
+   "y": 2528
+  },
+  "Notif-Gentle.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "7 Paziņojumi · zema emoc. stabilitāte",
+   "w": 390,
+   "x": 2820,
+   "y": 2528
+  },
+  "Notif-Plan.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "7 Paziņojumi · augsts apzinīgums",
+   "w": 390,
+   "x": 1880,
+   "y": 2528
+  },
+  "Onb-Basics.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "0.2 Pamatdati",
+   "w": 390,
+   "x": 1880,
+   "y": 0
+  },
+  "Onb-Device.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "0.3 Ierīces",
+   "w": 390,
+   "x": 2350,
+   "y": 0
+  },
+  "Onb-Goals.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "0.4 Mērķi",
+   "w": 390,
+   "x": 2820,
+   "y": 0
+  },
+  "Onb-Result.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "0.7 Rezultāts",
+   "w": 390,
+   "x": 4230,
+   "y": 0
+  },
+  "Onb-Test.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "0.6 Tests (3 piemēri)",
+   "w": 390,
+   "x": 3760,
+   "y": 0
+  },
+  "Onb-TestIntro.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "0.5 Testa ievads",
+   "w": 390,
+   "x": 3290,
+   "y": 0
+  },
+  "Onb-Welcome2.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "0.1 Sveiciens · 2/3",
+   "w": 390,
+   "x": 470,
+   "y": 0
+  },
+  "Onb-Welcome3.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "0.1 Sveiciens · 3/3",
+   "w": 390,
+   "x": 940,
+   "y": 0
+  },
+  "Pro.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "8 Pro",
+   "w": 390,
+   "x": 3290,
+   "y": 2528
+  },
+  "Sleep.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "4 Miegs",
+   "w": 390,
+   "x": 470,
+   "y": 2528
+  },
+  "Tone-Compare.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "title": "6 Tie paši dati, cits tonis",
+   "w": 390,
+   "x": 1410,
+   "y": 2528
+  },
+  "Onb-Login.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "0.1b Pieslēgšanās",
+   "is_interactive": true
+  }
+ },
+ "createdOnFiles": {
+  "at": "2026-09-27T10:00:00Z",
+  "v": 1
+ },
+ "designSystems": [],
+ "launch": {
+  "view": "canvas"
+ },
+ "notes": {
+  "row1": {
+   "kind": "title1",
+   "maxW": 4620,
+   "text": "Onboarding",
+   "w": 240,
+   "x": 0,
+   "y": -300
+  },
+  "row2": {
+   "kind": "title1",
+   "maxW": 3680,
+   "text": "Šodiena un uzturs",
+   "w": 240,
+   "x": 0,
+   "y": 964
+  },
+  "row3": {
+   "kind": "title1",
+   "maxW": 3680,
+   "text": "Kustība, miegs, profils un tonis",
+   "w": 240,
+   "x": 0,
+   "y": 2228
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "Onb-Welcome2.dc.html",
+  "Onb-Welcome3.dc.html",
+  "Onb-Login.dc.html",
+  "Onb-Basics.dc.html",
+  "Onb-Device.dc.html",
+  "Onb-Goals.dc.html",
+  "Onb-TestIntro.dc.html",
+  "Onb-Test.dc.html",
+  "Onb-Result.dc.html",
+  "Home.dc.html",
+  "Add-Sheet.dc.html",
+  "Food-Log.dc.html",
+  "Food-Camera.dc.html",
+  "Food-Analyzing.dc.html",
+  "Food-Result.dc.html",
+  "Food-Add.dc.html",
+  "Food-Trends.dc.html",
+  "Move.dc.html",
+  "Sleep.dc.html",
+  "Me.dc.html",
+  "Tone-Compare.dc.html",
+  "Notif-Plan.dc.html",
+  "Notif-Explore.dc.html",
+  "Notif-Gentle.dc.html",
+  "Pro.dc.html"
+ ],
+ "pages": [],
+ "title": "Balanss — prototips"
+}

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<title>Balanss — analizēju</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+html,body{overflow:hidden;width:390px;height:844px}
+body{margin:0;background:#F7F3EE;color:#26231F;font-family:'Figtree',-apple-system,'Segoe UI',sans-serif}
+a{color:#A9502A;text-decoration:none}a:hover{color:#8A3F1F}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.d{font-family:'Bricolage Grotesque','Figtree',-apple-system,sans-serif;letter-spacing:-0.02em}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+@keyframes scan{0%{top:8%}50%{top:88%}100%{top:8%}}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+.scan{animation:scan 2.4s ease-in-out infinite}
+.p1{animation:pulse 1.2s ease-in-out infinite}.p2{animation:pulse 1.2s ease-in-out .2s infinite}.p3{animation:pulse 1.2s ease-in-out .4s infinite}
+</style>
+</helmet>
+<main style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F7F3EE; display: flex; flex-direction: column">
+<div style="position: relative; width: 390px; height: 430px; background: #5B4E43; overflow: hidden; flex-shrink: 0">
+<svg viewBox="0 0 390 430" aria-hidden="true" style="position: absolute; inset: 0; width: 390px; height: 430px">
+<circle cx="195" cy="236" r="150" style="fill: #F4F1EC"></circle>
+<circle cx="195" cy="236" r="118" style="fill: #FBF9F6"></circle>
+<path d="M120 204c10-30 70-38 90-12 10 14-6 40-40 44-30 4-58-12-50-32z" style="fill: #E7C9A2"></path>
+<ellipse cx="238" cy="274" rx="52" ry="34" style="fill: #F2EDE3"></ellipse>
+<path d="M200 164c14-18 44-20 58-4 10 12 4 30-18 34-24 4-48-12-40-30z" style="fill: #8DB67A"></path>
+<ellipse cx="160" cy="284" rx="26" ry="16" style="fill: #E5D08E"></ellipse>
+</svg>
+<div class="scan" style="position: absolute; left: 24px; right: 24px; height: 3px; border-radius: 2px; background: #F5B48F; box-shadow: 0 0 18px 4px rgba(245,180,143,0.6)"></div>
+<a href="Food-Log.dc.html" aria-label="Atcelt" style="position: absolute; left: 16px; top: 56px; width: 44px; height: 44px; border-radius: 22px; background: rgba(0,0,0,0.45); color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+</div>
+<div style="flex-grow: 1; padding: 28px 24px 40px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 10px">
+<span class="p1" style="width: 10px; height: 10px; border-radius: 5px; background: #D9693C"></span>
+<span class="p2" style="width: 10px; height: 10px; border-radius: 5px; background: #D9693C"></span>
+<span class="p3" style="width: 10px; height: 10px; border-radius: 5px; background: #D9693C"></span>
+</div>
+<h1 class="d" style="margin: 0; font-size: 30px; font-weight: 700">{{title}}</h1>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 10px; font-size: 16px; color: {{s.color}}">
+<svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px"><path d="{{s.icon}}"></path></svg>
+{{s.label}}
+</div>
+</sc-for>
+</div>
+<div style="flex-grow: 1"></div>
+<sc-if value="{{done}}" hint-placeholder-val="{{false}}">
+<a href="Food-Result.dc.html" style="height: 56px; border-radius: 28px; background: #26231F; color: #FFFFFF; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center">Skatīt rezultātu</a>
+</sc-if>
+<sc-if value="{{waiting}}" hint-placeholder-val="{{true}}">
+<div style="height: 56px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #6F685E">Parasti tas aizņem pāris sekundes</div>
+</sc-if>
+</div>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { t: 0 }; }
+  componentDidMount() {
+    this.a = setTimeout(() => this.setState({ t: 1 }), 900);
+    this.b = setTimeout(() => this.setState({ t: 2 }), 1800);
+    this.c = setTimeout(() => this.setState({ t: 3 }), 2700);
+  }
+  componentWillUnmount() { clearTimeout(this.a); clearTimeout(this.b); clearTimeout(this.c); }
+  renderVals() {
+    const t = this.state.t;
+    const ok = 'M5 12.5l4.5 4.5L19 7.5', dot = 'M12 12h.01';
+    const st = (k, label) => ({ label, icon: t > k ? ok : dot, color: t > k ? '#26231F' : '#8C857B' });
+    return {
+      title: t >= 3 ? 'Gatavs' : 'Analizēju…',
+      steps: [st(0, 'Atpazīstu produktus'), st(1, 'Novērtēju porcijas'), st(2, 'Rēķinu uzturvērtību')],
+      done: t >= 3, waiting: t < 3
+    };
+  }
+}
+</script>
+</body>
+</html>

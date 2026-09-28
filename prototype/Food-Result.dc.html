@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<title>Balanss — foto rezultāts</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+html,body{overflow:hidden;width:390px;height:844px}
+body{margin:0;background:#F7F3EE;color:#26231F;font-family:'Figtree',-apple-system,'Segoe UI',sans-serif}
+a{color:#A9502A;text-decoration:none}a:hover{color:#8A3F1F}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.d{font-family:'Bricolage Grotesque','Figtree',-apple-system,sans-serif;letter-spacing:-0.02em}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sc{scrollbar-width:none}.sc::-webkit-scrollbar{display:none}
+input[type=range]{width:100%;height:32px;accent-color:#D9693C;margin:0}
+</style>
+</helmet>
+<main style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F7F3EE">
+<div class="sc" style="scrollbar-width: none; overflow-x: hidden; position: absolute; top: 0; left: 0; right: 0; bottom: 124px; overflow-y: auto; display: flex; flex-direction: column">
+<div style="position: relative; height: 200px; background: #5B4E43; overflow: hidden; flex-shrink: 0">
+<svg viewBox="0 0 390 200" aria-hidden="true" style="position: absolute; inset: 0; width: 390px; height: 200px">
+<circle cx="195" cy="130" r="130" style="fill: #F4F1EC"></circle>
+<circle cx="195" cy="130" r="102" style="fill: #FBF9F6"></circle>
+<path d="M125 104c9-26 60-33 78-10 9 12-5 35-35 38-26 3-50-10-43-28z" style="fill: #E7C9A2"></path>
+<ellipse cx="232" cy="160" rx="45" ry="29" style="fill: #F2EDE3"></ellipse>
+<path d="M200 70c12-16 38-17 50-4 9 10 3 26-16 29-21 4-41-10-34-25z" style="fill: #8DB67A"></path>
+<ellipse cx="160" cy="168" rx="22" ry="14" style="fill: #E5D08E"></ellipse>
+</svg>
+<a href="Food-Camera.dc.html" aria-label="Atpakaļ uz kameru" style="position: absolute; left: 16px; top: 56px; width: 44px; height: 44px; border-radius: 22px; background: rgba(0,0,0,0.45); color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px"><path d="M15 5l-7 7 7 7"></path></svg></a>
+</div>
+<div style="padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<h1 class="d" style="margin: 0; font-size: 26px; font-weight: 700">Atpazinu 4 produktus</h1>
+<button style="height: 36px; padding: 0 12px; border-radius: 18px; background: #FFFFFF; border: 1px solid #E3DBCF; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 4px">Pusdienas<svg class="i" viewBox="0 0 24 24" style="width: 16px; height: 16px"><path d="M6 9l6 6 6-6"></path></svg></button>
+</div>
+<sc-for list="{{items}}" as="it" hint-placeholder-count="4">
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 20px; padding: 14px 16px 10px; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px">
+<div style="font-size: 16px; font-weight: 700">{{it.name}}</div>
+<div style="font-size: 15px; font-weight: 700; white-space: nowrap">{{it.kcal}}</div>
+</div>
+<div style="font-size: 13px; color: #5E5850">{{it.meta}}</div>
+<label style="display: flex; align-items: center; gap: 10px; padding-top: 2px">
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden">Porcija: {{it.name}}</span>
+<input type="range" min="0" max="{{it.max}}" step="5" value="{{it.g}}" onChange="{{it.onChange}}">
+</label>
+<sc-if value="{{it.unsure}}" hint-placeholder-val="{{false}}">
+<div style="margin-top: 4px; border-radius: 14px; background: #FBEBE1; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 14px; font-weight: 600; color: #6E3A1F">Mērci atpazinu neskaidri — precizē?</div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap">
+<sc-for list="{{sauces}}" as="s" hint-placeholder-count="3">
+<button onClick="{{s.pick}}" style="height: 36px; padding: 0 12px; border-radius: 18px; font-size: 13px; font-weight: 600; background: {{s.bg}}; color: {{s.fg}}">{{s.label}}</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</section>
+</sc-for>
+<button style="height: 48px; border-radius: 16px; border: 1.5px dashed #D8CFC2; font-size: 15px; font-weight: 600; color: #5E5850; display: flex; align-items: center; justify-content: center; gap: 6px"><svg class="i" viewBox="0 0 24 24" style="width: 18px; height: 18px"><path d="M12 5v14M5 12h14"></path></svg>Pievienot, ko nepamanīju</button>
+</div>
+</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-top: 1px solid #ECE5DA; padding: 12px 20px 36px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; font-size: 14px; color: #5E5850">
+<span><b class="d" style="font-size: 18px; color: #26231F">{{totalKcal}}</b> kopā</span>
+<span>{{totalMacros}}</span>
+</div>
+<a href="Food-Log.dc.html" style="height: 54px; border-radius: 27px; background: #B9532A; color: #FFFFFF; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center">Saglabāt</a>
+</div>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { g: { v: 150, r: 120, s: 80, m: 30 }, sauce: null }; }
+  renderVals() {
+    const g = this.state.g;
+    const F = {
+      v: { name: 'Vistas krūtiņa', k: 1.65, p: 0.307, c: 0, f: 0.036 },
+      r: { name: 'Rīsi, vārīti', k: 1.30, p: 0.027, c: 0.28, f: 0.003 },
+      s: { name: 'Salāti', k: 0.18, p: 0.012, c: 0.03, f: 0.002 },
+      m: { name: 'Mērce', k: 3.2, p: 0.01, c: 0.06, f: 0.33 }
+    };
+    let K = 0, P = 0, C = 0, Fa = 0;
+    const items = Object.keys(F).map((id) => {
+      const d = F[id], gr = g[id];
+      const kc = Math.round(d.k * gr), pr = Math.round(d.p * gr);
+      K += d.k * gr; P += d.p * gr; C += d.c * gr; Fa += d.f * gr;
+      return {
+        name: d.name, g: gr, max: Math.max(300, gr * 2),
+        kcal: kc + ' kcal',
+        meta: gr + ' g · ' + pr + ' g olb.' + (id === 'm' ? ' · aptuveni' : ''),
+        unsure: id === 'm' && !this.state.sauce,
+        onChange: (e) => { const n = Object.assign({}, g); n[id] = Number(e.target.value); this.setState({ g: n }); }
+      };
+    });
+    const sauces = ['Jogurta mērce', 'Majonēze', 'Bez mērces'].map((label) => ({
+      label, bg: '#FFFFFF', fg: '#26231F',
+      pick: () => { const n = Object.assign({}, g); if (label === 'Bez mērces') n.m = 0; if (label === 'Jogurta mērce') n.m = 30; this.setState({ sauce: label, g: n }); }
+    }));
+    return {
+      items, sauces,
+      totalKcal: Math.round(K) + ' kcal',
+      totalMacros: 'olb. ' + Math.round(P) + ' g · ogļh. ' + Math.round(C) + ' g · tauki ' + Math.round(Fa) + ' g'
+    };
+  }
+}
+</script>
+</body>
+</html>

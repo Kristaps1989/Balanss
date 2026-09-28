@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<title>Balanss — personības tests</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+html,body{overflow:hidden;width:390px;height:844px}
+body{margin:0;background:#F7F3EE;color:#26231F;font-family:'Figtree',-apple-system,'Segoe UI',sans-serif}
+a{color:#A9502A;text-decoration:none}a:hover{color:#8A3F1F}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.d{font-family:'Bricolage Grotesque','Figtree',-apple-system,sans-serif;letter-spacing:-0.02em}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+</style>
+</helmet>
+<main style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F7F3EE; display: flex; flex-direction: column; padding: 56px 20px 40px; gap: 20px">
+<div style="display: flex; align-items: center; gap: 12px; height: 44px">
+<sc-if value="{{isFirst}}" hint-placeholder-val="{{true}}">
+<a href="Onb-TestIntro.dc.html" aria-label="Atpakaļ" style="width: 44px; height: 44px; display: flex; align-items: center; color: #26231F"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"></path></svg></a>
+</sc-if>
+<sc-if value="{{notFirst}}" hint-placeholder-val="{{false}}">
+<button onClick="{{back}}" aria-label="Iepriekšējais apgalvojums" style="width: 44px; height: 44px; display: flex; align-items: center; color: #26231F"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"></path></svg></button>
+</sc-if>
+<div style="flex-grow: 1; height: 6px; border-radius: 3px; background: #E6DED3; overflow: hidden"><div style="height: 6px; background: #D9693C; width: {{pct}}"></div></div>
+<div style="font-size: 13px; font-weight: 600; color: #6F685E">{{count}}</div>
+</div>
+<div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 0 4px">
+<div style="font-size: 14px; font-weight: 600; color: #6F685E">Cik lielā mērā tas par tevi?</div>
+<h1 class="d" style="margin: 0; font-size: 30px; line-height: 1.18; font-weight: 600">{{statement}}</h1>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px" role="group" aria-label="Atbilde">
+<sc-for list="{{opts}}" as="o" hint-placeholder-count="5">
+<button onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="height: 56px; border-radius: 18px; padding: 0 18px; display: flex; align-items: center; gap: 14px; text-align: left; font-size: 16px; font-weight: 600; background: {{o.bg}}; border: 1.5px solid {{o.bd}}">
+<span style="width: {{o.size}}; height: {{o.size}}; border-radius: 50%; border: 2px solid {{o.dotBd}}; background: {{o.dot}}; flex-shrink: 0"></span>
+<span style="flex-grow: 1">{{o.label}}</span>
+</button>
+</sc-for>
+</div>
+<div style="height: 56px">
+<sc-if value="{{showNext}}" hint-placeholder-val="{{true}}">
+<button onClick="{{next}}" style="width: 100%; height: 56px; border-radius: 28px; background: #26231F; color: #FFFFFF; font-size: 17px; font-weight: 600">Tālāk</button>
+</sc-if>
+<sc-if value="{{showFinish}}" hint-placeholder-val="{{false}}">
+<a href="Onb-Result.dc.html" style="height: 56px; border-radius: 28px; background: #26231F; color: #FFFFFF; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center">Skatīt rezultātu</a>
+</sc-if>
+</div>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { i: 0, ans: [3, null, null] }; }
+  renderVals() {
+    const S = [
+      'Man patīk, ja lietas ir kārtībā un iepriekš saplānotas.',
+      'Es mēdzu uztraukties par sīkumiem.',
+      'Man patīk izmēģināt jaunus ēdienus un idejas.'
+    ];
+    const L = ['Pilnīgi nepiekrītu', 'Drīzāk nepiekrītu', 'Neitrāli', 'Drīzāk piekrītu', 'Pilnīgi piekrītu'];
+    const sizes = ['22px', '18px', '14px', '18px', '22px'];
+    const { i, ans } = this.state;
+    const cur = ans[i];
+    const opts = L.map((label, k) => {
+      const on = cur === k;
+      return {
+        label, on: on ? 'true' : 'false', size: sizes[k],
+        bg: on ? '#FBEBE1' : '#FFFFFF', bd: on ? '#D9693C' : '#EDE6DB',
+        dot: on ? '#D9693C' : '#FFFFFF', dotBd: on ? '#D9693C' : '#B8AFA3',
+        pick: () => { const a = ans.slice(); a[i] = k; this.setState({ ans: a }); }
+      };
+    });
+    const answered = cur !== null && cur !== undefined;
+    return {
+      statement: S[i], opts,
+      count: (i + 1) + ' no 20', pct: ((i + 1) / 20 * 100) + '%',
+      isFirst: i === 0, notFirst: i > 0,
+      back: () => this.setState({ i: Math.max(0, i - 1) }),
+      showNext: answered && i < 2, showFinish: answered && i === 2,
+      next: () => this.setState({ i: i + 1 })
+    };
+  }
+}
+</script>
+</body>
+</html>
