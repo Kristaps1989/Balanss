@@ -38,3 +38,9 @@ yarn-error.*
 
 # Claude Code agent worktrees
 .claude/worktrees/
+
+# E2E output
+dist-e2e/
+e2e-report/
+test-results/
+.e2e-storage/

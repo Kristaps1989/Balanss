@@ -11,5 +11,6 @@ export default defineConfig({
   },
   test: {
     include: ['shared/**/*.test.ts', 'src/**/*.test.ts'],
+    exclude: ['e2e/**', 'backend/**', 'node_modules/**'],
   },
 });
