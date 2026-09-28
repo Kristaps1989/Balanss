@@ -36,7 +36,7 @@ async function main() {
   process.on('SIGINT', () => void shutdown('SIGINT'));
 
   await app.listen({ port: config.port, host: config.host });
-  app.log.info({ ai: config.aiProvider, email: config.emailProvider, scheduler: config.scheduler }, 'balanss api ready');
+  app.log.info({ ai: config.aiProvider, emailProvider: config.emailProvider, scheduler: config.scheduler }, 'balanss api ready');
 }
 
 main().catch((err: unknown) => {

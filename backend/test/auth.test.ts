@@ -55,6 +55,14 @@ describe('magic link', () => {
     expect((await post('/v1/auth/magic-link/verify', { token: devToken })).statusCode).toBe(401);
   });
 
+  it('never returns devToken in production', async () => {
+    const prod = await makeApp({ config: { nodeEnv: 'production' } });
+    const res = await prod.app.inject({ method: 'POST', url: '/v1/auth/magic-link', payload: { email: 'p@example.lv' } });
+    expect(res.json()).toEqual({ ok: true });
+    expect(prod.email.sent).toHaveLength(1);
+    await prod.app.close();
+  });
+
   it('validates the e-mail', async () => {
     const res = await post('/v1/auth/magic-link', { email: 'not-an-email' });
     expect(res.statusCode).toBe(400);

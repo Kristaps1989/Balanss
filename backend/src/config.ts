@@ -29,7 +29,6 @@ export interface Config {
   rateLimitMax: number;
   authRateLimitMax: number;
   freeAnalysesPerDay: number;
-  defaultTimezone: string;
 }
 
 const list = (v: string | undefined) =>
@@ -45,21 +44,21 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Part
   const production = nodeEnv === 'production';
   const port = Number(env.PORT ?? 3000);
 
-  const jwtSecret = env.JWT_SECRET ?? (production ? '' : DEV_JWT_SECRET);
+  const jwtSecret = env.JWT_SECRET || (production ? '' : DEV_JWT_SECRET);
   if (jwtSecret.length < 32) throw new Error('JWT_SECRET must be set to at least 32 characters');
 
   const cors = env.CORS_ORIGINS?.trim();
   const corsOrigins: string[] | '*' = cors ? (cors === '*' ? '*' : list(cors)) : production ? [] : '*';
 
   const anthropicApiKey = env.ANTHROPIC_API_KEY?.trim() || null;
-  const aiProvider = (env.AI_PROVIDER as AiProviderName | undefined) ?? (anthropicApiKey ? 'anthropic' : 'fake');
+  const aiProvider = ((env.AI_PROVIDER || undefined) as AiProviderName | undefined) ?? (anthropicApiKey ? 'anthropic' : 'fake');
   if (aiProvider !== 'anthropic' && aiProvider !== 'fake') throw new Error('AI_PROVIDER must be anthropic or fake');
 
-  const emailProvider = (env.EMAIL_PROVIDER as EmailProvider | undefined) ?? 'console';
+  const emailProvider = ((env.EMAIL_PROVIDER || undefined) as EmailProvider | undefined) ?? 'console';
   if (emailProvider !== 'console' && emailProvider !== 'resend') throw new Error('EMAIL_PROVIDER must be console or resend');
   if (emailProvider === 'resend' && !env.RESEND_API_KEY) throw new Error('RESEND_API_KEY is required with EMAIL_PROVIDER=resend');
 
-  const databaseUrl = env.DATABASE_URL ?? 'postgres://balanss:balanss@localhost:5432/balanss';
+  const databaseUrl = env.DATABASE_URL || 'postgres://balanss:balanss@localhost:5432/balanss';
 
   return {
     nodeEnv,
@@ -68,25 +67,24 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Part
     logLevel: env.LOG_LEVEL ?? (production ? 'info' : 'debug'),
     databaseUrl,
     jwtSecret,
-    publicApiUrl: (env.PUBLIC_API_URL ?? `http://localhost:${port}`).replace(/\/$/, ''),
-    publicWebUrl: (env.PUBLIC_WEB_URL ?? 'https://balanss.app').replace(/\/$/, ''),
+    publicApiUrl: (env.PUBLIC_API_URL || `http://localhost:${port}`).replace(/\/$/, ''),
+    publicWebUrl: (env.PUBLIC_WEB_URL || 'https://balanss.app').replace(/\/$/, ''),
     appScheme: env.APP_SCHEME || 'balanss',
     corsOrigins,
     googleClientIds: list(env.GOOGLE_CLIENT_IDS),
     appleBundleIds: list(env.APPLE_BUNDLE_IDS),
     emailProvider,
     emailFrom: env.EMAIL_FROM ?? 'Balanss <noreply@balanss.app>',
-    resendApiKey: env.RESEND_API_KEY ?? null,
-    storageDir: env.STORAGE_DIR ?? './storage',
+    resendApiKey: env.RESEND_API_KEY || null,
+    storageDir: env.STORAGE_DIR || './storage',
     aiProvider,
     aiModel: env.AI_MODEL || 'claude-opus-5-5',
     anthropicApiKey,
-    revenuecatWebhookSecret: env.REVENUECAT_WEBHOOK_SECRET ?? null,
+    revenuecatWebhookSecret: env.REVENUECAT_WEBHOOK_SECRET || null,
     scheduler: (env.SCHEDULER ?? 'on') !== 'off',
     rateLimitMax: Number(env.RATE_LIMIT_MAX ?? 300),
     authRateLimitMax: Number(env.AUTH_RATE_LIMIT_MAX ?? 20),
     freeAnalysesPerDay: 3,
-    defaultTimezone: env.DEFAULT_TIMEZONE ?? 'Europe/Riga',
     ...overrides,
   };
 }

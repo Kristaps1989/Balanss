@@ -5,7 +5,7 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: {
     server: 'src/server.ts',
-    migrate: 'src/db/migrate.ts',
+    migrate: 'src/migrate.ts',
     seed: 'src/seed.ts',
   },
   format: ['esm'],
