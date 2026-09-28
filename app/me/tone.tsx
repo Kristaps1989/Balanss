@@ -70,7 +70,7 @@ export default function TonePicker() {
           key={t.value}
           onPress={() => choose(t.value)}
           accessibilityRole="radio"
-          accessibilityState={{ checked: pref === t.value }}
+          aria-checked={pref === t.value}
           style={[styles.card, { borderColor: pref === t.value ? colors.accent : colors.border, borderWidth: pref === t.value ? 1.5 : 1 }]}>
           <View style={styles.cardHead}>
             <View style={[styles.chip, { backgroundColor: t.chip[0] }]}>
@@ -93,7 +93,7 @@ function Option({ selected, onPress, title, hint }: { selected: boolean; onPress
     <Pressable
       onPress={onPress}
       accessibilityRole="radio"
-      accessibilityState={{ checked: selected }}
+      aria-checked={selected}
       style={[styles.card, { flexDirection: 'row', alignItems: 'center', borderColor: selected ? colors.accent : colors.border, borderWidth: selected ? 1.5 : 1 }]}>
       <View style={{ flex: 1 }}>
         <Text style={type.bodySemi}>{title}</Text>

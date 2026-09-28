@@ -88,7 +88,7 @@ export default function Pro() {
                 key={p.id}
                 onPress={() => setPlan(p.id)}
                 accessibilityRole="radio"
-                accessibilityState={{ checked: on }}
+                aria-checked={on}
                 style={[styles.plan, { borderColor: on ? colors.accent : colors.inputBorder }]}>
                 <View style={[styles.radio, { borderColor: on ? colors.accent : colors.inputBorder, backgroundColor: on ? colors.accent : colors.white }]} />
                 <View style={{ flex: 1, gap: 2 }}>

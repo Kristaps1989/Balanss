@@ -67,7 +67,7 @@ export function PillChoice<T extends string>({
             key={o.value}
             onPress={() => onChange(o.value)}
             accessibilityRole="radio"
-            accessibilityState={{ checked: on }}
+            aria-checked={on}
             style={[styles.pill, { backgroundColor: on ? colors.ink : colors.white, borderColor: on ? colors.ink : colors.inputBorder }]}>
             <Text style={[styles.pillText, { color: on ? colors.white : colors.ink }]}>{o.label}</Text>
           </Pressable>
@@ -98,7 +98,7 @@ export function Segmented<T extends string | number>({
             key={String(o.value)}
             onPress={() => onChange(o.value)}
             accessibilityRole="radio"
-            accessibilityState={{ checked: on }}
+            aria-checked={on}
             style={[styles.segItem, on && styles.segOn]}>
             <Text style={styles.segText}>{o.label}</Text>
           </Pressable>
@@ -128,7 +128,7 @@ export function OptionCard({
     <Pressable
       onPress={onPress}
       accessibilityRole={multi ? 'checkbox' : 'radio'}
-      accessibilityState={multi ? { checked: selected } : { selected, checked: selected }}
+      aria-checked={selected}
       accessibilityLabel={accessibilityLabel}
       style={({ pressed }) => [
         styles.option,
@@ -161,7 +161,7 @@ export function Toggle({
       onPress={() => onChange(!value)}
       accessibilityRole="switch"
       accessibilityLabel={label}
-      accessibilityState={{ checked: value }}
+      aria-checked={value}
       hitSlop={8}
       style={[styles.toggle, { backgroundColor: value ? onColor : colors.toggleOff, justifyContent: value ? 'flex-end' : 'flex-start' }]}>
       <View style={styles.knob} />
@@ -175,7 +175,7 @@ export function CheckRow({ checked, onChange, title, hint }: { checked: boolean;
     <Pressable
       onPress={() => onChange(!checked)}
       accessibilityRole="checkbox"
-      accessibilityState={{ checked }}
+      aria-checked={checked}
       style={styles.checkRow}>
       <View style={[styles.box, { backgroundColor: checked ? colors.accent : colors.white, borderColor: checked ? colors.accent : colors.boxBorder }]}>
         {checked && <Icon name="check" color={colors.white} size={16} strokeWidth={2.6} />}

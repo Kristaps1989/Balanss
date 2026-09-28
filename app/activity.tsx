@@ -52,7 +52,7 @@ export default function ActivitySheet() {
               key={t}
               onPress={() => setKind(t)}
               accessibilityRole="radio"
-              accessibilityState={{ checked: on }}
+              aria-checked={on}
               style={[styles.chip, { backgroundColor: on ? colors.ink : colors.chip }]}>
               <Text style={[styles.chipText, { color: on ? colors.white : colors.ink }]}>{WORKOUT_LABEL[t]}</Text>
             </Pressable>

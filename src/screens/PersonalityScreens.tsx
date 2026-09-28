@@ -115,7 +115,7 @@ export function PersonalityTest({ mode }: { mode: 'onboarding' | 'retest' }) {
               key={label}
               onPress={() => pick(v)}
               accessibilityRole="radio"
-              accessibilityState={{ checked: on }}
+              aria-checked={on}
               style={[styles.opt, { backgroundColor: on ? colors.accentSoft : colors.white, borderColor: on ? colors.accent : colors.optionBorder }]}>
               <View style={styles.dotBox}>
                 <View

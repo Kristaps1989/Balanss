@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router, type Href } from 'expo-router';
 import type { ReactNode } from 'react';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { api, type Reminders } from '@/api';
 import { useMe, useMeMutation } from '@/api/hooks';
@@ -14,6 +14,7 @@ import { Screen } from '@/components/Screen';
 import { ErrorState, Loading } from '@/components/States';
 import { TraitBars } from '@/components/TraitBars';
 import { signOutProviders } from '@/lib/auth';
+import { openDownload } from '@/lib/download';
 import { duration, formatNumber, litres, monthYear } from '@/lib/format';
 import { colors, fonts, radius, type } from '@/theme';
 
@@ -33,7 +34,7 @@ export default function MeScreen() {
   const setTone = useMeMutation(api.setTone);
   const reminders = useMeMutation(api.updateReminders);
   const deletePersonality = useMeMutation(api.deletePersonality);
-  const exportData = useMutation({ mutationFn: api.exportData, onSuccess: (r) => Linking.openURL(r.downloadUrl) });
+  const exportData = useMutation({ mutationFn: api.exportData, onSuccess: (r) => openDownload(r.downloadUrl) });
   const logout = useMutation({
     mutationFn: async () => {
       await signOutProviders();

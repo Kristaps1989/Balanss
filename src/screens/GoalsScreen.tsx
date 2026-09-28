@@ -95,7 +95,7 @@ function GoalsForm({ mode, me }: { mode: 'onboarding' | 'edit'; me: Me }) {
               <Pressable
                 onPress={() => toggle(g.value)}
                 accessibilityRole="checkbox"
-                accessibilityState={{ checked: on }}
+                aria-checked={on}
                 accessibilityLabel={`${g.label}. ${g.hint}`}
                 style={styles.goalBtn}>
                 <View style={[styles.goalIcon, { backgroundColor: g.bg }]}>
@@ -122,7 +122,7 @@ function GoalsForm({ mode, me }: { mode: 'onboarding' | 'edit'; me: Me }) {
                             setGoalKg(Math.round(d === 'down' ? p.weightKg - 5 : p.weightKg + 4));
                           }}
                           accessibilityRole="radio"
-                          accessibilityState={{ checked: sel }}
+                          aria-checked={sel}
                           style={[styles.dir, sel && { backgroundColor: colors.ink }]}>
                           <Text style={[styles.dirText, sel && { color: colors.white }]}>{d === 'down' ? 'Samazināt' : 'Palielināt'}</Text>
                         </Pressable>

@@ -96,7 +96,7 @@ export default function Movement() {
       <Card style={styles.list}>
         <View style={styles.listHead}>
           <Text style={type.section}>Treniņi</Text>
-          <Button label="Pievienot" icon="plus" size="sm" variant="soft" onPress={() => router.push('/activity')} />
+          <Button label="Pievienot" accessibilityLabel="Pievienot treniņu" icon="plus" size="sm" variant="soft" onPress={() => router.push('/activity')} />
         </View>
         {m.workouts.length === 0 && <Text style={[type.secondary, { paddingBottom: 12 }]}>Vēl nav treniņu šonedēļ.</Text>}
         {m.workouts.slice(0, 6).map((w) => (

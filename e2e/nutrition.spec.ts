@@ -72,9 +72,10 @@ test('add a meal by text and delete it again', async ({ page }) => {
   await expect(page.getByTestId('log-kcal')).not.toHaveText(kcalBefore);
 
   // Open the newest meal and delete it
-  const card = page.getByRole('button', { name: /kcal$/ }).filter({ hasText: /Olas/ }).first();
+  const card = page.getByRole('button', { name: /kcal$/ }).filter({ hasText: /olas, vārītas/i }).first();
   await card.click();
-  await page.getByRole('button', { name: 'Dzēst maltīti' }).click();
+  const block = page.getByTestId('meal-block').filter({ hasText: 'Olas, vārītas' });
+  await block.getByRole('button', { name: 'Dzēst maltīti' }).click();
   await page.getByRole('button', { name: 'Dzēst', exact: true }).click();
   await expect(page.getByTestId('log-kcal')).toHaveText(kcalBefore);
 });
@@ -85,6 +86,6 @@ test('trends show the last 7 days', async ({ page }) => {
   await page.getByRole('link', { name: 'Tendences' }).click();
   await expect(page.getByTestId('trends')).toBeVisible();
   await expect(page.getByText('Pēdējās 7 dienas')).toBeVisible();
-  await expect(page.getByText(/mērķis 1 750/)).toBeVisible();
+  await expect(page.getByText(/mērķis 1\s750/)).toBeVisible();
   await expect(page.getByText(/vidēji/).first()).toBeVisible();
 });

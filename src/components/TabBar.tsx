@@ -39,7 +39,7 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
             <Pressable
               onPress={onPress}
               accessibilityRole="tab"
-              accessibilityState={{ selected: focused }}
+              aria-selected={focused}
               accessibilityLabel={tab.label}
               style={styles.slot}>
               <Icon name={tab.icon} color={color} size={24} />
@@ -59,6 +59,7 @@ function AddButton() {
         onPress={() => router.push('/add')}
         accessibilityRole="button"
         accessibilityLabel="Pievienot"
+        testID="tab-add"
         style={({ pressed }) => [styles.add, pressed && { transform: [{ scale: 0.95 }] }]}>
         <Icon name="plus" color={colors.white} size={26} strokeWidth={2.4} />
       </Pressable>

@@ -30,7 +30,7 @@ test('settings persist: tone, reminders, goals', async ({ page }) => {
   await page.getByRole('radio', { name: /Pēc mana profila/ }).click();
 });
 
-test('export my data and delete the account', async ({ page }) => {
+test('export my data and delete the account', async ({ page, request }) => {
   const email = uniqueEmail('gdpr');
   await signIn(page, email);
   await page.getByTestId('name-input').fill('Pēteris');
@@ -40,14 +40,21 @@ test('export my data and delete the account', async ({ page }) => {
   await page.getByTestId('skip-test').click();
   await page.getByRole('button', { name: 'Mans profils' }).click();
 
-  const [popup] = await Promise.all([page.waitForEvent('popup'), page.getByRole('button', { name: 'Eksportēt manus datus' }).click()]);
-  await popup.waitForLoadState();
-  const body = await popup.evaluate(() => document.body.innerText);
-  expect(body).toContain(email);
-  await popup.close();
+  // The export downloads a JSON file straight from the single-use link.
+  const [res, download] = await Promise.all([
+    page.waitForResponse((r) => r.url().endsWith('/v1/me/export') && r.request().method() === 'POST'),
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Eksportēt manus datus' }).click(),
+  ]);
+  const fs = await import('node:fs/promises');
+  const content = await fs.readFile((await download.path())!, 'utf8');
+  expect(content).toContain(email);
+  // The link is single use
+  const { downloadUrl } = await res.json();
+  expect((await request.get(downloadUrl)).status()).toBe(410);
 
   await page.getByRole('button', { name: 'Dzēst visus datus un kontu' }).click();
-  await page.getByRole('button', { name: 'Dzēst visu' }).click();
+  await page.getByRole('button', { name: 'Dzēst visu', exact: true }).click();
   await expect(page.getByTestId('welcome')).toBeVisible();
 
   // Signing in again with the same e-mail starts from scratch

@@ -31,11 +31,15 @@ export default function Welcome() {
   const { width } = useWindowDimensions();
   const [i, setI] = useState(0);
   const list = useRef<FlatList>(null);
+  // Ignore scroll events while a button-triggered scroll animates, so the index doesn't jump back.
+  const programmaticUntil = useRef(0);
   const go = (n: number) => {
     setI(n);
+    programmaticUntil.current = Date.now() + 600;
     list.current?.scrollToIndex({ index: n, animated: true });
   };
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (Date.now() < programmaticUntil.current) return;
     const n = Math.round(e.nativeEvent.contentOffset.x / width);
     if (n !== i && n >= 0 && n < SLIDES.length) setI(n);
   };

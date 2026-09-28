@@ -28,6 +28,13 @@ backend_env=(
   REVENUECAT_WEBHOOK_SECRET=e2e-webhook
 )
 
+for port in "$API_PORT" "$WEB_PORT"; do
+  if curl -s -o /dev/null "http://localhost:${port}"; then
+    echo "Port ${port} is already in use (a previous e2e run?). Stop it first." >&2
+    exit 1
+  fi
+done
+
 echo "› Resetting e2e database"
 psql "$DB_URL" -q -c 'DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public; DROP SCHEMA IF EXISTS drizzle CASCADE;'
 (cd backend && env "${backend_env[@]}" npm run -s migrate && env "${backend_env[@]}" npm run -s seed)
@@ -43,7 +50,16 @@ EXPO_OFFLINE=1 CI=1 EXPO_PUBLIC_API_URL="$E2E_API_URL" EXPO_PUBLIC_USE_MOCK=0 np
 echo "› Serving web build on :$WEB_PORT"
 npx -y serve -s "$OUT" -l "$WEB_PORT" >/dev/null 2>&1 &
 WEB_PID=$!
-trap 'kill $API_PID $WEB_PID 2>/dev/null || true' EXIT
+cleanup() {
+  # Kill the subshells and their children (tsx spawns node, npx spawns serve).
+  for pid in $API_PID $WEB_PID; do
+    pkill -TERM -P "$pid" 2>/dev/null || true
+    kill "$pid" 2>/dev/null || true
+  done
+  pkill -f "tsx src/server.ts" 2>/dev/null || true
+  pkill -f "serve -s $OUT" 2>/dev/null || true
+}
+trap cleanup EXIT
 
 for i in $(seq 1 60); do
   curl -sf "$E2E_API_URL/health" >/dev/null && curl -sf "$E2E_WEB_URL" >/dev/null && break

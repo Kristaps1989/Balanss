@@ -7,7 +7,7 @@ test('movement and sleep screens show seeded device data', async ({ page }) => {
   await page.getByRole('tab', { name: 'Kustība' }).click();
   const mv = page.getByTestId('movement');
   await expect(mv.getByText('6 430')).toBeVisible();
-  await expect(mv.getByText('Nūjošana')).toBeVisible();
+  await expect(mv.getByText('Nūjošana', { exact: true })).toBeVisible();
   await expect(mv.getByText('Pulsa zonas')).toBeVisible();
   await expect(mv.getByText('61', { exact: true })).toBeVisible();
 
@@ -16,9 +16,12 @@ test('movement and sleep screens show seeded device data', async ({ page }) => {
   await expect(sl.getByText('6 h 40 min')).toBeVisible();
   await expect(page.getByTestId('sleep-window')).toHaveText('23:00–23:30');
   await expect(sl.getByText('Hei, miega logs tuvojas')).toBeVisible();
+  await expect(sl.getByText('Tēja bez kofeīna')).toBeVisible();
   // Lead time changes the wind-down timeline and persists
   await page.getByRole('radio', { name: '30 min pirms' }).click();
-  await expect(sl.getByText('22:30', { exact: true })).toBeVisible();
+  // With a 30 min lead the tea step (22:30) falls before the nudge and is dropped
+  await expect(sl.getByText('Tēja bez kofeīna')).toHaveCount(0);
+  await expect(sl.getByText('Nomierināšanās')).toBeVisible();
   await page.reload();
   await expect(page.getByRole('radio', { name: '30 min pirms' })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('radio', { name: '45 min pirms' }).click();
@@ -51,17 +54,17 @@ test('synced Health Connect data appears for a new user', async ({ page, request
 
 test('manual activity and weight are saved', async ({ page }) => {
   await signIn(page, 'ilze@piemers.lv');
-  await page.getByRole('button', { name: 'Pievienot', exact: true }).click();
+  await page.getByTestId('tab-add').click();
   await page.getByRole('button', { name: /Aktivitāte/ }).click();
   await page.getByRole('radio', { name: 'Peldēšana' }).click();
   await page.getByRole('button', { name: 'Saglabāt' }).click();
   await page.getByRole('tab', { name: 'Kustība' }).click();
   await expect(page.getByTestId('movement').getByText('Peldēšana')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Pievienot', exact: true }).click();
+  await page.getByTestId('tab-add').click();
   await page.getByRole('button', { name: /Svars/ }).click();
   await page.getByRole('button', { name: 'Svars: mazāk' }).click();
   await page.getByRole('button', { name: 'Saglabāt' }).click();
-  await page.getByRole('button', { name: 'Pievienot', exact: true }).click();
+  await page.getByTestId('tab-add').click();
   await expect(page.getByText('Pēdējais: 70,9 kg')).toBeVisible();
 });

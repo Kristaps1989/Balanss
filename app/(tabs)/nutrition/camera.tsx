@@ -182,7 +182,7 @@ function RoundDark({ icon, label, onPress, active }: { icon: 'close' | 'flash'; 
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityState={active !== undefined ? { selected: active } : undefined}
+      aria-pressed={active}
       style={[styles.round, active && { backgroundColor: 'rgba(245,180,143,0.6)' }]}>
       <Icon name={icon} color={colors.white} size={20} />
     </Pressable>
@@ -191,7 +191,7 @@ function RoundDark({ icon, label, onPress, active }: { icon: 'close' | 'flash'; 
 
 function ModeTab({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} accessibilityRole="tab" accessibilityState={{ selected: on }} style={[styles.mode, on && styles.modeOn]}>
+    <Pressable onPress={onPress} accessibilityRole="tab" aria-selected={on} style={[styles.mode, on && styles.modeOn]}>
       <Text style={[styles.modeText, { color: on ? '#F5B48F' : '#BDB5AA' }]}>{label}</Text>
     </Pressable>
   );
