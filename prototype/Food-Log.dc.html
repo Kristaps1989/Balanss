@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<title>Balanss — Uzturs</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+html,body{overflow:hidden;width:390px;height:844px}
+body{margin:0;background:#F7F3EE;color:#26231F;font-family:'Figtree',-apple-system,'Segoe UI',sans-serif}
+a{color:#A9502A;text-decoration:none}a:hover{color:#8A3F1F}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.d{font-family:'Bricolage Grotesque','Figtree',-apple-system,sans-serif;letter-spacing:-0.02em}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sc{scrollbar-width:none}.sc::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+<main style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F7F3EE">
+<div class="sc" style="scrollbar-width: none; overflow-x: hidden; position: absolute; top: 0; left: 0; right: 0; bottom: 86px; overflow-y: auto; padding: 56px 20px 28px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<h1 class="d" style="margin: 0; font-size: 30px; font-weight: 700">Uzturs</h1>
+<div style="display: flex; align-items: center; gap: 2px">
+<button aria-label="Iepriekšējā diena" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px"><path d="M15 5l-7 7 7 7"></path></svg></button>
+<div style="font-size: 15px; font-weight: 700">Šodien</div>
+<button aria-label="Nākamā diena" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #B8AFA3"><svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px"><path d="M9 5l7 7-7 7"></path></svg></button>
+
+<a href="Me.dc.html" aria-label="Mans profils" class="d" style="width: 44px; height: 44px; border-radius: 22px; background: #E9E1D5; color: #26231F; font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0">I</a>
+</div>
+</div>
+
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 24px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: baseline; justify-content: space-between">
+<div><span class="d" style="font-size: 28px; font-weight: 700">1 480</span><span style="font-size: 15px; color: #5E5850"> / 1 750 kcal</span></div>
+<a href="Food-Trends.dc.html" style="font-size: 14px; font-weight: 600; padding: 10px 0 10px 12px">Tendences</a>
+</div>
+<div style="height: 10px; border-radius: 5px; background: #F4E2D5"><div style="width: 84.6%; height: 10px; border-radius: 5px; background: #D9693C"></div></div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{macros}}" as="m" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 5px">
+<div style="font-size: 12px; color: #5E5850">{{m.label}}</div>
+<div style="height: 5px; border-radius: 3px; background: {{m.track}}"><div style="height: 5px; border-radius: 3px; background: {{m.color}}; width: {{m.w}}"></div></div>
+<div style="font-size: 13px; font-weight: 700">{{m.value}}</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<div style="display: flex; gap: 10px">
+<a href="Food-Camera.dc.html" style="flex-grow: 1; height: 54px; border-radius: 27px; background: #26231F; color: #FFFFFF; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px"><svg class="i" viewBox="0 0 24 24" style="width: 22px; height: 22px"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>Foto</a>
+<a href="Food-Add.dc.html" style="flex-grow: 1; height: 54px; border-radius: 27px; background: #FFFFFF; border: 1px solid #E3DBCF; color: #26231F; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px"><svg class="i" viewBox="0 0 24 24" style="width: 22px; height: 22px"><path d="M4 7h16M4 12h10M4 17h7"></path></svg>Citādi</a>
+</div>
+
+<sc-for list="{{meals}}" as="meal" hint-placeholder-count="3">
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 24px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700">{{meal.name}}</h2>
+<div style="font-size: 15px; font-weight: 700">{{meal.kcal}}</div>
+</div>
+<div style="display: flex; gap: 12px; align-items: center">
+<div style="width: 64px; height: 64px; border-radius: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: {{meal.tile}}; color: {{meal.ink}}" aria-label="Maltītes foto">
+<svg class="i" viewBox="0 0 24 24" style="width: 28px; height: 28px"><circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="4.5"></circle></svg>
+</div>
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+<div style="font-size: 15px; font-weight: 600; line-height: 1.35">{{meal.items}}</div>
+<div style="font-size: 13px; color: #6F685E">{{meal.meta}}</div>
+</div>
+</div>
+</section>
+</sc-for>
+
+<section style="border: 1.5px dashed #D8CFC2; border-radius: 24px; padding: 16px 18px; display: flex; align-items: center; justify-content: space-between">
+<div>
+<h2 style="margin: 0; font-size: 17px; font-weight: 700">Vakariņas</h2>
+<div style="font-size: 14px; color: #5E5850">Vēl nav pievienotas</div>
+</div>
+<a href="Food-Camera.dc.html" aria-label="Pievienot vakariņas" style="width: 48px; height: 48px; border-radius: 24px; background: #FBEBE1; color: #A9502A; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></a>
+</section>
+</div>
+
+<nav aria-label="Galvenā navigācija" style="position: absolute; left: 0; right: 0; bottom: 0; height: 86px; padding: 6px 8px 0; background: #FFFFFF; border-top: 1px solid #ECE5DA; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: start; justify-items: center">
+<a href="Home.dc.html" style="width: 100%; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600; color: #6F685E"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"></path></svg>Šodiena</a>
+<a href="Food-Log.dc.html" aria-current="page" style="width: 100%; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 700; color: #A9502A"><svg class="i" viewBox="0 0 24 24"><path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z"></path><path d="M9 8c0-1.5 1.2-1.8 1.2-3.3M13.5 8c0-1.5 1.2-1.8 1.2-3.3"></path></svg>Uzturs</a>
+<a href="Add-Sheet.dc.html" aria-label="Pievienot" style="width: 60px; height: 60px; margin-top: -24px; border-radius: 30px; background: #D9693C; color: #FFFFFF; border: 4px solid #F7F3EE; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(217,105,60,0.30)"><svg class="i" viewBox="0 0 24 24" style="width: 26px; height: 26px; stroke-width: 2.4"><path d="M12 5v14M5 12h14"></path></svg></a>
+<a href="Move.dc.html" style="width: 100%; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600; color: #6F685E"><svg class="i" viewBox="0 0 24 24"><path d="M3 12.5h4l2.5-6 5 12 2.5-6H21"></path></svg>Kustība</a>
+<a href="Sleep.dc.html" style="width: 100%; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600; color: #6F685E"><svg class="i" viewBox="0 0 24 24"><path d="M19.5 14.2A7.8 7.8 0 1 1 9.8 4.5a6.2 6.2 0 0 0 9.7 9.7z"></path></svg>Miegs</a>
+</nav>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const m = (label, v, t, color, track) => ({ label, value: v + '/' + t + ' g', color, track, w: Math.min(v / t * 100, 100).toFixed(0) + '%' });
+    return {
+      macros: [
+        m('Olbaltumv.', 68, 110, '#56679A', '#DDE2F0'),
+        m('Ogļhidr.', 160, 190, '#C08A2E', '#F2E4C8'),
+        m('Tauki', 52, 60, '#9A6F8F', '#EADDE6'),
+        m('Šķiedrv.', 18, 25, '#5E8C74', '#DCEAE1')
+      ],
+      meals: [
+        { name: 'Brokastis', kcal: '420 kcal', items: 'Auzu putra ar ogām, kafija ar pienu', meta: '08:10 · 10 g olbaltumvielu', tile: '#F6E7CF', ink: '#8A6420' },
+        { name: 'Pusdienas', kcal: '514 kcal', items: 'Vistas krūtiņa, rīsi, salāti, mērce', meta: '13:05 · 51 g olbaltumvielu · no foto', tile: '#E6EFE9', ink: '#3F6E57' },
+        { name: 'Uzkodas', kcal: '546 kcal', items: 'Jogurts ar granolu, banāns, rieksti', meta: '16:20 · 3 ieraksti', tile: '#EEE6F0', ink: '#6E4E68' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

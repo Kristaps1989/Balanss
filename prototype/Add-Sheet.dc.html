@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<title>Balanss — pievienot</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+html,body{overflow:hidden;width:390px;height:844px}
+body{margin:0;background:#F7F3EE;color:#26231F;font-family:'Figtree',-apple-system,'Segoe UI',sans-serif}
+a{color:#A9502A;text-decoration:none}a:hover{color:#8A3F1F}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.d{font-family:'Bricolage Grotesque','Figtree',-apple-system,sans-serif;letter-spacing:-0.02em}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+</style>
+</helmet>
+<main style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F7F3EE">
+<div aria-hidden="true" style="position: absolute; inset: 0; padding: 56px 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="height: 60px"></div>
+<div style="height: 150px; border-radius: 24px; background: #FBEBE1"></div>
+<div style="height: 250px; border-radius: 24px; background: #FFFFFF"></div>
+<div style="height: 150px; border-radius: 24px; background: #FFFFFF"></div>
+</div>
+<a href="Home.dc.html" aria-label="Aizvērt" style="position: absolute; inset: 0; background: rgba(38,35,31,0.42)"></a>
+<section aria-label="Pievienot" style="position: absolute; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-radius: 28px 28px 0 0; padding: 10px 20px 40px; display: flex; flex-direction: column; gap: 16px">
+<div style="width: 40px; height: 5px; border-radius: 3px; background: #DDD5C9; align-self: center"></div>
+<div style="display: flex; justify-content: space-between; align-items: center">
+<h2 class="d" style="margin: 0; font-size: 22px; font-weight: 700">Ko pievienosim?</h2>
+<a href="Home.dc.html" aria-label="Aizvērt" style="width: 44px; height: 44px; border-radius: 22px; background: #F2ECE3; color: #26231F; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<a href="Food-Camera.dc.html" style="height: 120px; border-radius: 22px; background: #FBEBE1; color: #26231F; padding: 16px; display: flex; flex-direction: column; justify-content: space-between">
+<svg class="i" viewBox="0 0 24 24" style="width: 30px; height: 30px; color: #A9502A"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+<span style="display: flex; flex-direction: column"><span style="font-size: 17px; font-weight: 700">Foto</span><span style="font-size: 13px; color: #5E5850">Nofotografē maltīti</span></span>
+</a>
+<a href="Home.dc.html" style="height: 120px; border-radius: 22px; background: #E3F0F8; color: #26231F; padding: 16px; display: flex; flex-direction: column; justify-content: space-between">
+<svg class="i" viewBox="0 0 24 24" style="width: 30px; height: 30px; color: #1F5579"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"></path></svg>
+<span style="display: flex; flex-direction: column"><span style="font-size: 17px; font-weight: 700">+250 ml ūdens</span><span style="font-size: 13px; color: #5E5850">Viena glāze</span></span>
+</a>
+<a href="Move.dc.html" style="height: 120px; border-radius: 22px; background: #E6EFE9; color: #26231F; padding: 16px; display: flex; flex-direction: column; justify-content: space-between">
+<svg class="i" viewBox="0 0 24 24" style="width: 30px; height: 30px; color: #2F6049"><path d="M3 12.5h4l2.5-6 5 12 2.5-6H21"></path></svg>
+<span style="display: flex; flex-direction: column"><span style="font-size: 17px; font-weight: 700">Aktivitāte</span><span style="font-size: 13px; color: #5E5850">Ja pulkstenis to neredzēja</span></span>
+</a>
+<a href="Me.dc.html" style="height: 120px; border-radius: 22px; background: #F1ECE4; color: #26231F; padding: 16px; display: flex; flex-direction: column; justify-content: space-between">
+<svg class="i" viewBox="0 0 24 24" style="width: 30px; height: 30px; color: #5E5850"><rect x="4" y="4" width="16" height="16" rx="4"></rect><path d="M9 10a3 3 0 0 1 6 0M12 10l1.2-1.6"></path></svg>
+<span style="display: flex; flex-direction: column"><span style="font-size: 17px; font-weight: 700">Svars</span><span style="font-size: 13px; color: #5E5850">Pēdējais: 71,0 kg</span></span>
+</a>
+</div>
+</section>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

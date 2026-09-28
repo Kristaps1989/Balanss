@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Balanss",
+    "slug": "balanss",
+    "version": "0.1.0",
+    "scheme": "balanss",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F7F3EE",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "lv.balanss.app"
+    },
+    "android": {
+      "package": "lv.balanss.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#F7F3EE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F7F3EE",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

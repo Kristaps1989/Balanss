@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<title>Balanss — uztura tendences</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+html,body{overflow:hidden;width:390px;height:844px}
+body{margin:0;background:#F7F3EE;color:#26231F;font-family:'Figtree',-apple-system,'Segoe UI',sans-serif}
+a{color:#A9502A;text-decoration:none}a:hover{color:#8A3F1F}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.d{font-family:'Bricolage Grotesque','Figtree',-apple-system,sans-serif;letter-spacing:-0.02em}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sc{scrollbar-width:none}.sc::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+<main style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F7F3EE">
+<div class="sc" style="scrollbar-width: none; overflow-x: hidden; position: absolute; inset: 0; overflow-y: auto; padding: 56px 20px 40px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 8px; height: 44px">
+<a href="Food-Log.dc.html" aria-label="Atpakaļ" style="width: 44px; height: 44px; display: flex; align-items: center; color: #26231F"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"></path></svg></a>
+<h1 class="d" style="margin: 0; font-size: 24px; font-weight: 700">Pēdējās 7 dienas</h1>
+</div>
+
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700">Enerģija</h2>
+<div style="font-size: 14px; color: #5E5850">vidēji <b style="color: #26231F">1 715 kcal</b></div>
+</div>
+<div style="position: relative; height: 150px">
+<div style="position: absolute; left: 0; right: 0; top: 19px; border-top: 1.5px dashed #8C857B"></div>
+<div style="position: absolute; right: 0; top: 0; font-size: 12px; font-weight: 600; color: #5E5850; background: #FFFFFF; padding-left: 6px">mērķis 1 750</div>
+<div style="position: absolute; inset: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; align-items: end">
+<sc-for list="{{kcal}}" as="b" hint-placeholder-count="7">
+<div style="border-radius: 8px 8px 4px 4px; height: {{b.h}}; background: {{b.c}}" title="{{b.t}}"></div>
+</sc-for>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; font-size: 12px; font-weight: 600; color: #5E5850; text-align: center">
+<span>P</span><span>O</span><span>T</span><span>C</span><span>Pk</span><span>S</span><span style="color: #26231F">Sv</span>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700">Olbaltumvielas</h2>
+<div style="font-size: 14px; color: #5E5850">vidēji <b style="color: #26231F">89 g</b></div>
+</div>
+<div style="position: relative; height: 150px">
+<div style="position: absolute; left: 0; right: 0; top: 13px; border-top: 1.5px dashed #8C857B"></div>
+<div style="position: absolute; right: 0; top: -6px; font-size: 12px; font-weight: 600; color: #5E5850; background: #FFFFFF; padding-left: 6px">mērķis 110 g</div>
+<div style="position: absolute; inset: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; align-items: end">
+<sc-for list="{{prot}}" as="b" hint-placeholder-count="7">
+<div style="border-radius: 8px 8px 4px 4px; height: {{b.h}}; background: {{b.c}}" title="{{b.t}}"></div>
+</sc-for>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; font-size: 12px; font-weight: 600; color: #5E5850; text-align: center">
+<span>P</span><span>O</span><span>T</span><span>C</span><span>Pk</span><span>S</span><span style="color: #26231F">Sv</span>
+</div>
+</section>
+
+<section style="background: #FBEBE1; border-radius: 24px; padding: 16px 18px; display: flex; gap: 12px">
+<svg class="i" viewBox="0 0 24 24" style="color: #8A3F1F; margin-top: 2px"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"></path></svg>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #2E2A25">Enerģija turas tuvu mērķim. Olbaltumvielas visbiežāk pietrūkst vakaros — ja gribi, vakariņām pievieno vienu olbaltumvielu avotu.</p>
+</section>
+<div style="font-size: 13px; color: #6F685E; padding: 0 4px">Šodienas stabiņš vēl aug — diena nav beigusies.</div>
+</div>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const K = [1690, 1820, 1710, 1640, 1905, 1760, 1480];
+    const P = [92, 104, 88, 81, 97, 90, 68];
+    const bar = (v, max, i, unit) => ({ h: (v / max * 150).toFixed(0) + 'px', c: i === 6 ? '#D9693C' : '#D8CBBB', t: v + unit });
+    return {
+      kcal: K.map((v, i) => bar(v, 2000, i, ' kcal')),
+      prot: P.map((v, i) => bar(v, 120, i, ' g'))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<title>Balanss — Es</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+html,body{overflow:hidden;width:390px;height:844px}
+body{margin:0;background:#F7F3EE;color:#26231F;font-family:'Figtree',-apple-system,'Segoe UI',sans-serif}
+a{color:#A9502A;text-decoration:none}a:hover{color:#8A3F1F}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.d{font-family:'Bricolage Grotesque','Figtree',-apple-system,sans-serif;letter-spacing:-0.02em}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sc{scrollbar-width:none}.sc::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+<main style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F7F3EE">
+<div class="sc" style="scrollbar-width: none; overflow-x: hidden; position: absolute; top: 0; left: 0; right: 0; bottom: 86px; overflow-y: auto; padding: 56px 20px 28px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 14px">
+<div class="d" style="width: 60px; height: 60px; border-radius: 30px; background: #E9E1D5; font-size: 24px; font-weight: 700; display: flex; align-items: center; justify-content: center">I</div>
+<div>
+<h1 class="d" style="margin: 0; font-size: 28px; font-weight: 700">Ilze</h1>
+<div style="font-size: 14px; color: #5E5850">34 gadi · 168 cm · 71 kg</div>
+</div>
+</div>
+
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700">Personības profils</h2>
+<div style="font-size: 13px; color: #5E5850">Plānotāja ar maigu pieeju</div>
+</div>
+<sc-for list="{{traits}}" as="t" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 118px minmax(0, 1fr) 56px; gap: 10px; align-items: center">
+<div style="font-size: 13px; font-weight: 600">{{t.name}}</div>
+<div style="height: 8px; border-radius: 4px; background: #F0E9DF"><div style="height: 8px; border-radius: 4px; background: #D9693C; width: {{t.w}}"></div></div>
+<div style="font-size: 12px; font-weight: 700; color: #5E5850; text-align: right">{{t.level}}</div>
+</div>
+</sc-for>
+<a href="Tone-Compare.dc.html" style="min-height: 52px; border-radius: 16px; background: #FBEBE1; color: #6E3A1F; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; font-size: 15px; font-weight: 700">Tie paši dati, cits tonis<svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px"><path d="M9 5l7 7-7 7"></path></svg></a>
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="flex-grow: 1">
+<div style="font-size: 15px; font-weight: 600">Atgriezties uz neitrālu toni</div>
+<div style="font-size: 13px; color: #5E5850">Ieteikumi bez personības pielāgojuma</div>
+</div>
+<button onClick="{{toggleNeutral}}" aria-pressed="{{neutralStr}}" aria-label="Neitrāls tonis" style="width: 52px; height: 32px; border-radius: 16px; padding: 3px; display: flex; background: {{nTrack}}; justify-content: {{nKnob}}"><span style="width: 26px; height: 26px; border-radius: 13px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.2)"></span></button>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #6F685E">
+<svg class="i" viewBox="0 0 24 24" style="width: 18px; height: 18px"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>
+Atkārtot testu varēsi no 2027. gada marta
+</div>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 24px; padding: 6px 18px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700; padding: 12px 0 4px">Mērķi</h2>
+<sc-for list="{{goals}}" as="g" hint-placeholder-count="4">
+<div style="display: flex; justify-content: space-between; align-items: center; min-height: 48px; border-top: 1px solid #F0EAE1; font-size: 15px"><span style="color: #5E5850">{{g.k}}</span><b>{{g.v}}</b></div>
+</sc-for>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 24px; padding: 6px 18px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700; padding: 12px 0 4px">Ierīces</h2>
+<div style="display: flex; align-items: center; gap: 12px; min-height: 60px; border-top: 1px solid #F0EAE1">
+<div style="width: 40px; height: 40px; border-radius: 12px; background: #FCE7EA; color: #C2475E; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" style="width: 22px; height: 22px"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"></path></svg></div>
+<div style="flex-grow: 1"><div style="font-size: 15px; font-weight: 700">Apple Health</div><div style="font-size: 13px; color: #5E5850">Apple Watch · Polar H10</div></div>
+<div style="font-size: 13px; font-weight: 600; color: #2F6049">Sinhronizēts</div>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 24px; padding: 6px 18px 16px; display: flex; flex-direction: column">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700; padding: 12px 0 4px">Atgādinājumi</h2>
+<sc-for list="{{reminders}}" as="r" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; justify-content: space-between; min-height: 52px; border-top: 1px solid #F0EAE1">
+<span style="font-size: 15px">{{r.label}}</span>
+<button onClick="{{r.toggle}}" aria-pressed="{{r.onStr}}" aria-label="{{r.label}}" style="width: 52px; height: 32px; border-radius: 16px; padding: 3px; display: flex; background: {{r.track}}; justify-content: {{r.knob}}"><span style="width: 26px; height: 26px; border-radius: 13px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.2)"></span></button>
+</div>
+</sc-for>
+<div style="font-size: 14px; font-weight: 600; padding: 10px 0 8px; border-top: 1px solid #F0EAE1">Cik bieži</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: #F2ECE3">
+<sc-for list="{{freq}}" as="f" hint-placeholder-count="3">
+<button onClick="{{f.pick}}" style="height: 40px; border-radius: 11px; font-size: 14px; font-weight: 600; background: {{f.bg}}; box-shadow: {{f.sh}}">{{f.label}}</button>
+</sc-for>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 24px; padding: 6px 18px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700; padding: 12px 0 4px">Privātums un dati</h2>
+<button style="width: 100%; min-height: 52px; border-top: 1px solid #F0EAE1; display: flex; align-items: center; justify-content: space-between; font-size: 15px; text-align: left">Eksportēt manus datus<svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px; color: #6F685E"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg></button>
+<button style="width: 100%; min-height: 52px; border-top: 1px solid #F0EAE1; display: flex; align-items: center; justify-content: space-between; font-size: 15px; text-align: left">Dzēst personības profilu<svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px; color: #6F685E"><path d="M9 5l7 7-7 7"></path></svg></button>
+<button style="width: 100%; min-height: 52px; border-top: 1px solid #F0EAE1; display: flex; align-items: center; justify-content: space-between; font-size: 15px; font-weight: 600; color: #8A3F1F; text-align: left">Dzēst visus datus un kontu<svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px"><path d="M9 5l7 7-7 7"></path></svg></button>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 24px; padding: 6px 18px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700; padding: 12px 0 4px">Konts</h2>
+<div style="display: flex; justify-content: space-between; align-items: center; min-height: 48px; border-top: 1px solid #F0EAE1; font-size: 15px"><span style="color: #5E5850">E-pasts</span><span>ilze@[E-PASTS]</span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; min-height: 48px; border-top: 1px solid #F0EAE1; font-size: 15px"><span style="color: #5E5850">Plāns</span><span>Bezmaksas</span></div>
+<a href="Onb-Login.dc.html" style="min-height: 52px; border-top: 1px solid #F0EAE1; display: flex; align-items: center; justify-content: space-between; font-size: 15px; font-weight: 600; color: #26231F">Iziet no konta<svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px; color: #6F685E"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l4-4-4-4M14 12H4"></path></svg></a>
+</section>
+
+<a href="Pro.dc.html" style="border-radius: 24px; background: #26231F; color: #FFFFFF; padding: 18px; display: flex; align-items: center; gap: 14px">
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px">
+<span class="d" style="font-size: 19px; font-weight: 700">Balanss Pro</span>
+<span style="font-size: 14px; line-height: 1.4; color: #E4DDD3">Neierobežotas foto analīzes, nedēļas kopsavilkums un receptes</span>
+</div>
+<svg class="i" viewBox="0 0 24 24" style="width: 22px; height: 22px"><path d="M9 5l7 7-7 7"></path></svg>
+</a>
+</div>
+
+<nav aria-label="Galvenā navigācija" style="position: absolute; left: 0; right: 0; bottom: 0; height: 86px; padding: 6px 8px 0; background: #FFFFFF; border-top: 1px solid #ECE5DA; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: start; justify-items: center">
+<a href="Home.dc.html" style="width: 100%; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600; color: #6F685E"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"></path></svg>Šodiena</a>
+<a href="Food-Log.dc.html" style="width: 100%; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600; color: #6F685E"><svg class="i" viewBox="0 0 24 24"><path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z"></path><path d="M9 8c0-1.5 1.2-1.8 1.2-3.3M13.5 8c0-1.5 1.2-1.8 1.2-3.3"></path></svg>Uzturs</a>
+<a href="Add-Sheet.dc.html" aria-label="Pievienot" style="width: 60px; height: 60px; margin-top: -24px; border-radius: 30px; background: #D9693C; color: #FFFFFF; border: 4px solid #F7F3EE; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(217,105,60,0.30)"><svg class="i" viewBox="0 0 24 24" style="width: 26px; height: 26px; stroke-width: 2.4"><path d="M12 5v14M5 12h14"></path></svg></a>
+<a href="Move.dc.html" style="width: 100%; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600; color: #6F685E"><svg class="i" viewBox="0 0 24 24"><path d="M3 12.5h4l2.5-6 5 12 2.5-6H21"></path></svg>Kustība</a>
+<a href="Sleep.dc.html" style="width: 100%; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 600; color: #6F685E"><svg class="i" viewBox="0 0 24 24"><path d="M19.5 14.2A7.8 7.8 0 1 1 9.8 4.5a6.2 6.2 0 0 0 9.7 9.7z"></path></svg>Miegs</a>
+</nav>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { neutral: false, rem: { water: true, food: true, move: false, eve: true }, freq: 'low' }; }
+  renderVals() {
+    const s = this.state;
+    const sw = (on) => ({ track: on ? '#2F6049' : '#D8D0C4', knob: on ? 'flex-end' : 'flex-start', onStr: on ? 'true' : 'false' });
+    const R = [['water', 'Ūdens'], ['food', 'Maltīšu ieraksti'], ['move', 'Kustība'], ['eve', 'Miega logs']];
+    const F = [['low', 'Reti'], ['mid', 'Vidēji'], ['high', 'Bieži']];
+    const n = sw(s.neutral);
+    return {
+      traits: [
+        { name: 'Atvērtība', level: 'Vidēja', w: '52%' },
+        { name: 'Apzinīgums', level: 'Augsts', w: '84%' },
+        { name: 'Ekstraversija', level: 'Zema', w: '24%' },
+        { name: 'Labvēlība', level: 'Augsta', w: '78%' },
+        { name: 'Emoc. stabilitāte', level: 'Zema', w: '27%' }
+      ],
+      neutralStr: n.onStr, nTrack: n.track, nKnob: n.knob,
+      toggleNeutral: () => this.setState({ neutral: !s.neutral }),
+      goals: [
+        { k: 'Mērķi', v: 'Vēlamais svars 66 kg · rutīna' },
+        { k: 'Enerģija', v: '1 750 kcal' },
+        { k: 'Olbaltumvielas', v: '110 g' },
+        { k: 'Ūdens · soļi · miegs', v: '2,3 l · 8 000 · 7 h 30 min' }
+      ],
+      reminders: R.map(([id, label]) => Object.assign({ label, toggle: () => { const r = Object.assign({}, s.rem); r[id] = !r[id]; this.setState({ rem: r }); } }, sw(s.rem[id]))),
+      freq: F.map(([id, label]) => ({ label, pick: () => this.setState({ freq: id }), bg: s.freq === id ? '#FFFFFF' : 'transparent', sh: s.freq === id ? '0 1px 3px rgba(38,35,31,0.12)' : 'none' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

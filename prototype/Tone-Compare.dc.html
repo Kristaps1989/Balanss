@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<title>Balanss — tie paši dati, cits tonis</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+html,body{overflow:hidden;width:390px;height:844px}
+body{margin:0;background:#F7F3EE;color:#26231F;font-family:'Figtree',-apple-system,'Segoe UI',sans-serif}
+a{color:#A9502A;text-decoration:none}a:hover{color:#8A3F1F}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.d{font-family:'Bricolage Grotesque','Figtree',-apple-system,sans-serif;letter-spacing:-0.02em}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sc{scrollbar-width:none}.sc::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+<main style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F7F3EE">
+<div class="sc" style="scrollbar-width: none; overflow-x: hidden; position: absolute; inset: 0; overflow-y: auto; padding: 56px 20px 40px; display: flex; flex-direction: column; gap: 14px">
+<a href="Me.dc.html" aria-label="Atpakaļ" style="width: 44px; height: 44px; display: flex; align-items: center; color: #26231F"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"></path></svg></a>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 class="d" style="margin: 0; font-size: 30px; line-height: 1.1; font-weight: 700">Tie paši dati, cits tonis</h1>
+<p style="margin: 0; font-size: 15px; line-height: 1.45; color: #5E5850">Viena diena: 1 480 kcal, 68 g olbaltumvielu, 1,2 l ūdens, 6 h 40 min miega. Trīs profili — trīs veidi, kā par to runāt.</p>
+</div>
+<sc-for list="{{cards}}" as="c" hint-placeholder-count="3">
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 24px; padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<span style="height: 30px; padding: 0 12px; border-radius: 15px; font-size: 13px; font-weight: 700; display: flex; align-items: center; background: {{c.chipBg}}; color: {{c.chipFg}}">{{c.trait}}</span>
+<span style="font-size: 12px; font-weight: 600; color: #6F685E">{{c.style}}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #6F685E">Dienas ieteikums</div>
+<p style="margin: 0; font-size: 16px; line-height: 1.45; color: #26231F">{{c.tip}}</p>
+</div>
+<div style="display: flex; gap: 10px; align-items: flex-start; border-radius: 16px; background: #F7F3EE; padding: 12px">
+<svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px; color: #1F5579; margin-top: 1px"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"></path></svg>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #6F685E">Ūdens atgādinājums</div>
+<div style="font-size: 15px; line-height: 1.4">{{c.water}}</div>
+</div>
+</div>
+<div style="display: flex; gap: 10px; align-items: flex-start; border-radius: 16px; background: #F7F3EE; padding: 12px">
+<svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px; color: #A9502A; margin-top: 1px"><path d="M5 5h14v10H10l-5 4z"></path></svg>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #6F685E">Jautājums tev</div>
+<div style="font-size: 15px; line-height: 1.4">{{c.ask}}</div>
+</div>
+</div>
+</section>
+</sc-for>
+<a href="Notif-Plan.dc.html" style="min-height: 54px; border-radius: 27px; background: #26231F; color: #FFFFFF; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px">Skatīt paziņojumu piemērus<svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px"><path d="M9 5l7 7-7 7"></path></svg></a>
+</div>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      cards: [
+        {
+          trait: 'Augsts apzinīgums', style: 'Plāns un skaitļi', chipBg: '#EEF0F8', chipFg: '#2E3B66',
+          tip: 'Šodien trūkst 42 g olbaltumvielu. Plāns: biezpiens brokastīs (+18 g), vista pusdienās (+30 g). Sērija: 4 dienas pēc kārtas.',
+          water: 'Ūdens: 1,2 no 2,3 l. Viena glāze tagad — un līdz 16:00 būsi pie 1,7 l.',
+          ask: 'Vakara pārbaude: cik no 3 šodienas plāna punktiem izdevās?'
+        },
+        {
+          trait: 'Augsta atvērtība', style: 'Dažādība un jaunais', chipBg: '#F6E7CF', chipFg: '#5E420F',
+          tip: 'Ideja šodienai: izmēģini jaunu recepti — lēcu zupu ar ciedru riekstiem. Tā aizpildīs šķiedrvielas, un kaut kas jauns.',
+          water: 'Pamēģini ūdeni ar gurķi un piparmētru — tā pati glāze, cita garša.',
+          ask: 'Ko jaunu šonedēļ izmēģināji? Ēdienu, maršrutu, kustību — jebko.'
+        },
+        {
+          trait: 'Zema emocionālā stabilitāte', style: 'Maigi, bez spiediena', chipBg: '#E6EFE9', chipFg: '#24503B',
+          tip: 'Miegs bija īsāks, tas ir normāli. Šodien — bez spiediena. Ja sanāk, 15 minūšu pastaiga pēcpusdienā.',
+          water: 'Ja ērti, iedzer malku ūdens. Nekas nav nokavēts.',
+          ask: 'Kā tu šodien jūties? Pietiek ar vienu vārdu.'
+        }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

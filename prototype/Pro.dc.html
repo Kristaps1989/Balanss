@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<title>Balanss Pro</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+html,body{overflow:hidden;width:390px;height:844px}
+body{margin:0;background:#F7F3EE;color:#26231F;font-family:'Figtree',-apple-system,'Segoe UI',sans-serif}
+a{color:#A9502A;text-decoration:none}a:hover{color:#8A3F1F}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.d{font-family:'Bricolage Grotesque','Figtree',-apple-system,sans-serif;letter-spacing:-0.02em}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+</style>
+</helmet>
+<main style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F7F3EE; display: flex; flex-direction: column; padding: 56px 20px 36px; gap: 16px">
+<div style="display: flex; justify-content: flex-end">
+<a href="Me.dc.html" aria-label="Aizvērt" style="width: 44px; height: 44px; border-radius: 22px; background: #EDE6DB; color: #26231F; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 class="d" style="margin: 0; font-size: 32px; line-height: 1.1; font-weight: 700">Balanss Pro</h1>
+<p style="margin: 0; font-size: 16px; line-height: 1.45; color: #5E5850">Bezmaksas versija ir pilnvērtīga. Pro — ja gribi fotografēt katru maltīti un saņemt vairāk ideju.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<section style="background: #FFFFFF; border: 1px solid #EFE8DE; border-radius: 20px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-size: 14px; font-weight: 700; color: #5E5850">Bezmaksas</div>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.35">
+<div style="display: flex; gap: 6px"><svg class="i" viewBox="0 0 24 24" style="width: 18px; height: 18px; color: #2F6049"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>3 foto analīzes dienā</div>
+<div style="display: flex; gap: 6px"><svg class="i" viewBox="0 0 24 24" style="width: 18px; height: 18px; color: #2F6049"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Ierīču sinhronizācija</div>
+<div style="display: flex; gap: 6px"><svg class="i" viewBox="0 0 24 24" style="width: 18px; height: 18px; color: #2F6049"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Ieteikumi tavā stilā</div>
+</div>
+</section>
+<section style="background: #FBEBE1; border: 1.5px solid #D9693C; border-radius: 20px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-size: 14px; font-weight: 700; color: #8A3F1F">Pro</div>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.35">
+<div style="display: flex; gap: 6px"><svg class="i" viewBox="0 0 24 24" style="width: 18px; height: 18px; color: #A9502A"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Foto bez limita</div>
+<div style="display: flex; gap: 6px"><svg class="i" viewBox="0 0 24 24" style="width: 18px; height: 18px; color: #A9502A"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Nedēļas AI kopsavilkums</div>
+<div style="display: flex; gap: 6px"><svg class="i" viewBox="0 0 24 24" style="width: 18px; height: 18px; color: #A9502A"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Receptes tavam mērķim</div>
+</div>
+</section>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px" role="radiogroup" aria-label="Plāns">
+<sc-for list="{{plans}}" as="p" hint-placeholder-count="2">
+<button onClick="{{p.pick}}" role="radio" aria-checked="{{p.onStr}}" style="min-height: 68px; border-radius: 20px; padding: 12px 16px; display: flex; align-items: center; gap: 14px; text-align: left; background: #FFFFFF; border: 1.5px solid {{p.bd}}">
+<span style="width: 22px; height: 22px; border-radius: 11px; border: 2px solid {{p.bd}}; background: {{p.dot}}; flex-shrink: 0"></span>
+<span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 16px; font-weight: 700">{{p.name}}</span>
+<span style="font-size: 13px; color: #5E5850">{{p.sub}}</span>
+</span>
+<span class="d" style="font-size: 18px; font-weight: 700">{{p.price}}</span>
+</button>
+</sc-for>
+</div>
+<div style="flex-grow: 1"></div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<button style="height: 56px; border-radius: 28px; background: #26231F; color: #FFFFFF; font-size: 17px; font-weight: 600">{{cta}}</button>
+<a href="Me.dc.html" style="height: 48px; font-size: 16px; font-weight: 600; color: #5E5850; display: flex; align-items: center; justify-content: center">Varbūt vēlāk</a>
+<div style="font-size: 13px; color: #6F685E; text-align: center">Atcelt var jebkurā brīdī iestatījumos.</div>
+</div>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { plan: 'year' }; }
+  renderVals() {
+    const s = this.state;
+    const mk = (id, name, sub, price) => ({ name, sub, price, onStr: s.plan === id ? 'true' : 'false', bd: s.plan === id ? '#D9693C' : '#E3DBCF', dot: s.plan === id ? '#D9693C' : '#FFFFFF', pick: () => this.setState({ plan: id }) });
+    return {
+      plans: [
+        mk('year', 'Gada', '≈ €4,08 mēnesī · ietaupi 32%', '€49/gadā'),
+        mk('month', 'Mēneša', 'Maksā pa mēnesim', '€5,99/mēn.')
+      ],
+      cta: s.plan === 'year' ? 'Turpināt ar gada plānu' : 'Turpināt ar mēneša plānu'
+    };
+  }
+}
+</script>
+</body>
+</html>

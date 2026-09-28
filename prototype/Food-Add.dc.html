@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<title>Balanss — citi ievades veidi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+html,body{overflow:hidden;width:390px;height:844px}
+body{margin:0;background:#F7F3EE;color:#26231F;font-family:'Figtree',-apple-system,'Segoe UI',sans-serif}
+a{color:#A9502A;text-decoration:none}a:hover{color:#8A3F1F}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+input{font-family:inherit}
+.d{font-family:'Bricolage Grotesque','Figtree',-apple-system,sans-serif;letter-spacing:-0.02em}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+</style>
+</helmet>
+<main style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F7F3EE">
+<div aria-hidden="true" style="position: absolute; inset: 0; padding: 56px 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="height: 44px; width: 140px; border-radius: 12px; background: #EAE3D8"></div>
+<div style="height: 130px; border-radius: 24px; background: #FFFFFF"></div>
+<div style="height: 54px; border-radius: 27px; background: #FFFFFF"></div>
+</div>
+<a href="Food-Log.dc.html" aria-label="Aizvērt" style="position: absolute; inset: 0; background: rgba(38,35,31,0.42)"></a>
+<section aria-label="Pievienot citādi" style="position: absolute; left: 0; right: 0; bottom: 0; top: 118px; background: #FFFFFF; border-radius: 28px 28px 0 0; padding: 10px 20px 36px; display: flex; flex-direction: column; gap: 16px">
+<div style="width: 40px; height: 5px; border-radius: 3px; background: #DDD5C9; align-self: center"></div>
+<div style="display: flex; justify-content: space-between; align-items: center">
+<h2 class="d" style="margin: 0; font-size: 22px; font-weight: 700">Pievienot citādi</h2>
+<a href="Food-Log.dc.html" aria-label="Aizvērt" style="width: 44px; height: 44px; border-radius: 22px; background: #F2ECE3; color: #26231F; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<label for="q" style="font-size: 14px; font-weight: 700">Uzraksti vai pasaki</label>
+<div style="display: flex; gap: 8px">
+<input id="q" type="text" value="{{q}}" onChange="{{setQ}}" style="flex-grow: 1; min-width: 0; height: 52px; border-radius: 16px; border: 1.5px solid #D9693C; background: #FFFFFF; padding: 0 14px; font-size: 16px; color: #26231F">
+<button aria-label="Diktēt balsī" style="width: 52px; height: 52px; border-radius: 16px; background: #26231F; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="3.5" width="6" height="11" rx="3"></rect><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"></path></svg></button>
+</div>
+<div style="border-radius: 16px; background: #F7F3EE; padding: 4px 14px">
+<div style="display: flex; justify-content: space-between; align-items: center; min-height: 44px; border-bottom: 1px solid #ECE5DA; font-size: 15px"><span>Olas, vārītas · 2 gab.</span><b>156 kcal</b></div>
+<div style="display: flex; justify-content: space-between; align-items: center; min-height: 44px; font-size: 15px"><span>Rupjmaize · 1 šķēle</span><b>80 kcal</b></div>
+</div>
+<button style="height: 46px; border-radius: 23px; background: #26231F; color: #FFFFFF; font-size: 15px; font-weight: 600">Pievienot 236 kcal</button>
+</div>
+<a href="Food-Log.dc.html" style="min-height: 64px; border-radius: 18px; background: #F2ECE3; color: #26231F; padding: 0 16px; display: flex; align-items: center; gap: 14px">
+<svg class="i" viewBox="0 0 24 24" style="width: 28px; height: 28px"><path d="M4 6v12M7 6v12M10 6v12M14 6v12M16 6v12M20 6v12"></path></svg>
+<span style="flex-grow: 1; display: flex; flex-direction: column"><span style="font-size: 16px; font-weight: 700">Skenēt svītrkodu</span><span style="font-size: 13px; color: #5E5850">Iepakotiem produktiem</span></span>
+<svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px"><path d="M9 5l7 7-7 7"></path></svg>
+</a>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 14px; font-weight: 700; padding-bottom: 4px">Iecienītākie</div>
+<sc-for list="{{favs}}" as="f" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 12px; min-height: 56px; border-bottom: 1px solid #F0EAE1">
+<div style="flex-grow: 1">
+<div style="font-size: 15px; font-weight: 600">{{f.name}}</div>
+<div style="font-size: 13px; color: #5E5850">{{f.meta}}</div>
+</div>
+<button aria-label="Pievienot" style="width: 44px; height: 44px; border-radius: 22px; background: #FBEBE1; color: #A9502A; display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px"><path d="M12 5v14M5 12h14"></path></svg></button>
+</div>
+</sc-for>
+</div>
+</section>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { q: '2 olas un maize' }; }
+  renderVals() {
+    return {
+      q: this.state.q,
+      setQ: (e) => this.setState({ q: e.target.value }),
+      favs: [
+        { name: 'Auzu putra ar ogām', meta: '340 kcal · 9 g olb.' },
+        { name: 'Biezpiens ar medu', meta: '210 kcal · 18 g olb.' },
+        { name: 'Kafija ar pienu', meta: '80 kcal · 4 g olb.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
