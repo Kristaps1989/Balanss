@@ -8,16 +8,23 @@ import type { PushCopy, PushKind, ToneInput, TrendsInput, TipAngle, TipResult, W
  * follows prototype/Tone-Compare, Notif-* and Home.
  */
 
+/** "1,2 no 2,3 l" (prototype wording). */
+const litresOf = (p: { value: number; target: number }) => `${fmtDec(p.value / 1000)} no ${fmtLitres(p.target)}`;
+
 const ratio = (p: { value: number; target: number }) => (p.target > 0 ? p.value / p.target : 1);
 
-/** Angles worth talking about today, most pressing first. */
+/**
+ * Angles worth talking about today, most pressing first (share of target reached;
+ * lower = more pressing). Water, steps and fibre get a small handicap because they
+ * usually catch up during the day, while a protein gap needs a planned meal.
+ */
 export function rankAngles(input: ToneInput): TipAngle[] {
   const n = input.nutrition;
   const scored: [TipAngle, number][] = [
     ['protein', ratio(n.proteinG)],
-    ['water', ratio(n.waterMl)],
-    ['steps', ratio(input.steps)],
-    ['fibre', ratio(n.fibreG)],
+    ['water', ratio(n.waterMl) + 0.15],
+    ['steps', ratio(input.steps) + 0.1],
+    ['fibre', ratio(n.fibreG) + 0.1],
   ];
   if (input.sleep) scored.push(['sleep', input.sleep.totalMin / Math.max(1, input.sleep.targetMin) + 0.05]);
   const open = scored.filter(([, r]) => r < 1).sort((a, b) => a[1] - b[1]);
@@ -52,7 +59,7 @@ export function templateTip(input: ToneInput, angle: TipAngle): TipResult {
             ? t(`Līdz olbaltumvielu mērķim trūkst ${proteinGap} g. Viens viegls solis: biezpiens vai jogurts vakariņās (+18 g).${soft}`, `${proteinGap} g`)
             : t(`Šodien trūkst ${proteinGap} g olbaltumvielu. Plāns: biezpiens vai jogurts vakariņās (+18 g) un sauja riekstu uzkodām (+6 g).`, `${proteinGap} g`);
         case 'water':
-          return t(`Ūdens: ${fmtLitres(n.waterMl.value)} no ${fmtLitres(n.waterMl.target)}. Plāns: glāze tagad un pa glāzei pēc katras maltītes — tā pietrūkstošie ${fmtLitres(waterGap)} sanāks līdz vakaram.`, fmtLitres(waterGap));
+          return t(`Ūdens: ${litresOf(n.waterMl)}. Plāns: glāze tagad un pa glāzei pēc katras maltītes — tā pietrūkstošie ${fmtLitres(waterGap)} sanāks līdz vakaram.`, fmtLitres(waterGap));
         case 'steps':
           return t(`Līdz ${fmtInt(input.steps.target)} soļiem trūkst ${fmtInt(stepsGap)}. Plāns: 20 minūšu pastaiga pēc pusdienām — tas ir ap 2 000 soļu.${soft}`, `${fmtInt(stepsGap)}`);
         case 'fibre':
@@ -97,7 +104,7 @@ export function templateTip(input: ToneInput, angle: TipAngle): TipResult {
         case 'protein':
           return t(`Olbaltumvielas: ${fmtDec(n.proteinG.value)} no ${n.proteinG.target} g. Vakariņās der olas, biezpiens vai zivs.`, `${fmtDec(n.proteinG.value)} no ${n.proteinG.target} g`);
         case 'water':
-          return t(`Ūdens: ${fmtLitres(n.waterMl.value)} no ${fmtLitres(n.waterMl.target)}. Glāze tagad palīdzēs.`, `${fmtLitres(n.waterMl.value)} no ${fmtLitres(n.waterMl.target)}`);
+          return t(`Ūdens: ${litresOf(n.waterMl)}. Glāze tagad palīdzēs.`, litresOf(n.waterMl));
         case 'steps':
           return t(`Soļi: ${fmtInt(input.steps.value)} no ${fmtInt(input.steps.target)}. Īsa pastaiga pēc pusdienām aizpildīs starpību.`, `${fmtInt(input.steps.value)} no ${fmtInt(input.steps.target)}`);
         case 'fibre':
@@ -204,7 +211,7 @@ export function fakePushCopy(kind: PushKind, input: ToneInput, meal: 'lunch' | '
       case 'plan': {
         const hour = Math.min(21, Math.floor(hmToMin(input.localTime ?? '15:00') / 60) + 1);
         return {
-          title: `Ūdens: ${fmtLitres(water.value)} no ${fmtLitres(water.target)}`,
+          title: `Ūdens: ${litresOf(water)}`,
           body: `Viena glāze tagad — un līdz ${hour}:00 būsi pie ${fmtLitres(Math.min(water.target, water.value + 500))}.`,
         };
       }
@@ -213,7 +220,7 @@ export function fakePushCopy(kind: PushKind, input: ToneInput, meal: 'lunch' | '
       case 'gentle':
         return { title: 'Balanss', body: 'Ja ērti, iedzer malku ūdens. Nekas nav nokavēts.' };
       default:
-        return { title: 'Ūdens', body: `Šodien ${fmtLitres(water.value)} no ${fmtLitres(water.target)}. Laiks glāzei ūdens.` };
+        return { title: 'Ūdens', body: `Šodien ${litresOf(water)}. Laiks glāzei ūdens.` };
     }
   }
   switch (input.tone) {

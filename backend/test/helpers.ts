@@ -28,7 +28,7 @@ export { db, pool };
 export async function resetDb(): Promise<void> {
   migrated ??= runMigrations(db);
   await migrated;
-  const tables = Object.values(schema)
+  const tables = (Object.values(schema) as unknown[])
     .filter((t): t is PgTable => t instanceof PgTable)
     .map((t) => `"${getTableName(t)}"`);
   await db.execute(sql.raw(`TRUNCATE ${tables.join(', ')} CASCADE`));
