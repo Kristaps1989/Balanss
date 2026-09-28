@@ -38,7 +38,7 @@ API_PID=$!
 
 echo "› Building web app against $E2E_API_URL"
 rm -rf "$OUT"
-EXPO_OFFLINE=1 CI=1 EXPO_PUBLIC_API_URL="$E2E_API_URL" EXPO_PUBLIC_USE_MOCK=0 npx expo export -p web --output-dir "$OUT" >/dev/null
+EXPO_OFFLINE=1 CI=1 EXPO_PUBLIC_API_URL="$E2E_API_URL" EXPO_PUBLIC_USE_MOCK=0 npx expo export -p web --clear --output-dir "$OUT" >/dev/null
 
 echo "› Serving web build on :$WEB_PORT"
 npx -y serve -s "$OUT" -l "$WEB_PORT" >/dev/null 2>&1 &
