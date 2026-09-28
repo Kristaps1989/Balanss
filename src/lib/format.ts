@@ -76,3 +76,50 @@ export function greeting(date: Date): string {
   if (h >= 11 && h < 18) return 'Labdien';
   return 'Labvakar';
 }
+
+/** Latvian singular/plural: 1, 21, 31… take the singular (not 11). */
+export function plural(n: number, one: string, many: string): string {
+  return n % 10 === 1 && n % 100 !== 11 ? one : many;
+}
+
+/** ISO timestamp → local "HH:MM". */
+export function timeOf(iso: string): string {
+  const d = new Date(iso);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+/** Grams with one decimal only when needed: 68 → "68", 5.4 → "5,4". */
+export function grams(g: number): string {
+  return formatNumber(g, Number.isInteger(Math.round(g * 10) / 10) ? 0 : 1);
+}
+
+const WEEKDAYS_LOC = ['svētdien', 'pirmdien', 'otrdien', 'trešdien', 'ceturtdien', 'piektdien', 'sestdien'];
+
+/** Relative day label: "Šodien", "Vakar", "Piektdien, 25.09." */
+export function dayLabel(date: string, today: string): string {
+  if (date === today) return 'Šodien';
+  const [y, m, d] = date.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  const [ty, tm, td] = today.split('-').map(Number);
+  const diff = Math.round((new Date(ty, tm - 1, td).getTime() - dt.getTime()) / 86400000);
+  if (diff === 1) return 'Vakar';
+  const wd = WEEKDAYS_LOC[dt.getDay()];
+  return `${wd[0].toUpperCase()}${wd.slice(1)}, ${d}.${String(m).padStart(2, '0')}.`;
+}
+
+/** Workout day label: "Šodien 09:30", "Piektdien", "Ceturtdien" */
+export function workoutWhen(iso: string, today: string): string {
+  const d = new Date(iso);
+  const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  if (date === today) return `Šodien ${timeOf(iso)}`;
+  const label = dayLabel(date, today);
+  return label.split(',')[0];
+}
+
+const MONTHS_GEN = ['janvāra', 'februāra', 'marta', 'aprīļa', 'maija', 'jūnija', 'jūlija', 'augusta', 'septembra', 'oktobra', 'novembra', 'decembra'];
+
+/** "2027. gada marta" */
+export function monthYear(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getFullYear()}. gada ${MONTHS_GEN[d.getMonth()]}`;
+}

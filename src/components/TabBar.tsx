@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useSegments } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { Fragment } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -15,7 +15,11 @@ const TABS: Record<string, { label: string; icon: IconName }> = {
 };
 
 /** Five equal slots: Šodiena · Uzturs · (+) · Kustība · Miegs. */
+const FULL_SCREEN = new Set(['camera', 'analyzing', 'result']);
+
 export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
+  const segments = useSegments() as string[];
+  if (segments.some((s) => FULL_SCREEN.has(s))) return null;
   return (
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
       {state.routes.map((route, index) => {

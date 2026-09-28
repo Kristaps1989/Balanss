@@ -32,10 +32,10 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 160
         }
-      ]
-    ],
-    "experiments": {
-      "typedRoutes": true
-    }
+      ],
+      "expo-secure-store",
+      "expo-localization",
+      "expo-sharing"
+    ]
   }
 }

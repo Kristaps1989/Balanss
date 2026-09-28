@@ -435,7 +435,7 @@ export interface PushTokenRequest {
   timezone: string;
 }
 
-export interface ApiError {
+export interface ApiErrorBody {
   error: { code: string; message: string };
 }
 

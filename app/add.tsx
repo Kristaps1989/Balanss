@@ -1,12 +1,13 @@
 import { router, type Href } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { getMe, useAsync } from '@/api';
+import { useDay } from '@/api/hooks';
 import { Icon, type IconName } from '@/components/Icon';
+import { Sheet } from '@/components/Sheet';
 import { formatNumber } from '@/lib/format';
-import { addWater, GLASS_ML } from '@/store/water';
-import { colors, fonts, hit, radius, space, type } from '@/theme';
+import { GLASS_ML, useAddWater } from '@/lib/mutations';
+import { useToday } from '@/lib/today';
+import { colors, fonts } from '@/theme';
 
 interface Action {
   label: string;
@@ -17,18 +18,17 @@ interface Action {
   run: () => void;
 }
 
-/** Closes the sheet, then opens a route behind it. */
-const go = (href: Href) => () => {
-  router.back();
-  router.navigate(href);
-};
+/** Replace the sheet with another route. */
+const go = (href: Href) => () => router.replace(href);
 
 /** Global "+" sheet (prototype: Add-Sheet.dc.html). */
 export default function AddSheet() {
-  const insets = useSafeAreaInsets();
-  const user = useAsync(getMe);
+  const date = useToday();
+  const day = useDay(date);
+  const water = useAddWater(date);
+  const kg = day.data?.lastWeightKg;
   const actions: Action[] = [
-    { label: 'Foto', hint: 'Nofotografē maltīti', icon: 'camera', tint: colors.accentText, bg: colors.accentSoft, run: go('/nutrition') },
+    { label: 'Foto', hint: 'Nofotografē maltīti', icon: 'camera', tint: colors.accentText, bg: colors.accentSoft, run: go('/nutrition/camera') },
     {
       label: `+${GLASS_ML} ml ūdens`,
       hint: 'Viena glāze',
@@ -36,85 +36,45 @@ export default function AddSheet() {
       tint: colors.waterDeep,
       bg: colors.waterSoft,
       run: () => {
-        addWater();
+        water.mutate(GLASS_ML);
         router.back();
       },
     },
-    { label: 'Aktivitāte', hint: 'Ja pulkstenis to neredzēja', icon: 'movement', tint: colors.moveDeep, bg: colors.moveSoft, run: go('/movement') },
+    { label: 'Aktivitāte', hint: 'Ja pulkstenis to neredzēja', icon: 'movement', tint: colors.moveDeep, bg: colors.moveSoft, run: go('/activity') },
     {
       label: 'Svars',
-      hint: user ? `Pēdējais: ${formatNumber(user.weightKg, 1)} kg` : 'Pieraksti svaru',
+      hint: kg ? `Pēdējais: ${formatNumber(kg, 1)} kg` : 'Pieraksti svaru',
       icon: 'scale',
       tint: colors.text2,
       bg: colors.neutralSoft,
-      run: go('/me'),
+      run: go('/weight'),
     },
   ];
 
   return (
-    <View style={styles.root}>
-      <Pressable style={StyleSheet.absoluteFill} onPress={() => router.back()} accessibilityLabel="Aizvērt" />
-      <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) + 24 }]} accessibilityLabel="Pievienot">
-        <View style={styles.handle} />
-        <View style={styles.header}>
-          <Text style={type.h2}>Ko pievienosim?</Text>
+    <Sheet title="Ko pievienosim?">
+      <View style={styles.grid}>
+        {actions.map((a) => (
           <Pressable
-            onPress={() => router.back()}
+            key={a.label}
+            onPress={a.run}
             accessibilityRole="button"
-            accessibilityLabel="Aizvērt"
-            style={styles.close}>
-            <Icon name="close" color={colors.ink} size={20} />
+            style={({ pressed }) => [styles.tile, { backgroundColor: a.bg }, pressed && { opacity: 0.85 }]}>
+            <Icon name={a.icon} color={a.tint} size={30} />
+            <View>
+              <Text style={styles.tileLabel}>{a.label}</Text>
+              <Text style={styles.tileHint}>{a.hint}</Text>
+            </View>
           </Pressable>
-        </View>
-        <View style={styles.grid}>
-          {actions.map((a) => (
-            <Pressable
-              key={a.label}
-              onPress={a.run}
-              accessibilityRole="button"
-              style={({ pressed }) => [styles.tile, { backgroundColor: a.bg }, pressed && { opacity: 0.85 }]}>
-              <Icon name={a.icon} color={a.tint} size={30} />
-              <View>
-                <Text style={styles.tileLabel}>{a.label}</Text>
-                <Text style={styles.tileHint}>{a.hint}</Text>
-              </View>
-            </Pressable>
-          ))}
-        </View>
+        ))}
       </View>
-    </View>
+    </Sheet>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, justifyContent: 'flex-end', backgroundColor: colors.scrim },
-  sheet: {
-    backgroundColor: colors.card,
-    borderTopLeftRadius: radius.sheet,
-    borderTopRightRadius: radius.sheet,
-    paddingHorizontal: space.screen,
-    paddingTop: 10,
-    gap: space.lg,
-  },
-  handle: { alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: colors.handle },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  close: {
-    width: hit,
-    height: hit,
-    borderRadius: hit / 2,
-    backgroundColor: colors.chip,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  tile: {
-    width: '48%',
-    flexGrow: 1,
-    height: 120,
-    borderRadius: 22,
-    padding: 16,
-    justifyContent: 'space-between',
-  },
+  tile: { width: '47%', flexGrow: 1, height: 120, borderRadius: 22, padding: 16, justifyContent: 'space-between' },
   tileLabel: { fontFamily: fonts.bodyBold, fontSize: 17, color: colors.ink },
   tileHint: { fontFamily: fonts.body, fontSize: 13, color: colors.text2 },
 });
