@@ -129,11 +129,33 @@ export interface Devices {
   lastSyncAt: string | null;
 }
 
+/** Food preferences used by recipes and meal ideas (never sent with the user's identity). */
+export type Diet = 'any' | 'vegetarian' | 'vegan' | 'pescatarian';
+export type AvoidFood = 'lactose' | 'gluten' | 'nuts' | 'fish' | 'eggs' | 'pork';
+export interface FoodPreferences {
+  diet: Diet;
+  avoid: AvoidFood[];
+}
+
+/**
+ * Wellbeing "care mode": when intake, weight change or goals look risky, the app
+ * stops all deficit-oriented advice and gently points to professional support.
+ */
+export type CareReason = 'low_intake' | 'rapid_weight_loss' | 'underweight' | 'low_goal' | 'minor_weight_loss';
+export interface CareStatus {
+  active: boolean;
+  reasons: CareReason[];
+}
+
 export interface Me {
   id: string;
   email: string;
   profile: Profile;
   targets: Targets;
+  preferences: FoodPreferences;
+  /** When false no personal data is sent to the AI; tips and questions use built-in templates. Photo analysis stays available on request. */
+  aiPersonalization: boolean;
+  care: CareStatus;
   personality: Personality | null;
   tonePreference: TonePreference;
   /** Effective tone after applying the preference. */
@@ -168,6 +190,14 @@ export interface Tip {
   /** Short fragment of `body` to emphasise, e.g. "42 g". */
   highlight: string | null;
   accepted: boolean;
+  /** Written by the AI (true) or by the built-in templates (false). Shown as a label. */
+  aiGenerated: boolean;
+}
+
+/** POST /tips/:id/report — "this tip doesn't fit / isn't appropriate". Stored for review, never shown again. */
+export type TipReportReason = 'not_relevant' | 'wrong_data' | 'inappropriate' | 'other';
+export interface TipReportRequest {
+  reason: TipReportReason;
 }
 
 export interface WeeklyQuestionOption {
@@ -183,6 +213,70 @@ export interface WeeklyQuestion {
   question: string;
   options: WeeklyQuestionOption[];
   answerIndex: number | null;
+  /** The pattern the question is based on, e.g. "3 vakarus šonedēļ olbaltumvielas bija zem mērķa". */
+  basedOn: string | null;
+  aiGenerated: boolean;
+}
+
+// ---------------------------------------------------------------- AI analysis (Pro)
+
+/** A deterministic pattern found in the last weeks of data; the AI only phrases it. */
+export type FindingKind =
+  | 'protein_gap'
+  | 'fibre_low'
+  | 'water_low'
+  | 'weekend_shift'
+  | 'breakfast_skipped'
+  | 'short_sleep_low_steps'
+  | 'bedtime_irregular'
+  | 'bedtime_in_window'
+  | 'steps_trend'
+  | 'logging_gaps'
+  | 'consistency';
+
+export interface Finding {
+  kind: FindingKind;
+  /** Positive (something that works) or an opportunity. Never a failure. */
+  polarity: 'positive' | 'opportunity';
+  /** Short factual Latvian sentence with the numbers, e.g. "5 no 7 naktīm gulētiešana bija miega logā". */
+  fact: string;
+  /** 0..1, how clear the pattern is. */
+  strength: number;
+}
+
+/** GET /insights/weekly?date — Pro. */
+export interface WeeklySummary {
+  week: string;
+  periodStart: string;
+  periodEnd: string;
+  headline: string;
+  observations: { title: string; text: string }[];
+  suggestion: string;
+  reflection: string;
+  findings: Finding[];
+  stats: { avgKcal: number; avgProteinG: number; avgSteps: number | null; avgSleepMin: number | null; daysLogged: number };
+  aiGenerated: boolean;
+  generatedAt: string;
+}
+
+/** GET /recipes?date — Pro: meal ideas that fit what is left of today's targets and the preferences. */
+export interface Recipe {
+  id: string;
+  title: string;
+  minutes: number;
+  servings: number;
+  ingredients: { name: string; amount: string }[];
+  steps: string[];
+  perServing: Nutrients;
+  /** Why it fits today, e.g. "+32 g olbaltumvielu vakariņām". */
+  why: string;
+  tags: string[];
+}
+export interface RecipesResponse {
+  date: string;
+  mealType: MealType;
+  recipes: Recipe[];
+  aiGenerated: boolean;
 }
 
 // ---------------------------------------------------------------- nutrition
@@ -405,6 +499,7 @@ export interface Day {
   movement: { steps: Progress; activeKcal: number; restingHr: number | null; hrvMs: number | null; source: HealthSource | null };
   sleep: (SleepNight & { window: SleepWindow | null }) | null;
   tip: Tip | null;
+  care: CareStatus;
   weeklyQuestion: WeeklyQuestion | null;
   lastWeightKg: number | null;
 }
@@ -462,6 +557,8 @@ export interface ApiErrorBody {
  * GET    /exports/:token              (no auth, single-use)   → JSON file
  * DELETE /me                                                  → { ok: true }
  * GET    /me/quota                                            → Quota
+ * PUT    /me/preferences              Partial<FoodPreferences> → Me
+ * PUT    /me/ai                       { enabled: boolean }    → Me
  *
  * GET    /days/:date                                          → Day
  * POST   /water                       AddWaterRequest         → AddWaterResponse
@@ -487,6 +584,10 @@ export interface ApiErrorBody {
  * GET    /tips/today?date                                     → Tip
  * POST   /tips/next?date                                      → Tip
  * POST   /tips/:id/accept                                     → Tip
+ * POST   /tips/:id/report             TipReportRequest        → { ok: true }   (hides the tip, next one is generated)
+ * GET    /insights/weekly?date        (Pro; 402 pro_required) → WeeklySummary
+ * GET    /recipes?date                (Pro; 402 pro_required) → RecipesResponse
+ * POST   /recipes/:id/log             { date }                → Meal
  * GET    /weekly-question?date                                → WeeklyQuestion | null
  * POST   /weekly-question/:id/answer  { optionIndex }         → WeeklyQuestion
  *

@@ -1,4 +1,5 @@
 import type { ActivityLevel, Profile, Sex, Targets } from './api';
+import { KCAL_FLOOR, weightLossAllowed } from './safety';
 
 /**
  * Daily targets from the onboarding basics (prototype: Onb-Goals).
@@ -28,16 +29,19 @@ export function maintenanceKcal(p: Pick<Profile, 'weightKg' | 'heightCm' | 'age'
   return bmr(p) * ACTIVITY_FACTOR[p.activity];
 }
 
-function losing(p: Pick<Profile, 'goals' | 'weightDirection' | 'goalWeightKg' | 'weightKg'>) {
-  return p.goals.includes('weight') && p.weightDirection === 'down' && (p.goalWeightKg ?? p.weightKg) < p.weightKg;
+function losing(p: Pick<Profile, 'goals' | 'weightDirection' | 'goalWeightKg' | 'weightKg' | 'age' | 'heightCm'>) {
+  return (
+    p.goals.includes('weight') && p.weightDirection === 'down' && (p.goalWeightKg ?? p.weightKg) < p.weightKg && weightLossAllowed(p)
+  );
 }
-function gaining(p: Pick<Profile, 'goals' | 'weightDirection' | 'goalWeightKg' | 'weightKg'>) {
+function gaining(p: Pick<Profile, 'goals' | 'weightDirection' | 'goalWeightKg' | 'weightKg' | 'age' | 'heightCm'>) {
   return p.goals.includes('weight') && p.weightDirection === 'up' && (p.goalWeightKg ?? p.weightKg) > p.weightKg;
 }
 
 export function computeTargets(p: Profile): Targets {
   const tdee = maintenanceKcal(p);
-  const kcal = roundTo(losing(p) ? tdee * 0.89 : gaining(p) ? tdee * 1.1 : tdee, 50);
+  // Never below the safety floor, whatever the formula says.
+  const kcal = Math.max(KCAL_FLOOR[p.sex], roundTo(losing(p) ? tdee * 0.89 : gaining(p) ? tdee * 1.1 : tdee, 50));
   const proteinG = roundTo(p.weightKg * (losing(p) ? 1.55 : 1.3), 5);
   const fatG = roundTo((kcal * 0.3) / 9, 5);
   // Floor so the macro energy never exceeds the kcal target.

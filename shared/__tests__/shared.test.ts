@@ -163,3 +163,49 @@ describe('dates', () => {
     expect(ageOn('1992-03-01', '2026-02-28')).toBe(33);
   });
 });
+
+describe('safety', async () => {
+  const { careStatus, copyViolation, minGoalWeight, weightLossAllowed, mentionsKcalBelow } = await import('../safety');
+  const base = { age: 34, sex: 'f' as const, weightKg: 71, heightCm: 168, goals: ['weight' as const], weightDirection: 'down' as const, goalWeightKg: 66 };
+  const days = (kcal: number[]) => kcal.map((k, i) => ({ date: `2026-09-2${i}`, kcal: k, mealsLogged: 3 }));
+
+  it('sample user is not in care mode', () => {
+    expect(careStatus({ profile: base, recentDays: days([1690, 1820, 1710, 1640, 1905, 1760, 1480]), weights: [] })).toEqual({ active: false, reasons: [] });
+  });
+  it('flags repeated very low intake', () => {
+    expect(careStatus({ profile: base, recentDays: days([700, 650, 800, 1700, 1600, 1500, 1500]), weights: [] }).reasons).toEqual(['low_intake']);
+  });
+  it('ignores days with too few meals logged', () => {
+    const d = days([500, 500, 500, 500]).map((x) => ({ ...x, mealsLogged: 1 }));
+    expect(careStatus({ profile: base, recentDays: d, weights: [] }).active).toBe(false);
+  });
+  it('flags rapid weight loss, low goals, underweight and minors', () => {
+    const w = [{ date: '2026-09-01', kg: 75 }, { date: '2026-09-22', kg: 71 }];
+    expect(careStatus({ profile: base, recentDays: [], weights: w }).reasons).toContain('rapid_weight_loss');
+    expect(careStatus({ profile: { ...base, goalWeightKg: 50 }, recentDays: [], weights: [] }).reasons).toContain('low_goal');
+    expect(careStatus({ profile: { ...base, weightKg: 50 }, recentDays: [], weights: [] }).reasons).toContain('underweight');
+    expect(careStatus({ profile: { ...base, age: 16 }, recentDays: [], weights: [] }).reasons).toContain('minor_weight_loss');
+  });
+  it('limits goal weight and weight loss', () => {
+    expect(minGoalWeight(168)).toBe(53);
+    expect(weightLossAllowed({ age: 17, weightKg: 80, heightCm: 170 })).toBe(false);
+    expect(weightLossAllowed({ age: 30, weightKg: 52, heightCm: 168 })).toBe(false);
+  });
+  it('never sets targets below the floor or with a deficit when loss is not allowed', () => {
+    const tiny = computeTargets({ ...ilze, age: 70, heightCm: 150, weightKg: 45, activity: 'sit', goalWeightKg: 40 });
+    expect(tiny.kcal).toBeGreaterThanOrEqual(1200);
+    const teen = computeTargets({ ...ilze, age: 16 });
+    expect(teen.kcal).toBe(computeTargets({ ...ilze, age: 16, goals: ['health'], weightDirection: null, goalWeightKg: null }).kcal);
+  });
+  it('catches unsafe copy', () => {
+    expect(copyViolation('Ja sanāk, pastaiga pēc vakariņām.')).toBeNull();
+    expect(copyViolation('Izlaid vakariņas, lai sasniegtu mērķi')).toBe('restriction');
+    expect(copyViolation('Pastaiga palīdzēs sadedzināt kūku')).toBe('compensation');
+    expect(copyViolation('Zaudēsi 2 kg nedēļā')).toBe('weight promise');
+    expect(copyViolation('Tas samazinās holesterīnu')).toBe('medical');
+    expect(copyViolation('Šodien bija neveiksme')).toBe('shame');
+    expect(mentionsKcalBelow('Mērķis šodien: 900 kcal dienā', 1200)).toBe(true);
+    expect(mentionsKcalBelow('Vēl 700 kcal līdz mērķim', 1200)).toBe(false);
+    expect(mentionsKcalBelow('Enerģija: 1 750 kcal dienā', 1200)).toBe(false);
+  });
+});
