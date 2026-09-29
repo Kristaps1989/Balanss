@@ -1,5 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import { eq } from 'drizzle-orm';
+
 import { pushLog, tips } from '../src/db/schema';
 import { zonedTime } from '../src/lib/time';
 import { runSchedulerTick, waterShareBy } from '../src/scheduler';
@@ -37,7 +39,7 @@ describe('push scheduler', () => {
     let r = await at('05:00');
     expect(r.tipsGenerated).toHaveLength(1);
     expect(r.pushes).toEqual([]);
-    expect(await db.select().from(tips)).toHaveLength(1);
+    expect(await db.select().from(tips).where(eq(tips.date, TODAY))).toHaveLength(1);
     expect((await at('05:05')).tipsGenerated).toEqual([]);
 
     // 10:00 and 13:10 — 1,2 l is ahead of the pro-rated target, so no water push.

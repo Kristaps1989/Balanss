@@ -1,11 +1,13 @@
 import { eq } from 'drizzle-orm';
 
-import type { Devices, Me, Personality, Plan, Profile, Reminders, TonePreference } from '../../../shared/api';
+import type { CareStatus, Devices, FoodPreferences, Me, Personality, Plan, Profile, Reminders, TonePreference } from '../../../shared/api';
 import { effectiveTone } from '../../../shared/personality';
 import { computeTargets } from '../../../shared/targets';
 import type { Db } from '../db/client';
 import { personalities, users, type PersonalityRow, type UserRow } from '../db/schema';
-import { unauthorized } from '../errors';
+import { AppError, unauthorized } from '../errors';
+import { localNow } from '../lib/time';
+import { careFor } from './analysis';
 
 export const DEFAULT_PROFILE: Profile = {
   firstName: '',
@@ -29,6 +31,8 @@ export const DEFAULT_REMINDERS: Reminders = {
 };
 
 export const DEFAULT_DEVICES: Devices = { source: null, connected: false, devices: [], lastSyncAt: null };
+
+export const DEFAULT_PREFERENCES: FoodPreferences = { diet: 'any', avoid: [] };
 
 export function newUserValues(email: string, extra: { firstName?: string | null; googleSub?: string; appleSub?: string; timezone?: string } = {}) {
   const profile: Profile = { ...DEFAULT_PROFILE, firstName: extra.firstName?.trim().slice(0, 60) ?? '' };
@@ -63,13 +67,21 @@ export function toPersonality(row: PersonalityRow | null | undefined): Personali
   };
 }
 
-export function toMe(user: UserRow, personality: PersonalityRow | null | undefined): Me {
+/** 402 `pro_required` unless the user has an active Pro entitlement. */
+export function requirePro(user: Pick<UserRow, 'plan' | 'planExpiresAt'>, now: Date): void {
+  if (effectivePlan(user, now) !== 'pro') throw new AppError(402, 'pro_required', 'This feature is part of Balanss Pro');
+}
+
+export function toMe(user: UserRow, personality: PersonalityRow | null | undefined, care: CareStatus): Me {
   const pref = user.tonePreference as TonePreference;
   return {
     id: user.id,
     email: user.email,
     profile: user.profile,
     targets: user.targets,
+    preferences: user.preferences ?? DEFAULT_PREFERENCES,
+    aiPersonalization: user.aiPersonalization,
+    care,
     personality: toPersonality(personality),
     tonePreference: pref,
     tone: effectiveTone(pref, personality?.levels ?? null),
@@ -92,7 +104,9 @@ export async function getPersonality(db: Db, userId: string): Promise<Personalit
   return row ?? null;
 }
 
-export async function loadMe(db: Db, userId: string): Promise<Me> {
+/** Me, with care mode computed as of the user's local today. */
+export async function loadMe(db: Db, userId: string, now: Date = new Date()): Promise<Me> {
   const [user, p] = await Promise.all([getUser(db, userId), getPersonality(db, userId)]);
-  return toMe(user, p);
+  const care = await careFor(db, user, localNow(user.timezone, now).date);
+  return toMe(user, p, care);
 }

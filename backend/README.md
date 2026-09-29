@@ -17,8 +17,11 @@ backend/
   src/routes/*.ts       one plugin per area (auth, me, day, meals, health, copy, push, public)
   src/services/*.ts     auth, users, day aggregation, meals, photos, quota, GDPR, e-mail, push
   src/ai/               claude.ts (structured-output call), food.ts, tone.ts (tone engine),
-                        fake-food.ts + tone-templates.ts (deterministic fake / fallback)
-  src/seed-data.ts      the CLAUDE.md sample user Ilze with 14 days of history
+                        analysis.ts (deterministic pattern findings), insights.ts (weekly summary),
+                        recipes.ts + recipes-data.ts (meal ideas, preference blacklist, curated list),
+                        safety.ts (ethics gate for all AI copy), fake-food.ts, tone-templates.ts,
+                        question-templates.ts, food-ideas.ts (deterministic fake / fallback)
+  src/seed-data.ts      sample users: Ilze (28 days of history) and Marta (care mode)
   drizzle/              generated SQL migrations
   evals/tone.eval.ts    LLM-judged tone eval
   test/                 integration tests (fastify.inject against Postgres)
@@ -33,7 +36,7 @@ cd backend
 cp .env.example .env        # defaults work for local dev
 npm install
 npm run migrate             # applies drizzle/ migrations
-npm run seed                # (re)creates ilze@piemers.lv with 14 days ending today
+npm run seed                # (re)creates ilze@piemers.lv (28 days + today) and care@piemers.lv
 npm run dev                 # http://localhost:3000, reloads on change
 ```
 
@@ -59,7 +62,7 @@ For the Android emulator, point the app at `EXPO_PUBLIC_API_URL=http://10.0.2.2:
 | `npm start` | `node dist/server.js` |
 | `npm run migrate` / `migrate:prod` | apply migrations (tsx / built) |
 | `npm run db:generate` | generate a new migration after editing `src/db/schema.ts` |
-| `npm run seed` | idempotent sample user (re-running resets Ilze) |
+| `npm run seed` | idempotent sample users (re-running resets Ilze and Marta) |
 | `npm test` | Vitest integration tests (needs the test database, see below) |
 | `npm run typecheck` / `lint` | `tsc --noEmit` (strict) |
 | `npm run eval:tone` | tone-engine eval against the Claude API (needs `ANTHROPIC_API_KEY`; costs money) |
@@ -144,7 +147,8 @@ on all but one replica.
 
 - **Errors** are always `{ "error": { "code", "message" } }` with stable English codes
   (`validation_error`, `unauthorized`, `invalid_token`, `refresh_token_reused`,
-  `consent_required`, `retest_locked`, `quota_exceeded`, `export_unavailable`, …); the app
+  `consent_required`, `retest_locked`, `quota_exceeded`, `export_unavailable`, `pro_required`,
+  `target_below_floor`, `goal_below_healthy`, `weight_loss_not_allowed`, …); the app
   localises them.
 - **Auth**: magic-link tokens are 32 random bytes, stored as SHA-256, single use, 15 min.
   Access JWTs last 15 min. Refresh tokens last 30 days, are stored hashed, rotate on every
@@ -152,6 +156,14 @@ on all but one replica.
   Google/Apple sign-in link to an existing account only when the provider verifies the e-mail.
 - **Targets** follow `computeTargets(profile)` until the user edits targets by hand
   (`users.targets_edited`).
+- **Safety floors** (`shared/safety.ts`): `PUT /me/targets` rejects energy below
+  `KCAL_FLOOR[sex]` (400 `target_below_floor`); `PUT /me/profile` rejects, whenever the goal is
+  set or changed, a weight-loss goal below BMI 18,5 (`goal_below_healthy`) and any weight-loss
+  goal for under-18s or at BMI ≤ 18,5 (`weight_loss_not_allowed`).
+- **Care mode**: `Me.care` and `Day.care` come from `careStatus()` over the 7 complete days
+  before the date (energy + meals logged per day) and the weights of the last 42 days. While
+  active, findings that invite "eat less" are dropped, templates switch to regular meals, rest
+  and gentle movement, and Claude gets `care: true` plus the care-mode rules.
 - **Personality**: without `consent: true` nothing is stored (400 `consent_required`);
   retaking before `retestFrom` (6 months) is 409 `retest_locked`.
 - **Days / stats / health** use the user's local date. The time zone comes from the push-token
@@ -160,6 +172,7 @@ on all but one replica.
   HMAC-signed URLs valid for 24 h. The scheduler deletes photos older than 30 days (the meal
   keeps its nutrition data).
 - **Quota**: free plan 3 photo analyses per local day (402 `quota_exceeded`); Pro unlimited.
+  The weekly summary and recipes are Pro-only (402 `pro_required`).
   Pro is set by the RevenueCat webhook (`INITIAL_PURCHASE`, `RENEWAL`, `UNCANCELLATION`,
   `PRODUCT_CHANGE` → pro with expiry; `EXPIRATION` → free).
 - **GDPR**: `POST /me/export` returns a single-use link valid 24 h; the download is a JSON
@@ -174,7 +187,7 @@ on all but one replica.
 All AI runs server-side (`src/ai`). Every Claude call (`callStructured` in `claude.ts`):
 
 - model `AI_MODEL` (default `claude-opus-5-5`) with adaptive thinking (the model default);
-- `output_config.effort` per route: photo analysis `medium`, text parsing `low`, tone copy `medium`;
+- `output_config.effort` per route: photo analysis `medium`, text parsing `low`, tone copy, weekly summary and recipes `medium`;
 - **structured outputs**: `output_config.format` is a JSON schema generated from Zod, and the
   reply is validated with Zod again, then with domain rules (clamped nutrients, alternatives
   only below 0.6 confidence, copy length/emoji/highlight checks);
@@ -192,7 +205,76 @@ insight in four tones (plan, novelty, gentle, neutral), with golden examples tak
 `prototype/Tone-Compare`, `Notif-*` and `Home`.
 
 `npm run eval:tone` runs 12 fixture days × 4 tones through the engine and grades them with
-`claude-sonnet-5-5` for tone adherence, Latvian, safety and length. It is not run in CI.
+`claude-sonnet-5-5` for tone adherence, Latvian, safety and length, then 4 ethics fixtures
+(care-mode user, low-intake day, over-target day, a user who keeps dismissing protein tips)
+× 4 tones for restriction, compensation, shame / body talk, medical content, care mode,
+respect for history, autonomy and Latvian. It is not run in CI.
+
+### Analysis, memory and ethics
+
+- **Findings** (`src/ai/analysis.ts`) are computed deterministically from the 28 complete days
+  before the request date: `protein_gap`, `fibre_low`, `water_low`, `weekend_shift`,
+  `breakfast_skipped`, `short_sleep_low_steps` (nights shorter than target − 30 min),
+  `bedtime_irregular`, `bedtime_in_window`, `steps_trend`, `logging_gaps` and the positive
+  `consistency`. Each has a minimum-data guard and a factual Latvian `fact` with the real
+  numbers; they are sorted by `strength`. The AI never finds patterns itself; it only phrases
+  questions, summaries and tips around these facts.
+- **Memory** (`services/analysis.ts` `buildHistory`): the last 4 weekly questions with the chosen
+  option label and, per angle, how tips of the last 14 days were received (accepted, dismissed
+  via "Cits ieteikums" → `POST /tips/next`, reported via `POST /tips/:id/report`). Tip angles are
+  ranked down when dismissed or reported and up when accepted; an angle reported today is never
+  used again that day. The weekly question skips last week's topic.
+- **What Claude sees**: numbers, short labels, our own finding facts, the history above, food
+  preferences, the care flag, tone + modifiers and sex (grammar only). Never the name, e-mail or
+  personality scores.
+- **Ethics gate** (`src/ai/safety.ts`): every tip, push, question, option reply, insight,
+  summary text and recipe text goes through `copyViolation` and `mentionsKcalBelow` from
+  `shared/safety.ts` plus length / emoji / markup checks and backend rules (restriction,
+  "diet food" framing, compensation, body talk; in care mode any deficit or weight-loss content).
+  A violation logs the reason only (`safety:<reason>`) and the reviewed templates are used.
+  The system prompt spells out the same rules (autonomy, no guilt or body talk, no
+  compensation, no restriction or skipped meals, no medical or supplement claims, no weight
+  promises, strict food preferences, honesty about incomplete data, care mode with at most one
+  gentle mention of the family doctor). `test/ethics.test.ts` renders every template for a
+  matrix of tones × sex × care × preferences × days and requires all of it to pass the gate.
+- **Weekly summary** (`GET /insights/weekly`, Pro): headline, 2–3 observations (at least one
+  positive when there is one), one small optional suggestion and one reflection question,
+  cached per user, week and request date (`weekly_summaries`).
+- **Recipes** (`GET /recipes`, Pro): 3 ideas for the next meal slot by local time (the next
+  unlogged main meal), focused on the largest relative gap (protein or fibre, never energy),
+  ≤ 40 min, Latvian-shop ingredients. Preferences are strict: Claude's recipes are checked
+  against a keyword blacklist per diet and avoid-group, violating ones are dropped and the set
+  is topped up from 17 curated recipes. Sets are cached per user, date, slot and preference set
+  (`recipes`); `POST /recipes/:id/log` logs one serving as a single `manual` meal item.
+
+## Privacy
+
+- Health and personality data are GDPR special-category data. The backend sends Claude only
+  what the copy needs: numbers, short labels and our own computed facts — never the name,
+  e-mail, personality answers or scores.
+- **AI personalisation off** (`PUT /me/ai { "enabled": false }`, `Me.aiPersonalization`): no
+  personal data goes to the AI for tips, weekly questions, pushes, trends insights, weekly
+  summaries or recipes; all of them come from the built-in templates and curated recipes,
+  still personalised locally with the user's numbers (`aiGenerated: false`).
+- **Photo analysis and text parsing still use Claude** with AI personalisation off, because
+  the user explicitly starts them for that one photo or sentence; nothing else about the user
+  is attached to those requests.
+- Tip reports store only the reason code; logs never contain copy, prompts or responses.
+
+## Seed data
+
+`npm run seed` (and the tests) create:
+
+- **Ilze** (`ilze@piemers.lv`, the CLAUDE.md sample user): today's exact sample day (1 480 kcal,
+  protein 68 g, carbs 160 g, fat 52 g, fibre 18 g, water 1 200 ml, 6 430 steps, sleep 6 h 40 min,
+  window 23:00–23:30) plus 28 days of history shaped so the analysis finds real patterns:
+  4 light, low-protein dinners in the last 14 days, weekends ~ +18 % energy, breakfast not
+  logged on 2 days, 3 short nights (6 h) followed by fewer steps, bedtime in the window on 3 of
+  the last 7 nights, the water target reached on 5 of the last 7 days and steps up ~11 % week on
+  week. Last week's weekly question (bedtime) is answered ("Telefons vai seriāli"); a protein
+  tip was accepted, a steps tip dismissed and a water tip accepted.
+- **Marta** (`care@piemers.lv`, free plan, onboarding done): ~650–770 kcal on each of the last
+  7 days, so `care.active` is true with reason `low_intake`.
 
 ## Push scheduler
 

@@ -85,6 +85,14 @@ export const DevicesPatch = z
   .partial()
   .strict();
 
+export const PreferencesPatch = z
+  .object({
+    diet: z.enum(['any', 'vegetarian', 'vegan', 'pescatarian']),
+    avoid: z.array(z.enum(['lactose', 'gluten', 'nuts', 'fish', 'eggs', 'pork'])).max(6),
+  })
+  .partial()
+  .strict();
+
 export const CreateMeal = z.object({
   date: DateStr,
   type: MealType,

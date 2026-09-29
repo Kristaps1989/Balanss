@@ -92,7 +92,8 @@ export const BANNED_PATTERNS: { re: RegExp; why: string }[] = [
   { re: /badoš|badā|neēd |neēst|izlaid (maltīti|brokastis|pusdienas|vakariņas)|atteikties no ēšanas|tukšā dūšā visu dienu/i, why: 'restriction' },
   { re: /sadedzin|nostrādā(t|jot) kalorij|kompensē|atpelnī|sods|sodī/i, why: 'compensation' },
   { re: /resn|tievul|neglīt|kauns|kaunēties|vainīg|slikti ēdi|neveiksm|izgāz/i, why: 'shame' },
-  { re: /jums |jūs |jūsu /i, why: 'formal address' },
+  // Whole words only: "atgādinājums", "krējums", "sautējums" end in "-jums" and are fine.
+  { re: /(?<!\p{L})(jums|jūs|jūsu)(?!\p{L})/iu, why: 'formal address' },
 ];
 
 export function copyViolation(text: string): string | null {

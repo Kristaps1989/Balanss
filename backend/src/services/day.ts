@@ -20,6 +20,7 @@ import { addDays, lastNDates, mondayOf } from '../../../shared/dates';
 import { effectiveTone, toneModifiers } from '../../../shared/personality';
 import { computeSleepWindow, eveningMinutes, sleepScore } from '../../../shared/sleep';
 import type { ToneInput, TrendsInput } from '../ai/tone';
+import type { TipAngle } from '../ai/tone-types';
 import type { Config } from '../config';
 import type { Db } from '../db/client';
 import {
@@ -37,7 +38,9 @@ import {
   type WeeklyQuestionRow,
   type WorkoutRow,
 } from '../db/schema';
+import { buildHistory, careFor, findingsFor } from './analysis';
 import { dayTotals, mealsInRange } from './meals';
+import { DEFAULT_PREFERENCES } from './users';
 
 const progress = (value: number, target: number): Progress => ({ value, target });
 
@@ -68,11 +71,19 @@ export function toWorkout(w: WorkoutRow): Workout {
 }
 
 export function toTip(t: TipRow): Tip {
-  return { id: t.id, date: t.date, tone: t.tone as ToneStyle, body: t.body, highlight: t.highlight, accepted: t.accepted };
+  return { id: t.id, date: t.date, tone: t.tone as ToneStyle, body: t.body, highlight: t.highlight, accepted: t.accepted, aiGenerated: t.aiGenerated };
 }
 
 export function toWeeklyQuestion(q: WeeklyQuestionRow): WeeklyQuestion {
-  return { id: q.id, week: q.week, question: q.question, options: q.options, answerIndex: q.answerIndex };
+  return {
+    id: q.id,
+    week: q.week,
+    question: q.question,
+    options: q.options,
+    answerIndex: q.answerIndex,
+    basedOn: q.basedOn,
+    aiGenerated: q.aiGenerated,
+  };
 }
 
 // ---------------------------------------------------------------- sleep
@@ -163,14 +174,20 @@ export async function waterFor(db: Db, userId: string, date: string): Promise<nu
 
 export async function buildDay(db: Db, config: Config, user: UserRow, date: string): Promise<Day> {
   const t = user.targets;
-  const [meals, waterMl, [health], nights, [tip], [wq], [weight]] = await Promise.all([
+  const [meals, waterMl, [health], nights, [tip], [wq], [weight], care] = await Promise.all([
     mealsInRange(db, config, user.id, date, date),
     waterFor(db, user.id, date),
     db.select().from(healthDays).where(and(eq(healthDays.userId, user.id), eq(healthDays.date, date))),
     nightsUpTo(db, user.id, date, 14),
-    db.select().from(tips).where(and(eq(tips.userId, user.id), eq(tips.date, date))).orderBy(desc(tips.createdAt)).limit(1),
+    db
+      .select()
+      .from(tips)
+      .where(and(eq(tips.userId, user.id), eq(tips.date, date), eq(tips.hidden, false)))
+      .orderBy(desc(tips.createdAt))
+      .limit(1),
     db.select().from(weeklyQuestions).where(and(eq(weeklyQuestions.userId, user.id), eq(weeklyQuestions.week, mondayOf(date)))),
     db.select().from(weights).where(and(eq(weights.userId, user.id), lte(weights.date, date))).orderBy(desc(weights.date)).limit(1),
+    careFor(db, user, date),
   ]);
   const totals = dayTotals(meals);
   const window = windowFor(nights);
@@ -195,6 +212,7 @@ export async function buildDay(db: Db, config: Config, user: UserRow, date: stri
     },
     sleep: last && last.date === date ? { ...toSleepNight(last, t.sleepMin, window), window } : null,
     tip: tip ? toTip(tip) : null,
+    care,
     weeklyQuestion: wq ? toWeeklyQuestion(wq) : null,
     lastWeightKg: weight?.kg ?? null,
   };
@@ -238,22 +256,24 @@ export async function buildToneInput(
   personality: PersonalityRow | null,
   date: string,
   localTime?: string,
+  avoidAngles: TipAngle[] = [],
 ): Promise<ToneInput> {
   const day = await buildDay(db, config, user, date);
-  const [series, nights, health] = await Promise.all([
+  const [series, nights, health, findings, history] = await Promise.all([
     nutritionSeries(db, config, user.id, date, 7),
     nightsUpTo(db, user.id, date, 14),
     db
       .select()
       .from(healthDays)
       .where(and(eq(healthDays.userId, user.id), gte(healthDays.date, addDays(date, -6)), lte(healthDays.date, date))),
+    findingsFor(db, user, date, day.care),
+    buildHistory(db, user.id, date),
   ]);
   const stats = statsFrom(series, user);
   const window = windowFor(nights);
   const lastWeek = nights.filter((n) => n.date > addDays(date, -7));
   return {
     date,
-    firstName: user.profile.firstName,
     sex: user.profile.sex,
     ...userTone(user, personality),
     nutrition: day.nutrition,
@@ -267,9 +287,14 @@ export async function buildToneInput(
       nightsInWindow: window ? lastWeek.filter((n) => inWindow(n.bedtime, window)).length : null,
     },
     ...(localTime ? { localTime } : {}),
+    care: day.care.active,
+    findings: findings.slice(0, 5),
+    history,
+    preferences: user.preferences ?? DEFAULT_PREFERENCES,
+    ...(avoidAngles.length ? { avoidAngles } : {}),
   };
 }
 
-export function trendsInput(user: UserRow, personality: PersonalityRow | null, stats: Omit<NutritionStats, 'insight'>): TrendsInput {
-  return { ...userTone(user, personality), firstName: user.profile.firstName, ...stats };
+export function trendsInput(user: UserRow, personality: PersonalityRow | null, stats: Omit<NutritionStats, 'insight'>, care: boolean): TrendsInput {
+  return { ...userTone(user, personality), sex: user.profile.sex, care, preferences: user.preferences ?? DEFAULT_PREFERENCES, ...stats };
 }

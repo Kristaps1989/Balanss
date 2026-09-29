@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 import { tips, weeklyQuestions } from '../db/schema';
 import { badRequest, notFound, parse } from '../errors';
-import { getOrCreateTip, getWeeklyQuestion, nextTip } from '../services/copy';
+import { getOrCreateTip, getWeeklyQuestion, nextTip, reportTip } from '../services/copy';
 import { toTip, toWeeklyQuestion } from '../services/day';
 import { userToday } from '../services/quota';
 import { getUser } from '../services/users';
@@ -34,6 +34,15 @@ export const copyRoutes: FastifyPluginAsync = async (app) => {
       .returning();
     if (!row) throw notFound('Tip');
     return toTip(row);
+  });
+
+  app.post('/tips/:id/report', async (req) => {
+    const { id } = parse(z.object({ id: z.uuid() }), req.params);
+    const { reason } = parse(z.object({ reason: z.enum(['not_relevant', 'wrong_data', 'inappropriate', 'other']) }), req.body);
+    await reportTip(app.deps, req.userId, id, reason);
+    // Only the reason code is logged, never the tip text.
+    req.log.info({ tipReport: { reason } }, 'tip reported');
+    return { ok: true as const };
   });
 
   app.get('/weekly-question', async (req) => {

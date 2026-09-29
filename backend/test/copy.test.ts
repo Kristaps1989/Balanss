@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import type { Tip, WeeklyQuestion } from '../../shared/api';
@@ -24,13 +25,13 @@ describe('tips', () => {
     const res = await call({ method: 'GET', url: `/v1/tips/today?date=${SUNDAY}` });
     expect(res.statusCode).toBe(200);
     const tip = res.json() as Tip;
-    expect(tip).toMatchObject({ date: SUNDAY, tone: 'plan', accepted: false, highlight: '42 g' });
+    expect(tip).toMatchObject({ date: SUNDAY, tone: 'plan', accepted: false, highlight: '42 g', aiGenerated: false });
     expect(tip.body).toBe(
       'Līdz olbaltumvielu mērķim trūkst 42 g. Viens viegls solis: biezpiens vai jogurts vakariņās (+18 g). Miegs bija nedaudz īsāks — tāpēc šodien bez spiediena.',
     );
     const again = (await call({ method: 'GET', url: `/v1/tips/today?date=${SUNDAY}` })).json() as Tip;
     expect(again.id).toBe(tip.id);
-    expect(await db.select().from(tips)).toHaveLength(1);
+    expect(await db.select().from(tips).where(eq(tips.date, SUNDAY))).toHaveLength(1);
   });
 
   it('POST /tips/next gives a different tip each time and becomes today’s tip', async () => {
@@ -68,9 +69,13 @@ describe('weekly question', () => {
   it('is generated on Friday–Sunday for the week’s Monday, then answered', async () => {
     const q = (await call({ method: 'GET', url: `/v1/weekly-question?date=${SUNDAY}` })).json() as WeeklyQuestion;
     expect(q.week).toBe('2026-09-21');
-    expect(q.question).toBe('Kas šonedēļ tev palīdzēja visvairāk?');
+    // Based on the strongest finding that was not last week's topic (last week: bedtime).
+    expect(q.question).toBe('Kas tev šonedēļ palīdzēja dzert pietiekami daudz ūdens?');
+    expect(q.basedOn).toBe('Ūdens mērķis sasniegts 5 no 7 dienām.');
+    expect(q.aiGenerated).toBe(false);
     expect(q.options).toHaveLength(4);
-    expect(q.options[1]!.reply).toContain('2 naktis');
+    expect(q.options[0]!.reply).toContain('5 no 7 dienām');
+    expect(q.options[3]!.label).toBe('Grūti pateikt');
     expect(q.answerIndex).toBeNull();
 
     // The same question is returned for the rest of the week, even on Monday–Thursday of it.

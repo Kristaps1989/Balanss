@@ -94,7 +94,7 @@ describe('overviews for the seeded sample user', () => {
   it('GET /health/sleep gives the 23:00–23:30 window', async () => {
     const s = (await call({ method: 'GET', url: `/v1/health/sleep?date=${TODAY}` })).json() as SleepOverview;
     expect(s.window).toEqual({ start: '23:00', end: '23:30', basedOnNights: 14 });
-    expect(s.nights.map((n) => n.bedtime)).toEqual(['23:12', '23:40', '00:05', '23:25', '23:55', '00:20', '23:48']);
+    expect(s.nights.map((n) => n.bedtime)).toEqual(['23:12', '23:28', '00:05', '23:25', '23:55', '00:20', '23:48']);
     expect(s.lastNight).toMatchObject({ totalMin: 400, deepMin: 65, remMin: 80, lightMin: 255, bedtime: '23:48', wakeTime: '06:45' });
     expect(s.devices).toEqual(['Apple Watch', 'Polar H10']);
   });
