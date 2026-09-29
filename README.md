@@ -7,6 +7,7 @@ A daily health companion app (Latvian). You log meals from a photo. Movement, he
 - `backend/` — Node/TypeScript API (Fastify, Postgres, Claude for food photos and tone-adapted copy). See `backend/README.md`.
 - `android/` — committed native project. Never run `expo prebuild --clean`.
 - `e2e/` — Playwright end-to-end tests that run the web build of the app against the real backend.
+- `docs/AI_AND_ETHICS.md` — how the AI analyses data, what it receives, and the safety rules;
 - `docs/PLAN.md` — the implementation plan; `docs/NATIVE_SETUP.md` — accounts and keys (Google, FCM, RevenueCat, Health Connect, signing).
 
 ## Run it
