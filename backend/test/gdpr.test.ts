@@ -48,13 +48,15 @@ describe('export', () => {
     expect(data.personality.answers).toHaveLength(20);
     expect(data.meals.length).toBeGreaterThan(40);
     expect(data.meals.find((m: { date: string; type: string }) => m.date === TODAY && m.type === 'lunch').items).toHaveLength(4);
-    expect(data.water).toHaveLength(14);
-    expect(data.weights).toHaveLength(5);
-    expect(data.healthDays).toHaveLength(14);
-    expect(data.sleepNights).toHaveLength(14);
+    expect(data.water).toHaveLength(29);
+    expect(data.weights).toHaveLength(7);
+    expect(data.healthDays).toHaveLength(29);
+    expect(data.sleepNights).toHaveLength(29);
     expect(data.workouts).toHaveLength(3);
-    expect(data.tips).toHaveLength(1);
-    expect(data.weeklyQuestions).toHaveLength(1);
+    // 3 seeded tips (history) + today's.
+    expect(data.tips).toHaveLength(4);
+    expect(data.tips.filter((t: { date: string }) => t.date === TODAY)).toHaveLength(1);
+    expect(data.weeklyQuestions).toHaveLength(2);
     expect(data.favourites).toHaveLength(1);
     expect(data.reminders.sleepLeadMin).toBe(45);
     expect(data.pushTokens).toHaveLength(1);
@@ -75,6 +77,19 @@ describe('DELETE /me', () => {
     const file = path.join(ctx.config.storageDir, photo!.key);
     expect(existsSync(file)).toBe(true);
     expect(analyzed.photoUrl).toContain(photo!.key);
+
+    // Pro data (weekly summary, meal ideas, a reported tip) is deleted as well.
+    const me = (await call({ method: 'GET', url: '/v1/me' })).json();
+    await ctx.app.inject({
+      method: 'POST',
+      url: '/v1/billing/webhook',
+      headers: { authorization: 'Bearer rc-test-secret' },
+      payload: { event: { type: 'INITIAL_PURCHASE', app_user_id: me.id } },
+    });
+    expect((await call({ method: 'GET', url: `/v1/insights/weekly?date=${TODAY}` })).statusCode).toBe(200);
+    expect((await call({ method: 'GET', url: `/v1/recipes?date=${TODAY}` })).statusCode).toBe(200);
+    const tip = (await call({ method: 'GET', url: `/v1/tips/today?date=${TODAY}` })).json();
+    await call({ method: 'POST', url: `/v1/tips/${tip.id}/report`, payload: { reason: 'other' } });
 
     const res = await call({ method: 'DELETE', url: '/v1/me' });
     expect(res.json()).toEqual({ ok: true });
@@ -98,6 +113,8 @@ describe('DELETE /me', () => {
       'tips',
       'weekly_questions',
       'insights',
+      'weekly_summaries',
+      'recipes',
       'push_tokens',
       'push_log',
       'magic_links',

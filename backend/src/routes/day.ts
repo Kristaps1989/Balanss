@@ -4,6 +4,8 @@ import { z } from 'zod';
 
 import { insights, users, waterDays, weights } from '../db/schema';
 import { parse } from '../errors';
+import { copyAiFor } from '../ai';
+import { careFor } from '../services/analysis';
 import { buildDay, nutritionSeries, statsFrom, trendsInput } from '../services/day';
 import { userToday } from '../services/quota';
 import { getPersonality, getUser } from '../services/users';
@@ -66,8 +68,8 @@ export const dayRoutes: FastifyPluginAsync = async (app) => {
       .where(and(eq(insights.userId, user.id), eq(insights.date, date), eq(insights.kind, kind)));
     if (cached) return { ...stats, insight: cached.text };
 
-    const personality = await getPersonality(db, user.id);
-    const text = await app.deps.ai.tone.trendsInsight(trendsInput(user, personality, stats), req.log);
+    const [personality, care] = await Promise.all([getPersonality(db, user.id), careFor(db, user, date)]);
+    const text = await copyAiFor(app.deps.ai, user).tone.trendsInsight(trendsInput(user, personality, stats, care.active), req.log);
     await db.insert(insights).values({ userId: user.id, date, kind, text }).onConflictDoNothing();
     return { ...stats, insight: text };
   });

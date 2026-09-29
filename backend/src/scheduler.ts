@@ -3,6 +3,7 @@ import type { FastifyBaseLogger } from 'fastify';
 
 import type { ReminderFrequency } from '../../shared/api';
 import { hmToMin } from '../../shared/dates';
+import { copyAiFor } from './ai';
 import type { PushKind } from './ai/tone';
 import type { AppDeps } from './deps';
 import { meals, pushLog, pushTokens, users, type UserRow } from './db/schema';
@@ -77,7 +78,7 @@ async function sendPush(
   if (!(await claim(deps, user.id, kind, local.date, slot))) return null;
   const personality = await getPersonality(deps.db, user.id);
   const input = await buildToneInput(deps.db, deps.config, user, personality, local.date, local.hm);
-  const copy = await deps.ai.tone.pushCopy(kind, input, meal, log);
+  const copy = await copyAiFor(deps.ai, user).tone.pushCopy(kind, input, meal, log);
   try {
     const results = await deps.push.send(tokens.map((to) => ({ to, title: copy.title, body: copy.body, data: { kind, date: local.date } })));
     const invalid = results.filter((r) => r.invalidToken).map((r) => r.token);

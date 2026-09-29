@@ -16,15 +16,19 @@ import {
 import type {
   CreateMealRequest,
   Devices,
+  Finding,
   FoodItemDraft,
+  FoodPreferences,
   HrZones,
   Nutrients,
   PersonalityLevels,
   Profile,
+  Recipe,
   Reminders,
   Targets,
   Trait,
   WeeklyQuestionOption,
+  WeeklySummary,
 } from '../../../shared/api';
 
 const ts = (name: string) => timestamp(name, { withTimezone: true, mode: 'date' });
@@ -49,6 +53,10 @@ export const users = pgTable('users', {
   tonePreference: text('tone_preference').notNull().default('auto'),
   reminders: jsonb('reminders').$type<Reminders>().notNull(),
   devices: jsonb('devices').$type<Devices>().notNull(),
+  /** Diet and foods to avoid, used by recipes (never sent with the user's identity). */
+  preferences: jsonb('preferences').$type<FoodPreferences>().notNull().default({ diet: 'any', avoid: [] }),
+  /** When false no personal data goes to the AI for tips, questions, pushes, insights or recipes. */
+  aiPersonalization: boolean('ai_personalization').notNull().default(true),
   plan: text('plan').notNull().default('free'),
   planExpiresAt: ts('plan_expires_at'),
   onboardingDone: boolean('onboarding_done').notNull().default(false),
@@ -241,6 +249,13 @@ export const tips = pgTable(
     body: text('body').notNull(),
     highlight: text('highlight'),
     accepted: boolean('accepted').notNull().default(false),
+    /** The user asked for another tip ("Cits ieteikums") while this one was shown. */
+    dismissed: boolean('dismissed').notNull().default(false),
+    /** Reported via POST /tips/:id/report: never shown again. */
+    hidden: boolean('hidden').notNull().default(false),
+    reportReason: text('report_reason'),
+    reportedAt: ts('reported_at'),
+    aiGenerated: boolean('ai_generated').notNull().default(false),
     createdAt: ts('created_at').notNull().defaultNow(),
   },
   (t) => [index('tips_user_date_idx').on(t.userId, t.date)],
@@ -257,6 +272,10 @@ export const weeklyQuestions = pgTable(
     options: jsonb('options').$type<WeeklyQuestionOption[]>().notNull(),
     answerIndex: integer('answer_index'),
     answeredAt: ts('answered_at'),
+    /** The finding the question is based on (fact shown to the user, kind for history). */
+    basedOn: text('based_on'),
+    basedOnKind: text('based_on_kind'),
+    aiGenerated: boolean('ai_generated').notNull().default(false),
     createdAt: ts('created_at').notNull().defaultNow(),
   },
   (t) => [unique('weekly_questions_user_week_uq').on(t.userId, t.week)],
@@ -273,6 +292,40 @@ export const insights = pgTable(
     createdAt: ts('created_at').notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.date, t.kind] })],
+);
+
+/** Pro weekly summary, cached per user, week and request date. */
+export const weeklySummaries = pgTable(
+  'weekly_summaries',
+  {
+    userId: userRef(),
+    week: day('week').notNull(),
+    date: day('date').notNull(),
+    summary: jsonb('summary').$type<WeeklySummary>().notNull(),
+    findings: jsonb('findings').$type<Finding[]>().notNull(),
+    createdAt: ts('created_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.week, t.date] })],
+);
+
+/** Pro meal ideas, cached per user, date, meal slot and preference set; the row id is the Recipe id. */
+export const recipes = pgTable(
+  'recipes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: userRef(),
+    date: day('date').notNull(),
+    mealType: text('meal_type').notNull(),
+    /** Preferences the set was built for ("diet|avoid,avoid"); a change regenerates the set. */
+    prefsKey: text('prefs_key').notNull(),
+    position: integer('position').notNull(),
+    recipe: jsonb('recipe').$type<Omit<Recipe, 'id'>>().notNull(),
+    /** Grams of one serving, used when the recipe is logged as a meal item. */
+    servingGrams: integer('serving_grams').notNull(),
+    aiGenerated: boolean('ai_generated').notNull().default(false),
+    createdAt: ts('created_at').notNull().defaultNow(),
+  },
+  (t) => [index('recipes_user_date_idx').on(t.userId, t.date)],
 );
 
 // ---------------------------------------------------------------- push
@@ -308,3 +361,4 @@ export type SleepNightRow = typeof sleepNights.$inferSelect;
 export type TipRow = typeof tips.$inferSelect;
 export type WeeklyQuestionRow = typeof weeklyQuestions.$inferSelect;
 export type PersonalityRow = typeof personalities.$inferSelect;
+export type RecipeRow = typeof recipes.$inferSelect;

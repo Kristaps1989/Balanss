@@ -7,6 +7,7 @@ import type { ClaudeClient } from '../src/ai/claude';
 import { fakeAnalyzeMeal, fakeParseText } from '../src/ai/fake-food';
 import { fakeTip } from '../src/ai/tone-templates';
 import type { ToneInput } from '../src/ai/tone';
+import { EMPTY_HISTORY } from '../src/ai/tone-types';
 import { authed, JPEG_BASE64, loginByEmail, makeApp, resetDb, type TestContext } from './helpers';
 
 const log = pino({ level: 'silent' });
@@ -29,7 +30,6 @@ function reply(json: unknown, stop_reason = 'end_turn') {
 
 const input: ToneInput = {
   date: '2026-09-27',
-  firstName: 'Ilze',
   sex: 'f',
   tone: 'plan',
   modifiers: { softer: true, social: false, warm: true },
@@ -45,6 +45,10 @@ const input: ToneInput = {
   steps: { value: 6430, target: 8000 },
   sleep: { totalMin: 400, targetMin: 450, bedtime: '23:48', window: { start: '23:00', end: '23:30', basedOnNights: 14 } },
   week: { avgKcal: 1715, avgProteinG: 89, avgSteps: 7796, nightsInWindow: 2 },
+  care: false,
+  findings: [],
+  history: EMPTY_HISTORY,
+  preferences: { diet: 'any', avoid: [] },
 };
 
 beforeEach(() => create.mockReset());
@@ -94,9 +98,9 @@ describe('Anthropic provider request shape', () => {
     create.mockResolvedValueOnce(reply({ items: [] }));
     await ai.food.parseText('ābols', log);
     expect(create.mock.calls[0]![0].output_config.effort).toBe('low');
-    create.mockResolvedValueOnce(reply({ body: 'Šodien trūkst 42 g olbaltumvielu. Plāns: biezpiens vakariņās (+18 g).', highlight: '42 g' }));
+    create.mockResolvedValueOnce(reply({ angle: 'protein', body: 'Šodien trūkst 42 g olbaltumvielu. Plāns: biezpiens vakariņās (+18 g).', highlight: '42 g' }));
     const tip = await ai.tone.tip(input, [], log);
-    expect(tip).toMatchObject({ body: 'Šodien trūkst 42 g olbaltumvielu. Plāns: biezpiens vakariņās (+18 g).', highlight: '42 g' });
+    expect(tip).toMatchObject({ angle: 'protein', body: 'Šodien trūkst 42 g olbaltumvielu. Plāns: biezpiens vakariņās (+18 g).', highlight: '42 g', aiGenerated: true });
     expect(create.mock.calls[1]![0].output_config.effort).toBe('medium');
     expect(create.mock.calls[1]![0].messages[0].content).toContain('"tone":"plan"');
   });
@@ -120,7 +124,7 @@ describe('fallback to the fake provider', () => {
   });
 
   it('on output that breaks the copy rules', async () => {
-    create.mockResolvedValueOnce(reply({ body: 'Lieliski! 🎉 Turpini tā.', highlight: null }));
+    create.mockResolvedValueOnce(reply({ angle: 'overall', body: 'Lieliski! 🎉 Turpini tā.', highlight: null }));
     expect((await ai.tone.tip(input, [], log)).body).toBe(fakeTip(input, []).body);
     create.mockResolvedValueOnce(reply({ question: 'Kā gāja?', options: [{ label: 'Labi', reply: 'Super.' }] }));
     const q = await ai.tone.weeklyQuestion(input, log);
@@ -130,7 +134,7 @@ describe('fallback to the fake provider', () => {
   });
 
   it('drops a highlight that is not in the body', async () => {
-    create.mockResolvedValueOnce(reply({ body: 'Olbaltumvielas: 68 no 110 g.', highlight: '42 g' }));
+    create.mockResolvedValueOnce(reply({ angle: 'protein', body: 'Olbaltumvielas: 68 no 110 g.', highlight: '42 g' }));
     expect((await ai.tone.tip(input, [], log)).highlight).toBeNull();
   });
 });

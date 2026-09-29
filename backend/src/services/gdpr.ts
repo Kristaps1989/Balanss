@@ -14,11 +14,13 @@ import {
   personalities,
   photos,
   pushTokens,
+  recipes,
   sleepNights,
   tips,
   users,
   waterDays,
   weeklyQuestions,
+  weeklySummaries,
   weights,
   workouts,
 } from '../db/schema';
@@ -51,7 +53,7 @@ const redact = (token: string) => (token.length > 12 ? `${token.slice(0, 12)}…
 export async function collectExport(db: Db, userId: string, now: Date) {
   const [user] = await db.select().from(users).where(eq(users.id, userId));
   if (!user) return null;
-  const [personality, mealRows, favs, water, weightRows, health, nights, workoutRows, tipRows, weekly, tokens, usage, insightRows, photoRows] =
+  const [personality, mealRows, favs, water, weightRows, health, nights, workoutRows, tipRows, weekly, tokens, usage, insightRows, photoRows, summaryRows, recipeRows] =
     await Promise.all([
       db.select().from(personalities).where(eq(personalities.userId, userId)),
       db.select().from(meals).where(eq(meals.userId, userId)).orderBy(asc(meals.eatenAt)),
@@ -67,6 +69,8 @@ export async function collectExport(db: Db, userId: string, now: Date) {
       db.select().from(analysisUsage).where(eq(analysisUsage.userId, userId)),
       db.select().from(insights).where(eq(insights.userId, userId)),
       db.select().from(photos).where(eq(photos.userId, userId)),
+      db.select().from(weeklySummaries).where(eq(weeklySummaries.userId, userId)).orderBy(asc(weeklySummaries.date)),
+      db.select().from(recipes).where(eq(recipes.userId, userId)).orderBy(asc(recipes.date), asc(recipes.position)),
     ]);
   const items = mealRows.length ? await db.select().from(mealItems).where(inArray(mealItems.mealId, mealRows.map((m) => m.id))) : [];
   const p = personality[0];
@@ -86,6 +90,8 @@ export async function collectExport(db: Db, userId: string, now: Date) {
     profile: user.profile,
     targets: user.targets,
     targetsEditedManually: user.targetsEdited,
+    preferences: user.preferences,
+    aiPersonalization: user.aiPersonalization,
     tonePreference: user.tonePreference,
     reminders: user.reminders,
     devices: user.devices,
@@ -119,8 +125,29 @@ export async function collectExport(db: Db, userId: string, now: Date) {
     healthDays: health.map((h) => ({ date: h.date, steps: h.steps, activeKcal: h.activeKcal, restingHr: h.restingHr, hrvMs: h.hrvMs, source: h.source })),
     sleepNights: nights.map(({ userId: _u, ...n }) => n),
     workouts: workoutRows.map(({ userId: _u, ...w }) => ({ ...w, startedAt: w.startedAt.toISOString() })),
-    tips: tipRows.map((t) => ({ date: t.date, tone: t.tone, body: t.body, highlight: t.highlight, accepted: t.accepted, createdAt: t.createdAt.toISOString() })),
-    weeklyQuestions: weekly.map((q) => ({ week: q.week, tone: q.tone, question: q.question, options: q.options, answerIndex: q.answerIndex })),
+    tips: tipRows.map((t) => ({
+      date: t.date,
+      tone: t.tone,
+      angle: t.angle,
+      body: t.body,
+      highlight: t.highlight,
+      accepted: t.accepted,
+      dismissed: t.dismissed,
+      reported: t.hidden ? { reason: t.reportReason, at: t.reportedAt?.toISOString() ?? null } : null,
+      aiGenerated: t.aiGenerated,
+      createdAt: t.createdAt.toISOString(),
+    })),
+    weeklyQuestions: weekly.map((q) => ({
+      week: q.week,
+      tone: q.tone,
+      question: q.question,
+      options: q.options,
+      answerIndex: q.answerIndex,
+      basedOn: q.basedOn,
+      aiGenerated: q.aiGenerated,
+    })),
+    weeklySummaries: summaryRows.map((w) => ({ week: w.week, date: w.date, summary: w.summary })),
+    recipes: recipeRows.map((r) => ({ id: r.id, date: r.date, mealType: r.mealType, recipe: r.recipe, aiGenerated: r.aiGenerated })),
     insights: insightRows.map((i) => ({ date: i.date, kind: i.kind, text: i.text })),
     photoAnalyses: usage.map((u) => ({ date: u.date, count: u.count })),
     photos: photoRows.map((ph) => ({ key: ph.key, mediaType: ph.mediaType, createdAt: ph.createdAt.toISOString() })),

@@ -9,6 +9,7 @@ import { authRoutes } from './routes/auth';
 import { copyRoutes } from './routes/copy';
 import { dayRoutes } from './routes/day';
 import { healthRoutes } from './routes/health';
+import { insightRoutes } from './routes/insights';
 import { mealRoutes } from './routes/meals';
 import { meRoutes } from './routes/me';
 import { publicRoutes } from './routes/public';
@@ -119,6 +120,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
         await secured.register(mealRoutes);
         await secured.register(healthRoutes);
         await secured.register(copyRoutes);
+        await secured.register(insightRoutes);
         await secured.register(pushRoutes);
       });
     },
