@@ -20,6 +20,8 @@ export const keys = {
   sleep: (date: string) => ['sleep', date] as const,
   tip: (date: string) => ['tip', date] as const,
   weekly: (date: string) => ['weekly', date] as const,
+  summary: (date: string) => ['summary', date] as const,
+  recipes: (date: string) => ['recipes', date] as const,
 };
 
 export const useMe = (enabled = true) => useQuery({ queryKey: keys.me, queryFn: api.me, enabled });
@@ -33,6 +35,11 @@ export const useSleep = (date: string) => useQuery({ queryKey: keys.sleep(date),
 export const useTip = (date: string) => useQuery({ queryKey: keys.tip(date), queryFn: () => api.tipToday(date), staleTime: Infinity });
 export const useWeeklyQuestion = (date: string) =>
   useQuery({ queryKey: keys.weekly(date), queryFn: () => api.weeklyQuestion(date), staleTime: Infinity });
+
+export const useWeeklySummary = (date: string, enabled: boolean) =>
+  useQuery({ queryKey: keys.summary(date), queryFn: () => api.weeklySummary(date), enabled, staleTime: 10 * 60_000 });
+export const useRecipes = (date: string, enabled: boolean) =>
+  useQuery({ queryKey: keys.recipes(date), queryFn: () => api.recipes(date), enabled, staleTime: 10 * 60_000 });
 
 /** Mutation that returns the updated Me and writes it into the cache. */
 export function useMeMutation<A>(fn: (arg: A) => Promise<Me>) {

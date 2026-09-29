@@ -4,9 +4,12 @@ import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { api, type Day, type Progress, type Tip, type WeeklyQuestion } from '@/api';
-import { keys, useDay, useMe, useTip, useWeeklyQuestion } from '@/api/hooks';
+import { keys, useDay, useMe, useTip, useWeeklyQuestion, useWeeklySummary } from '@/api/hooks';
+import { AiLabel } from '@/components/AiLabel';
 import { Avatar } from '@/components/Avatar';
+import { CareCard } from '@/components/CareCard';
 import { Card } from '@/components/Card';
+import { IconButton } from '@/components/Header';
 import { Icon, type IconName } from '@/components/Icon';
 import { ProgressBar } from '@/components/ProgressBar';
 import { ProgressRing } from '@/components/ProgressRing';
@@ -29,6 +32,7 @@ export default function HomeScreen() {
   return (
     <HomeContent
       date={date}
+      pro={me.data.plan === 'pro'}
       firstName={me.data.profile.firstName}
       day={day.data}
       refreshing={day.isRefetching}
@@ -37,7 +41,7 @@ export default function HomeScreen() {
   );
 }
 
-function HomeContent({ date, firstName, day, refreshing, onRefresh }: { date: string; firstName: string; day: Day; refreshing: boolean; onRefresh: () => void }) {
+function HomeContent({ date, pro, firstName, day, refreshing, onRefresh }: { date: string; pro: boolean; firstName: string; day: Day; refreshing: boolean; onRefresh: () => void }) {
   const now = new Date();
   const { nutrition, movement, sleep } = day;
   const water = useAddWater(date);
@@ -55,6 +59,8 @@ function HomeContent({ date, firstName, day, refreshing, onRefresh }: { date: st
         <Avatar name={firstName || '?'} onPress={() => router.push('/me')} />
       </View>
 
+      {day.care.active && <CareCard />}
+
       <TipCard date={date} />
 
       <Card style={styles.card}>
@@ -70,8 +76,17 @@ function HomeContent({ date, firstName, day, refreshing, onRefresh }: { date: st
             <Text style={styles.ringCaption}>no {kcal(nutrition.kcal.target)}</Text>
           </ProgressRing>
           <View style={{ flex: 1, gap: 4 }}>
-            <Text style={styles.left}>{remainingLabel(nutrition.kcal)}</Text>
-            <Text style={type.secondary}>{remainingHint(nutrition.kcal)}</Text>
+            {day.care.active ? (
+              <>
+                <Text style={styles.left}>Šodien apēsts</Text>
+                <Text style={type.secondary}>Galvenais — regulāras maltītes un pietiekami daudz atpūtas.</Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.left}>{remainingLabel(nutrition.kcal)}</Text>
+                <Text style={type.secondary}>{remainingHint(nutrition.kcal)}</Text>
+              </>
+            )}
           </View>
         </View>
         <View style={styles.macros}>
@@ -150,6 +165,8 @@ function HomeContent({ date, firstName, day, refreshing, onRefresh }: { date: st
       </Card>
 
       <WeeklyQuestionCard date={date} />
+
+      <SummaryCard date={date} pro={pro} />
 
       <View style={{ gap: 10, paddingTop: 4 }}>
         <Text style={[type.section, { paddingHorizontal: 2 }]}>Pievieno</Text>
@@ -232,7 +249,45 @@ function TipCard({ date }: { date: string }) {
         )}
         <Chip label={next.isPending ? 'Meklēju…' : 'Cits ieteikums'} onPress={() => next.mutate()} disabled={next.isPending} />
       </View>
+      <View style={styles.tipFoot}>
+        <View style={{ flex: 1 }}>
+          <AiLabel ai={t.aiGenerated} color={colors.accentDeep} />
+        </View>
+        <IconButton
+          icon="dots"
+          label="Ziņot par ieteikumu"
+          color={colors.accentDeep}
+          size={20}
+          onPress={() => router.push({ pathname: '/tip-report', params: { id: t.id, date } })}
+          testID="tip-report"
+        />
+      </View>
     </View>
+  );
+}
+
+function SummaryCard({ date, pro }: { date: string; pro: boolean }) {
+  const summary = useWeeklySummary(date, pro);
+  return (
+    <Card
+      style={[styles.card, { gap: 8 }]}
+      onPress={() => router.push(pro ? '/summary' : '/me/pro')}
+      accessibilityLabel={pro ? 'Nedēļas kopsavilkums' : 'Nedēļas AI kopsavilkums, Pro'}>
+      <View style={styles.cardHeader}>
+        <View style={styles.tipTitle}>
+          <Icon name="trend" color={colors.accentDeep} size={18} />
+          <Text style={styles.tipTitleText}>Nedēļas kopsavilkums</Text>
+        </View>
+        {pro ? <Icon name="chevron" color={colors.caption} size={20} /> : <Text style={styles.proBadge}>PRO</Text>}
+      </View>
+      {pro ? (
+        <Text style={styles.question} testID="summary-headline">
+          {summary.data?.headline ?? (summary.isError ? 'Kopsavilkums vēl gatavojas' : 'Analizēju tavu nedēļu…')}
+        </Text>
+      ) : (
+        <Text style={type.secondary}>AI izanalizē tavu nedēļu — kas strādā, kur ir iespējas un viens mazs nākamais solis.</Text>
+      )}
+    </Card>
   );
 }
 
@@ -304,6 +359,7 @@ function WeeklyQuestionCard({ date }: { date: string }) {
         </View>
       ) : (
         <View style={{ gap: 12 }}>
+          {q.basedOn && <Text style={styles.basedOn}>Pamanīju: {q.basedOn}</Text>}
           <Text style={styles.question}>{q.question}</Text>
           <View style={styles.options}>
             {q.options.map((o, i) => (
@@ -356,6 +412,9 @@ const styles = StyleSheet.create({
   tipBody: { fontFamily: fonts.body, fontSize: 16, lineHeight: 24, color: colors.tipText },
   chip: { height: 40, paddingHorizontal: 16, borderRadius: radius.chip, justifyContent: 'center' },
   chipText: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.ink },
+  tipFoot: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: -4, marginBottom: -8, marginRight: -10 },
+  proBadge: { fontFamily: fonts.bodyBold, fontSize: 11, color: colors.white, backgroundColor: colors.ink, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, overflow: 'hidden' },
+  basedOn: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.text2 },
   accepted: { height: 40, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 6 },
 
   energy: { flexDirection: 'row', alignItems: 'center', gap: 18 },

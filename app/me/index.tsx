@@ -33,6 +33,7 @@ export default function MeScreen() {
   const me = useMe();
   const setTone = useMeMutation(api.setTone);
   const reminders = useMeMutation(api.updateReminders);
+  const setAi = useMeMutation(api.setAiPersonalization);
   const deletePersonality = useMeMutation(api.deletePersonality);
   const exportData = useMutation({ mutationFn: api.exportData, onSuccess: (r) => openDownload(r.downloadUrl) });
   const logout = useMutation({
@@ -137,6 +138,28 @@ export default function MeScreen() {
         <KV k="Enerģija" v={`${formatNumber(m.targets.kcal)} kcal`} />
         <KV k="Olbaltumvielas" v={`${m.targets.proteinG} g`} />
         <KV k="Ūdens · soļi · miegs" v={`${litres(m.targets.waterMl)} · ${formatNumber(m.targets.steps)} · ${duration(m.targets.sleepMin)}`} />
+      </Section>
+
+      <Section title="Ēšanas paradumi" onPress={() => router.push('/me/preferences')} actionLabel="Mainīt">
+        <KV
+          k="Uzturs"
+          v={{ any: 'Ēdu visu', vegetarian: 'Veģetārs', vegan: 'Vegāns', pescatarian: 'Peskatārs' }[m.preferences.diet]}
+        />
+        <KV k="Izvairos no" v={m.preferences.avoid.length ? `${m.preferences.avoid.length} produktu grupām` : '—'} />
+      </Section>
+
+      <Section title="AI un privātums">
+        <View style={styles.line}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.rowTitle}>AI personalizācija</Text>
+            <Text style={type.caption}>Ieteikumi un jautājumi no tavu datu analīzes</Text>
+          </View>
+          <Toggle value={m.aiPersonalization} onChange={(v) => setAi.mutate(v)} label="AI personalizācija" testID="me-ai-toggle" />
+        </View>
+        <Pressable onPress={() => router.push('/me/ai')} accessibilityRole="button" style={[styles.line, { minHeight: 52 }]}>
+          <Text style={styles.rowTitle}>Kā darbojas AI un kādi dati tiek izmantoti</Text>
+          <Icon name="chevron" color={colors.caption} size={20} />
+        </Pressable>
       </Section>
 
       <Section title="Ierīces">

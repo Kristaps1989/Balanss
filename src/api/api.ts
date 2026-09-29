@@ -10,6 +10,7 @@ import type {
   Day,
   Devices,
   ExportResponse,
+  FoodPreferences,
   Favourite,
   HealthSyncRequest,
   HealthSyncResponse,
@@ -22,13 +23,16 @@ import type {
   Profile,
   PushTokenRequest,
   Quota,
+  RecipesResponse,
   Reminders,
   SleepOverview,
   Targets,
   Tip,
+  TipReportReason,
   TonePreference,
   UpdateMealRequest,
   WeeklyQuestion,
+  WeeklySummary,
   Workout,
 } from '@shared/api';
 
@@ -54,6 +58,8 @@ export interface Api {
   exportData(): Promise<ExportResponse>;
   deleteAccount(): Promise<void>;
   quota(): Promise<Quota>;
+  updatePreferences(p: Partial<FoodPreferences>): Promise<Me>;
+  setAiPersonalization(enabled: boolean): Promise<Me>;
 
   // day
   day(date: string): Promise<Day>;
@@ -82,6 +88,10 @@ export interface Api {
   tipToday(date: string): Promise<Tip>;
   tipNext(date: string): Promise<Tip>;
   acceptTip(id: string): Promise<Tip>;
+  reportTip(id: string, reason: TipReportReason): Promise<void>;
+  weeklySummary(date: string): Promise<WeeklySummary>;
+  recipes(date: string): Promise<RecipesResponse>;
+  logRecipe(id: string, date: string): Promise<Meal>;
   weeklyQuestion(date: string): Promise<WeeklyQuestion | null>;
   answerWeeklyQuestion(id: string, optionIndex: number): Promise<WeeklyQuestion>;
 

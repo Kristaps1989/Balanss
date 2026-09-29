@@ -112,6 +112,16 @@ export default function FoodLog() {
         if (t === 'snack') return null;
         return <EmptyMeal key={t} type={t} canAdd={isToday} />;
       })}
+
+      {isToday && (
+        <Card style={styles.recipes} onPress={() => router.push('/nutrition/recipes')} accessibilityLabel="Receptes tavam mērķim">
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={type.section}>Receptes tavam mērķim</Text>
+            <Text style={type.secondary}>Idejas nākamajai maltītei pēc tā, kā šodien vēl pietrūkst</Text>
+          </View>
+          {me.data?.plan === 'pro' ? <Icon name="chevron" color={colors.caption} size={20} /> : <Text style={styles.pro}>PRO</Text>}
+        </Card>
+      )}
     </Screen>
   );
 }
@@ -204,5 +214,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  recipes: { paddingVertical: 16, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  pro: { fontFamily: fonts.bodyBold, fontSize: 11, color: colors.white, backgroundColor: colors.ink, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, overflow: 'hidden' },
   emptyAdd: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
 });

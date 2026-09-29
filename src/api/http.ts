@@ -155,6 +155,8 @@ export class HttpApi implements Api {
     await tokenStore.clear();
   };
   quota: Api['quota'] = () => this.get('/me/quota');
+  updatePreferences: Api['updatePreferences'] = (p) => this.put('/me/preferences', p);
+  setAiPersonalization: Api['setAiPersonalization'] = (enabled) => this.put('/me/ai', { enabled });
 
   day: Api['day'] = (date) => this.get(`/days/${date}`);
   addWater: Api['addWater'] = (date, ml) => this.post('/water', { date, ml });
@@ -183,6 +185,12 @@ export class HttpApi implements Api {
   tipToday: Api['tipToday'] = (date) => this.get(`/tips/today?date=${date}`);
   tipNext: Api['tipNext'] = (date) => this.post(`/tips/next?date=${date}`);
   acceptTip: Api['acceptTip'] = (id) => this.post(`/tips/${id}/accept`);
+  reportTip: Api['reportTip'] = async (id, reason) => {
+    await this.post(`/tips/${id}/report`, { reason });
+  };
+  weeklySummary: Api['weeklySummary'] = (date) => this.get(`/insights/weekly?date=${date}`);
+  recipes: Api['recipes'] = (date) => this.get(`/recipes?date=${date}`);
+  logRecipe: Api['logRecipe'] = (id, date) => this.post(`/recipes/${encodeURIComponent(id)}/log`, { date });
   weeklyQuestion: Api['weeklyQuestion'] = (date) => this.get(`/weekly-question?date=${date}`);
   answerWeeklyQuestion: Api['answerWeeklyQuestion'] = (id, optionIndex) =>
     this.post(`/weekly-question/${id}/answer`, { optionIndex });

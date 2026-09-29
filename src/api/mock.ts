@@ -16,10 +16,12 @@ import type {
   MealType,
   Nutrients,
   Profile,
+  Recipe,
   SleepNight,
   Tip,
   ToneStyle,
   WeeklyQuestion,
+  WeeklySummary,
   Workout,
 } from '@shared/api';
 import { addDays, lastNDates, mondayOf, parseISODate, toISODate } from '@shared/dates';
@@ -123,6 +125,9 @@ function newMe(email: string, seeded: boolean): Me {
     plan: 'free',
     onboardingDone: seeded,
     createdAt: new Date().toISOString(),
+    preferences: { diet: 'any', avoid: [] },
+    aiPersonalization: true,
+    care: { active: false, reasons: [] },
   };
 }
 
@@ -309,7 +314,7 @@ function makeTip(date: string, variant: number): Tip {
   }
   options.push({ body: 'Īsa pastaiga pēc vakariņām palīdz arī miegam. 15 minūtes ir gana.', highlight: '15 minūtes' });
   const pick = options[variant % options.length];
-  return { id: id('tip'), date, tone, body: pick.body, highlight: pick.highlight, accepted: false };
+  return { id: id('tip'), date, tone, body: pick.body, highlight: pick.highlight, accepted: false, aiGenerated: false };
 }
 
 function weeklyQuestionFor(date: string): WeeklyQuestion | null {
@@ -328,6 +333,8 @@ function weeklyQuestionFor(date: string): WeeklyQuestion | null {
       { label: 'Grūti pateikt', reply: 'Tas ir pilnīgi normāli. Nākamnedēļ pajautāšu vēlreiz — bez spiediena.' },
     ],
     answerIndex: null,
+    basedOn: '4 no 7 dienām olbaltumvielas bija zem mērķa, visbiežāk vakaros',
+    aiGenerated: false,
   };
   s.questions.push(q);
   return q;
@@ -366,6 +373,7 @@ function dayFor(date: string): Day {
     tip,
     weeklyQuestion: s.questions.find((q) => q.week === week) ?? null,
     lastWeightKg: w?.kg ?? s.me.profile.weightKg,
+    care: s.me.care,
   };
 }
 
@@ -374,7 +382,9 @@ function withTone(me: Me): Me {
 }
 
 async function tokensFor(email: string): Promise<AuthTokens> {
-  const seeded = email.trim().toLowerCase() === 'ilze@piemers.lv';
+  const pro = email.trim().toLowerCase() === 'pro@piemers.lv';
+  const seeded = email.trim().toLowerCase() === 'ilze@piemers.lv' || pro;
+  const care = email.trim().toLowerCase() === 'care@piemers.lv';
   const isNew = !state || state.me.email !== email;
   if (isNew) {
     state = seed();
@@ -386,6 +396,15 @@ async function tokensFor(email: string): Promise<AuthTokens> {
       state.weights = [];
       state.days = {};
       state.nights = [];
+    }
+    if (pro) state.me = { ...state.me, email, plan: 'pro' };
+    if (care) {
+      state.me = {
+        ...state.me,
+        onboardingDone: true,
+        profile: { ...state.me.profile, firstName: 'Marta', sex: 'f', age: 27, heightCm: 165, weightKg: 58 },
+        care: { active: true, reasons: ['low_intake'] },
+      };
     }
   }
   const t: AuthTokens = { accessToken: 'mock', refreshToken: 'mock', expiresIn: 3600 * 24 * 365, user: { id: S().me.id, email, isNew } };
@@ -705,5 +724,126 @@ export class MockApi implements Api {
     return q;
   };
 
+  reportTip: Api['reportTip'] = async (tipId) => {
+    const s = S();
+    s.tips = s.tips.filter((t) => t.id !== tipId);
+  };
+  weeklySummary: Api['weeklySummary'] = async (date) => {
+    const s = S();
+    if (s.me.plan !== 'pro') throw new ApiError(402, 'pro_required', 'Pro required');
+    return MOCK_SUMMARY(date);
+  };
+  recipes: Api['recipes'] = async (date) => {
+    const s = S();
+    if (s.me.plan !== 'pro') throw new ApiError(402, 'pro_required', 'Pro required');
+    const p = s.me.preferences;
+    const ok = (r: Recipe) =>
+      (p.diet === 'any' || r.tags.includes(p.diet) || (p.diet === 'vegetarian' && r.tags.includes('vegan'))) &&
+      p.avoid.every((a) => !r.tags.includes(`contains:${a}`));
+    return { date, mealType: mealTypeForTime(new Date()), recipes: MOCK_RECIPES.filter(ok).slice(0, 3), aiGenerated: false };
+  };
+  logRecipe: Api['logRecipe'] = async (recipeId, date) => {
+    const r = MOCK_RECIPES.find((x) => x.id === recipeId);
+    if (!r) throw new ApiError(404, 'not_found', 'Recipe not found');
+    return this.createMeal({
+      date,
+      type: mealTypeForTime(new Date()),
+      eatenAt: new Date().toISOString(),
+      source: 'manual',
+      items: [{ name: r.title, grams: 100, per100g: r.perServing, portionLabel: '1 porcija' }],
+    });
+  };
+  updatePreferences: Api['updatePreferences'] = async (pref) => {
+    const s = S();
+    s.me = { ...s.me, preferences: { ...s.me.preferences, ...pref } };
+    return s.me;
+  };
+  setAiPersonalization: Api['setAiPersonalization'] = async (enabled) => {
+    const s = S();
+    s.me = { ...s.me, aiPersonalization: enabled };
+    return s.me;
+  };
+
   registerPushToken: Api['registerPushToken'] = async () => undefined;
 }
+
+const MOCK_SUMMARY = (date: string): WeeklySummary => ({
+  week: mondayOf(date),
+  periodStart: addDays(date, -6),
+  periodEnd: date,
+  headline: 'Stabila nedēļa ar labu miega ritmu',
+  observations: [
+    { title: 'Kas strādā', text: '5 no 7 naktīm gulētiešana bija tavā miega logā, un pēc tām soļu bija vairāk.' },
+    { title: 'Vakari', text: '4 vakarus olbaltumvielas palika zem mērķa — pusdienās tās parasti ir pietiekami.' },
+  ],
+  suggestion: 'Ja gribi, pievieno vakariņām vienu olbaltumvielu avotu — biezpienu, olas vai pupiņas.',
+  reflection: 'Kas palīdz tev vakarā paēst mierīgi?',
+  findings: [],
+  stats: { avgKcal: 1715, avgProteinG: 89, avgSteps: 7800, avgSleepMin: 410, daysLogged: 7 },
+  aiGenerated: false,
+  generatedAt: new Date().toISOString(),
+});
+
+const MOCK_RECIPES: Recipe[] = [
+  {
+    id: 'r-biezpiens',
+    title: 'Biezpiens ar ogām un auzu pārslām',
+    minutes: 5,
+    servings: 1,
+    ingredients: [
+      { name: 'Biezpiens', amount: '200 g' },
+      { name: 'Ogas', amount: '100 g' },
+      { name: 'Auzu pārslas', amount: '2 ēdamkarotes' },
+    ],
+    steps: ['Samaisi biezpienu ar ogām.', 'Pārkaisi auzu pārslas.'],
+    perServing: N(330, 30, 32, 9, 5),
+    why: '+30 g olbaltumvielu vakariņām',
+    tags: ['vegetarian', 'contains:lactose', 'contains:gluten'],
+  },
+  {
+    id: 'r-lecas',
+    title: 'Lēcu zupa ar burkāniem',
+    minutes: 35,
+    servings: 3,
+    ingredients: [
+      { name: 'Sarkanās lēcas', amount: '200 g' },
+      { name: 'Burkāni', amount: '2 gab.' },
+      { name: 'Sīpols', amount: '1 gab.' },
+      { name: 'Dārzeņu buljons', amount: '1 l' },
+    ],
+    steps: ['Apcep sīpolu un burkānus.', 'Pievieno lēcas un buljonu, vāri 20 minūtes.', 'Sablendē pēc garšas.'],
+    perServing: N(290, 17, 45, 4, 11),
+    why: '+11 g šķiedrvielu un 17 g olbaltumvielu',
+    tags: ['vegetarian', 'vegan', 'pescatarian'],
+  },
+  {
+    id: 'r-lasis',
+    title: 'Cepts lasis ar kartupeļiem un salātiem',
+    minutes: 30,
+    servings: 2,
+    ingredients: [
+      { name: 'Laša fileja', amount: '300 g' },
+      { name: 'Jaunie kartupeļi', amount: '400 g' },
+      { name: 'Lapu salāti', amount: '1 sauja' },
+    ],
+    steps: ['Vāri kartupeļus.', 'Cep lasi 4 minūtes no katras puses.', 'Pasniedz ar salātiem.'],
+    perServing: N(520, 34, 38, 24, 5),
+    why: '+34 g olbaltumvielu',
+    tags: ['pescatarian', 'contains:fish'],
+  },
+  {
+    id: 'r-vista',
+    title: 'Vistas un griķu bļoda',
+    minutes: 25,
+    servings: 2,
+    ingredients: [
+      { name: 'Vistas fileja', amount: '300 g' },
+      { name: 'Griķi', amount: '150 g' },
+      { name: 'Gurķis un tomāts', amount: '1 + 1 gab.' },
+    ],
+    steps: ['Izvāri griķus.', 'Apcep vistu sagrieztu strēmelēs.', 'Saliec bļodā ar dārzeņiem.'],
+    perServing: N(480, 42, 50, 9, 6),
+    why: '+42 g olbaltumvielu',
+    tags: [],
+  },
+];

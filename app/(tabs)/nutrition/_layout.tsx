@@ -10,6 +10,7 @@ export default function NutritionLayout() {
       <Stack.Screen name="analyzing" options={{ animation: 'fade', gestureEnabled: false }} />
       <Stack.Screen name="result" />
       <Stack.Screen name="trends" />
+      <Stack.Screen name="recipes" />
     </Stack>
   );
 }

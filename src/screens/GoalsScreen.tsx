@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { api, type Goal, type Me, type Targets, type WeightDirection } from '@/api';
+import { api, ApiError, type Goal, type Me, type Targets, type WeightDirection } from '@/api';
 import { useMe, useMeMutation } from '@/api/hooks';
 import { BottomBar, Button } from '@/components/Button';
 import { RoundButton } from '@/components/Controls';
@@ -11,6 +11,7 @@ import { Icon, type IconName } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { Loading } from '@/components/States';
 import { duration, formatNumber, litres } from '@/lib/format';
+import { KCAL_FLOOR, minGoalWeight, weightLossAllowed } from '@shared/safety';
 import { computeTargets, targetSources, weeksToGoal } from '@shared/targets';
 import { colors, fonts, radius, type } from '@/theme';
 
@@ -33,8 +34,12 @@ export function GoalsScreen({ mode }: { mode: 'onboarding' | 'edit' }) {
 function GoalsForm({ mode, me }: { mode: 'onboarding' | 'edit'; me: Me }) {
   const p = me.profile;
   const [goals, setGoals] = useState<Goal[]>(p.goals.length ? p.goals : ['health']);
-  const [dir, setDir] = useState<WeightDirection>(p.weightDirection ?? 'down');
-  const [goalKg, setGoalKg] = useState<number>(p.goalWeightKg ?? Math.round(p.weightKg - 5));
+  const lossOk = weightLossAllowed(p);
+  const minKg = minGoalWeight(p.heightCm);
+  const [dir, setDir] = useState<WeightDirection>(lossOk ? (p.weightDirection ?? 'down') : 'up');
+  const [goalKg, setGoalKg] = useState<number>(
+    p.goalWeightKg ?? (lossOk ? Math.max(minKg, Math.round(p.weightKg - 5)) : Math.round(p.weightKg + 3)),
+  );
   const [edited, setEdited] = useState<Partial<Targets>>(mode === 'edit' ? me.targets : {});
   const profile = { ...p, goals, weightDirection: goals.includes('weight') ? dir : null, goalWeightKg: goals.includes('weight') ? goalKg : null };
   const targets: Targets = { ...computeTargets(profile), ...edited };
@@ -52,7 +57,7 @@ function GoalsForm({ mode, me }: { mode: 'onboarding' | 'edit'; me: Me }) {
   const pace = diff === 0 ? 'Svars paliek, kāds ir — fokuss uz ieradumiem.' : `Mierīgā tempā tas ir apmēram ${weeksToGoal(p.weightKg, goalKg)} nedēļas (0,25–0,5 kg nedēļā).`;
 
   const rows: { k: TargetKey; label: string; value: string; src: string; step: number; lo: number; hi: number }[] = [
-    { k: 'kcal', label: 'Enerģija dienā', value: `${formatNumber(targets.kcal)} kcal`, src: src.kcal, step: 50, lo: 1200, hi: 4500 },
+    { k: 'kcal', label: 'Enerģija dienā', value: `${formatNumber(targets.kcal)} kcal`, src: src.kcal, step: 50, lo: KCAL_FLOOR[p.sex], hi: 4500 },
     { k: 'proteinG', label: 'Olbaltumvielas', value: `${targets.proteinG} g`, src: src.protein, step: 5, lo: 40, hi: 250 },
     { k: 'waterMl', label: 'Ūdens', value: litres(targets.waterMl), src: src.water, step: 100, lo: 1000, hi: 5000 },
     { k: 'steps', label: 'Soļi', value: formatNumber(targets.steps), src: src.steps, step: 500, lo: 2000, hi: 30000 },
@@ -70,7 +75,17 @@ function GoalsForm({ mode, me }: { mode: 'onboarding' | 'edit'; me: Me }) {
       testID="goals"
       footer={
         <BottomBar>
-          {save.isError && <Text style={styles.error}>Neizdevās saglabāt. Mēģini vēlreiz.</Text>}
+          {save.isError && (
+            <Text style={styles.error}>
+              {save.error instanceof ApiError && save.error.code === 'goal_below_healthy'
+                ? 'Šāds mērķa svars būtu zem veselīga diapazona.'
+                : save.error instanceof ApiError && save.error.code === 'target_below_floor'
+                  ? `Enerģijas mērķis nevar būt zemāks par ${formatNumber(KCAL_FLOOR[p.sex])} kcal.`
+                  : save.error instanceof ApiError && save.error.code === 'weight_loss_not_allowed'
+                    ? 'Svara samazināšanu šim profilam nepiedāvājam.'
+                    : 'Neizdevās saglabāt. Mēģini vēlreiz.'}
+            </Text>
+          )}
           <Button label={mode === 'onboarding' ? 'Tālāk' : 'Saglabāt'} onPress={next} loading={save.isPending} disabled={!goals.length} testID="goals-next" />
         </BottomBar>
       }>
@@ -112,14 +127,14 @@ function GoalsForm({ mode, me }: { mode: 'onboarding' | 'edit'; me: Me }) {
               {on && g.value === 'weight' && (
                 <View style={styles.weight}>
                   <View style={styles.dirs} accessibilityRole="radiogroup">
-                    {(['down', 'up'] as WeightDirection[]).map((d) => {
+                    {((lossOk ? ['down', 'up'] : ['up']) as WeightDirection[]).map((d) => {
                       const sel = d === dir;
                       return (
                         <Pressable
                           key={d}
                           onPress={() => {
                             setDir(d);
-                            setGoalKg(Math.round(d === 'down' ? p.weightKg - 5 : p.weightKg + 4));
+                            setGoalKg(d === 'down' ? Math.max(minKg, Math.round(p.weightKg - 5)) : Math.round(p.weightKg + 4));
                           }}
                           accessibilityRole="radio"
                           aria-checked={sel}
@@ -134,10 +149,23 @@ function GoalsForm({ mode, me }: { mode: 'onboarding' | 'edit'; me: Me }) {
                       <Text style={type.secondary}>Vēlamais svars · tagad {formatNumber(p.weightKg)} kg</Text>
                       <Text style={styles.big}>{goalKg} kg</Text>
                     </View>
-                    <RoundButton icon="minus" label="Vēlamais svars: mazāk" bg={colors.white} onPress={() => setGoalKg((k) => Math.max(35, k - 1))} />
+                    <RoundButton
+                      icon="minus"
+                      label="Vēlamais svars: mazāk"
+                      bg={colors.white}
+                      onPress={() => setGoalKg((k) => Math.max(dir === 'down' ? minKg : Math.ceil(p.weightKg), k - 1))}
+                    />
                     <RoundButton icon="plus" label="Vēlamais svars: vairāk" bg={colors.white} onPress={() => setGoalKg((k) => Math.min(250, k + 1))} />
                   </View>
                   <Text style={type.secondary}>{pace}</Text>
+                  {!lossOk && (
+                    <Text style={type.secondary}>
+                      Svara samazināšanu nepiedāvājam{p.age < 18 ? ' līdz 18 gadu vecumam' : ', jo tavs svars jau ir veselīgā diapazona apakšā'} — fokuss uz enerģiju un ieradumiem.
+                    </Text>
+                  )}
+                  {lossOk && dir === 'down' && goalKg === minKg && (
+                    <Text style={type.secondary}>Zemāku mērķi nepiedāvājam — tas būtu zem veselīga svara diapazona.</Text>
+                  )}
                 </View>
               )}
             </View>
@@ -166,6 +194,9 @@ function GoalsForm({ mode, me }: { mode: 'onboarding' | 'edit'; me: Me }) {
           </View>
         ))}
       </View>
+      {targets.kcal <= KCAL_FLOOR[p.sex] && (
+        <Text style={styles.disclaimer}>Enerģijas mērķi zemāk par {formatNumber(KCAL_FLOOR[p.sex])} kcal nenosakām.</Text>
+      )}
       <Text style={styles.disclaimer}>
         Vispārīgi ieteikumi veseliem pieaugušajiem, nevis medicīnisks padoms. Ja tev ir veselības stāvoklis, mērķus pārrunā ar ārstu.
       </Text>
