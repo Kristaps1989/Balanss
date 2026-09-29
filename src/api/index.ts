@@ -1,34 +1,16 @@
 /**
- * API client. Until the Railway backend exists, every call resolves with
- * mocked sample data. Swap the implementations to fetch from
- * `process.env.EXPO_PUBLIC_API_URL` in milestone 5.
+ * API entry point. Uses the real backend at EXPO_PUBLIC_API_URL, or the
+ * in-memory mock when EXPO_PUBLIC_USE_MOCK=1 or no URL is configured.
  */
-import { useEffect, useState } from 'react';
+import type { Api } from './api';
+import { HttpApi } from './http';
+import { MockApi } from './mock';
 
-import { mockToday, mockUser } from './mock';
-import type { Today, User } from './types';
+export * from '@shared/api';
+export { ApiError, type Api } from './api';
+export { tokenStore } from './http';
 
-export * from './types';
+export const API_URL = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, '');
+export const USE_MOCK = process.env.EXPO_PUBLIC_USE_MOCK === '1' || !API_URL;
 
-export const API_URL = process.env.EXPO_PUBLIC_API_URL;
-
-export async function getMe(): Promise<User> {
-  return mockUser;
-}
-
-export async function getToday(date = new Date()): Promise<Today> {
-  return mockToday(date);
-}
-
-export function useAsync<T>(load: () => Promise<T>): T | undefined {
-  const [data, setData] = useState<T>();
-  useEffect(() => {
-    let alive = true;
-    load().then((d) => alive && setData(d));
-    return () => {
-      alive = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  return data;
-}
+export const api: Api = USE_MOCK ? new MockApi() : new HttpApi(API_URL!);

@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app:
+    name: App · lint, types, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx eslint .
+      - run: npm test
+
+  backend:
+    name: Backend · types, integration tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: balanss
+          POSTGRES_PASSWORD: balanss
+          POSTGRES_DB: balanss_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U balanss" --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+        env:
+          TEST_DATABASE_URL: postgres://balanss:balanss@localhost:5432/balanss_test
+
+  e2e:
+    name: End-to-end (web build + backend)
+    runs-on: ubuntu-latest
+    needs: [app, backend]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: balanss
+          POSTGRES_PASSWORD: balanss
+          POSTGRES_DB: balanss_e2e
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U balanss" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm ci
+        working-directory: backend
+      - run: npx playwright install --with-deps chromium
+      - run: sudo apt-get install -y postgresql-client
+      - run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-report
+          path: |
+            e2e-report
+            test-results
+
+  android:
+    name: Android · assembleDebug
+    runs-on: ubuntu-latest
+    needs: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - run: npm ci
+      - run: ./gradlew assembleDebug --no-daemon
+        working-directory: android
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk

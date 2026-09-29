@@ -51,6 +51,12 @@ export const colors = {
   handle: '#DDD5C9',
   navBorder: '#ECE5DA',
   scrim: 'rgba(38,35,31,0.42)',
+  inputBorder: '#E3DBCF',
+  optionBorder: '#EDE6DB',
+  toggleOff: '#D8D0C4',
+  boxBorder: '#B8AFA3',
+  muted: '#8C857B',
+  barMuted: '#D8CBBB',
   /** Neutral track behind progress bars and rings. */
   track: '#F1EBE3',
 } as const;

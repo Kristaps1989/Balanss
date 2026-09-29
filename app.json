@@ -10,7 +10,11 @@
     "backgroundColor": "#F7F3EE",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "lv.balanss.app"
+      "bundleIdentifier": "lv.balanss.app",
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "Balanss nolasa so\u013cus, pulsu un miegu, lai par\u0101d\u012btu tavu dienu vien\u0101 skat\u0101."
+      }
     },
     "android": {
       "package": "lv.balanss.app",
@@ -32,10 +36,39 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 160
         }
-      ]
+      ],
+      "expo-secure-store",
+      "expo-localization",
+      "expo-sharing",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Balanss izmanto kameru, lai nofotograf\u0113tu malt\u012bti un atpaz\u012btu produktus.",
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Balanss piek\u013c\u016bst foto, lai tu var\u0113tu pievienot malt\u012bti no galerijas.",
+          "cameraPermission": "Balanss izmanto kameru, lai nofotograf\u0113tu malt\u012bti."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#D9693C"
+        }
+      ],
+      "expo-apple-authentication",
+      "react-native-health-connect",
+      "@react-native-google-signin/google-signin"
     ],
-    "experiments": {
-      "typedRoutes": true
+    "extra": {
+      "eas": {
+        "projectId": null
+      }
     }
   }
 }

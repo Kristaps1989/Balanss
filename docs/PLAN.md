@@ -22,6 +22,19 @@ Runtime AI in the backend defaults to **Claude Opus 5.5** with adaptive thinking
 
 | # | Milestone | Status |
 |---|---|---|
+| 1 | Scaffold, tokens, tab bar, Šodiena | Done |
+| 2 | Nutrition screens | Done |
+| 3 | Onboarding + personality test | Done |
+| 4 | Movement, Sleep, Me, Pro | Done |
+| 5 | Backend (Fastify + Postgres) + auth + app on real API | Done — Railway deploy pending your account |
+| 6 | AI: food photo, text parse, 28-day pattern analysis, tips with memory, data-based weekly questions, weekly summary, recipes, ethics filter, care mode | Done — see docs/AI_AND_ETHICS.md; Claude is stubbed in tests, needs `ANTHROPIC_API_KEY` for real output and the eval |
+| 7 | Health Connect sync | Code done — needs a real phone to verify; iOS HealthKit later |
+| 8 | Push notifications + signed release | Code done — needs Firebase/Expo project and upload keystore (docs/NATIVE_SETUP.md) |
+| 9 | Tests, CI, GDPR | Done — 35 unit, 136 backend, 20 end-to-end tests; CI incl. Android build |
+
+Verified in the cloud sandbox: typecheck, lint, all test suites, and a web build of the app against the real backend. **Not** verified here (no Android SDK / external accounts): `./gradlew assembleDebug`, Health Connect on a device, real Google/Apple/Resend/FCM/RevenueCat/Anthropic calls. CI's `android` job runs the Gradle build on GitHub.
+
+---|---|---|
 | 1 | Scaffold, tokens, tab bar, Šodiena | Done (branch `claude/new-session-6rp4b0`) |
 | 2 | Nutrition screens (mock) | Not started |
 | 3 | Onboarding + personality test (mock) | Not started |

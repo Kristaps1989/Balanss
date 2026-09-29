@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useSegments } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { Fragment } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -15,7 +15,11 @@ const TABS: Record<string, { label: string; icon: IconName }> = {
 };
 
 /** Five equal slots: Šodiena · Uzturs · (+) · Kustība · Miegs. */
+const FULL_SCREEN = new Set(['camera', 'analyzing', 'result']);
+
 export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
+  const segments = useSegments() as string[];
+  if (segments.some((s) => FULL_SCREEN.has(s))) return null;
   return (
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
       {state.routes.map((route, index) => {
@@ -35,7 +39,7 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
             <Pressable
               onPress={onPress}
               accessibilityRole="tab"
-              accessibilityState={{ selected: focused }}
+              aria-selected={focused}
               accessibilityLabel={tab.label}
               style={styles.slot}>
               <Icon name={tab.icon} color={color} size={24} />
@@ -55,6 +59,7 @@ function AddButton() {
         onPress={() => router.push('/add')}
         accessibilityRole="button"
         accessibilityLabel="Pievienot"
+        testID="tab-add"
         style={({ pressed }) => [styles.add, pressed && { transform: [{ scale: 0.95 }] }]}>
         <Icon name="plus" color={colors.white} size={26} strokeWidth={2.4} />
       </Pressable>
