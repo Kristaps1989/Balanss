@@ -35,7 +35,11 @@ export default function Login() {
             ? 'Pārbaudi e-pasta adresi.'
             : e instanceof ApiError && e.status === 429
               ? 'Pārāk daudz mēģinājumu. Pamēģini pēc brīža.'
-              : 'Neizdevās pieslēgties. Mēģini vēlreiz.',
+              : e instanceof ApiError && e.status === 0
+                ? 'Nevar sasniegt serveri. Pārbaudi interneta savienojumu un mēģini vēlreiz.'
+                : e instanceof ApiError && e.status >= 500
+                  ? 'Serveris pašlaik nav pieejams. Pamēģini pēc brīža.'
+                  : 'Neizdevās pieslēgties. Mēģini vēlreiz.',
         );
       }
     } finally {

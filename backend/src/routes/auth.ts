@@ -37,7 +37,7 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
       expiresAt: new Date(app.deps.now().getTime() + MAGIC_LINK_TTL_MS),
     });
     const q = `token=${encodeURIComponent(token)}`;
-    await app.deps.email.sendMagicLink({ to: email, appLink: `${config.appScheme}://auth?${q}`, webLink: `${config.publicWebUrl}/auth?${q}` }, req.log);
+    await app.deps.email.sendMagicLink({ to: email, appLink: `${config.appScheme}://auth?${q}`, webLink: `${config.publicApiUrl}/auth/open?${q}` }, req.log);
     // devToken is a dev/test convenience only; never exposed in production.
     return config.emailProvider === 'console' && config.nodeEnv !== 'production' ? { ok: true, devToken: token } : { ok: true };
   });

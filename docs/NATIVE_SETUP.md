@@ -6,7 +6,7 @@ All `EXPO_PUBLIC_*` variables go in a `.env` file in the project root (it is git
 
 ```bash
 # .env
-EXPO_PUBLIC_API_URL=https://<your-railway-app>.up.railway.app
+# EXPO_PUBLIC_API_URL defaults to https://balanss-production.up.railway.app (see docs/RAILWAY.md)
 EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=<...>.apps.googleusercontent.com
 EXPO_PUBLIC_REVENUECAT_ANDROID_KEY=goog_<...>
 EXPO_PUBLIC_EAS_PROJECT_ID=<uuid>
@@ -14,7 +14,7 @@ EXPO_PUBLIC_PRIVACY_URL=https://<site>/privatums
 EXPO_PUBLIC_TERMS_URL=https://<site>/noteikumi
 ```
 
-For UI work without a backend, set `EXPO_PUBLIC_USE_MOCK=1` (or leave `EXPO_PUBLIC_API_URL` unset). The mock signs in `ilze@piemers.lv` as the seeded sample user; any other e-mail starts onboarding as a new user.
+For UI work without a backend, set `EXPO_PUBLIC_USE_MOCK=1`. The mock signs in `ilze@piemers.lv` as the seeded sample user; any other e-mail starts onboarding as a new user.
 
 ## 1. Build once after pulling
 

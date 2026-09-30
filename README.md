@@ -14,6 +14,8 @@ A daily health companion app (Latvian). You log meals from a photo. Movement, he
 
 ```bash
 npm install
+# Default: the production API on Railway (docs/RAILWAY.md)
+npx expo start
 # UI only, no backend: the mock signs in ilze@piemers.lv as the sample user
 EXPO_PUBLIC_USE_MOCK=1 npx expo start
 
@@ -25,6 +27,8 @@ EXPO_PUBLIC_API_URL=http://10.0.2.2:3000 npx expo start   # Android emulator
 On a phone, open `android/` in Android Studio and press Run ▶ while Metro is running. You can also run `npx expo run:android`. For USB, run `adb reverse tcp:8081 tcp:8081` (and `tcp:3000` for a local backend).
 
 ## Checks
+
+Deployed API: `scripts/check-api.sh` (see docs/RAILWAY.md).
 
 ```bash
 npx tsc --noEmit && npx eslint . && npm test          # app + shared unit tests
