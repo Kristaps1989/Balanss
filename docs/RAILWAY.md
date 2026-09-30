@@ -15,6 +15,55 @@ Or open `https://balanss-production.up.railway.app/health` in a browser. When ev
 {"ok":true,"db":true,"ai":"anthropic","email":"resend","env":"production"}
 ```
 
+## Automatic setup (recommended): Infrastructure as Code
+
+The whole Railway setup lives in [`.railway/railway.ts`](../.railway/railway.ts):
+- the Postgres database;
+- the API service, built from `backend/Dockerfile`, which runs migrations before each deploy and uses `/health` as its health check;
+- the link `DATABASE_URL → Postgres`;
+- the `/data` volume, the domain and port 8081, the EU region, and "Wait for CI";
+- all non-secret variables.
+
+The GitHub workflow **Railway infrastructure** (`.github/workflows/railway.yml`) keeps Railway in sync:
+
+| When | What happens |
+|---|---|
+| A pull request changes `.railway/` | Shows the plan: what would change on Railway |
+| Merge to `main` | Applies the plan |
+| Actions → Railway infrastructure → **Run workflow** | Applies on demand |
+
+Code changes still deploy the usual way. Railway builds each commit on `main` once CI is green, because of "Wait for CI".
+
+Secrets are never in git. `preserve()` keeps the values you set once in the dashboard. The workflow never deletes anything, such as a database, volume or variable. A deletion needs a person to run `railway config apply` and confirm it.
+
+### One-time setup (about 10 minutes)
+
+1. **Stop using the old config file.** Service **Balanss** → **Settings** → **Config-as-code**: clear `/backend/railway.json` (✕) and save. Railway can't manage a service with IaC while a config file is set. Do steps 2–5 right after this one.
+2. **Secrets, set once.** Service **Balanss** → **Variables** → add:
+   - `JWT_SECRET`: 48+ random characters;
+   - `ANTHROPIC_API_KEY`: `sk-ant-…`;
+   - `RESEND_API_KEY`: `re_…`.
+
+   Leave everything else to the file.
+3. **Railway token.** Railway → project **Balanss** → **Settings → Tokens** → create a token for the **production** environment and copy it.
+4. **GitHub secret.** GitHub → repo **Balanss** → **Settings → Secrets and variables → Actions → New repository secret**. Name: `RAILWAY_TOKEN`, value: the token.
+5. **First apply.** GitHub → **Actions** → **Railway infrastructure** → **Run workflow** (branch `main`). The log shows the plan, then the apply. Railway redeploys.
+6. **Check.** Open `https://balanss-production.up.railway.app/health` or run `scripts/check-api.sh`.
+
+If step 5 stops with *destructive changes*, the plan wants to delete or replace something. For example, you attached a volume with another name, or the Postgres image or region differs. Send me the log, or run the step yourself on your PC and read the plan before confirming:
+
+```bash
+npm install -g @railway/cli
+railway login
+railway link            # choose Balanss → production
+railway config plan     # read it
+railway config apply    # confirm
+```
+
+To change the infrastructure later (a new variable, more replicas, another database), edit `.railway/railway.ts` in a pull request, check the plan in the PR, then merge.
+
+The manual steps below do the same thing by hand. Use them only if you don't use IaC.
+
 ## What was wrong
 
 | Problem | Effect | Fix |
@@ -26,7 +75,7 @@ Or open `https://balanss-production.up.railway.app/health` in a browser. When ev
 | The app used the mock unless `.env` was set | The phone never called Railway | Fixed in code: production URL is the default |
 | Gmail doesn't open `balanss://` links | Sign-in link did nothing | Fixed in code: the e-mail links to `https://…/auth/open`, which opens the app |
 
-## Steps (Railway dashboard)
+## Manual setup (reference; not needed with IaC)
 
 ### 1. Point the service at the backend config
 Service **Balanss** → **Settings**:
