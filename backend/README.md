@@ -51,7 +51,7 @@ ACCESS=$(curl -s -XPOST localhost:3000/v1/auth/magic-link/verify -H 'content-typ
 curl -s localhost:3000/v1/days/$(date +%F) -H "authorization: Bearer $ACCESS"
 ```
 
-For the Android emulator, point the app at `EXPO_PUBLIC_API_URL=http://10.0.2.2:3000/v1`.
+For the Android emulator, point the app at `EXPO_PUBLIC_API_URL=http://10.0.2.2:3000`.
 
 ### Scripts
 
