@@ -58,7 +58,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Part
   if (emailProvider !== 'console' && emailProvider !== 'resend') throw new Error('EMAIL_PROVIDER must be console or resend');
   if (emailProvider === 'resend' && !env.RESEND_API_KEY) throw new Error('RESEND_API_KEY is required with EMAIL_PROVIDER=resend');
 
+  if (production && !env.DATABASE_URL) throw new Error('DATABASE_URL must be set (on Railway: DATABASE_URL=${{Postgres.DATABASE_URL}})');
   const databaseUrl = env.DATABASE_URL || 'postgres://balanss:balanss@localhost:5432/balanss';
+  // Railway sets RAILWAY_PUBLIC_DOMAIN once a public domain is generated, so PUBLIC_API_URL is optional there.
+  const railwayUrl = env.RAILWAY_PUBLIC_DOMAIN ? `https://${env.RAILWAY_PUBLIC_DOMAIN}` : undefined;
 
   return {
     nodeEnv,
@@ -67,7 +70,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Part
     logLevel: env.LOG_LEVEL ?? (production ? 'info' : 'debug'),
     databaseUrl,
     jwtSecret,
-    publicApiUrl: (env.PUBLIC_API_URL || `http://localhost:${port}`).replace(/\/$/, ''),
+    publicApiUrl: (env.PUBLIC_API_URL || railwayUrl || `http://localhost:${port}`).replace(/\/$/, ''),
     publicWebUrl: (env.PUBLIC_WEB_URL || 'https://balanss.app').replace(/\/$/, ''),
     appScheme: env.APP_SCHEME || 'balanss',
     corsOrigins,

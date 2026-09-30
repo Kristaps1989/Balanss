@@ -1,6 +1,7 @@
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
+import { sql } from 'drizzle-orm';
 import Fastify, { type FastifyError, type FastifyInstance, type FastifyRequest } from 'fastify';
 
 import type { AppDeps } from './deps';
@@ -11,6 +12,7 @@ import { dayRoutes } from './routes/day';
 import { healthRoutes } from './routes/health';
 import { insightRoutes } from './routes/insights';
 import { mealRoutes } from './routes/meals';
+import { magicLinkPage } from './routes/magic-link-page';
 import { meRoutes } from './routes/me';
 import { publicRoutes } from './routes/public';
 import { pushRoutes } from './routes/push';
@@ -103,7 +105,23 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   });
   app.setNotFoundHandler((_req, reply) => reply.status(404).send({ error: { code: 'not_found', message: 'Route not found' } }));
 
-  app.get('/health', { config: { rateLimit: false } }, async () => ({ ok: true }));
+  // Liveness + readiness. Reports which providers are configured (never their keys) so a deploy can be checked from a browser.
+  app.get('/health', { config: { rateLimit: false } }, async (_req, reply) => {
+    let db = true;
+    try {
+      await deps.db.execute(sql`select 1`);
+    } catch {
+      db = false;
+    }
+    return reply.status(db ? 200 : 503).send({
+      ok: db,
+      db,
+      ai: config.aiProvider,
+      email: deps.email.kind,
+      env: config.nodeEnv,
+    });
+  });
+  await app.register(magicLinkPage);
 
   await app.register(
     async (v1) => {

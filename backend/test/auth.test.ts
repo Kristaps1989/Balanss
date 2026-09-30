@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import type { AuthTokens } from '../../shared/api';
+import { loadConfig } from '../src/config';
 import { magicLinks, refreshTokens } from '../src/db/schema';
 import { authed, db, loginByEmail, makeApp, resetDb, type TestContext } from './helpers';
 
@@ -22,7 +23,15 @@ describe('magic link', () => {
     expect(body.ok).toBe(true);
     expect(body.devToken).toMatch(/^[A-Za-z0-9_-]{43}$/);
     expect(ctx.email.sent.at(-1)!.appLink).toBe(`balanss://auth?token=${body.devToken}`);
-    expect(ctx.email.sent.at(-1)!.webLink).toContain('/auth?token=');
+    expect(ctx.email.sent.at(-1)!.webLink).toMatch(/^http.+\/auth\/open\?token=/);
+    // The https page hands the token to the app (mail apps don't open balanss:// links).
+    const open = await ctx.app.inject({ method: 'GET', url: `/auth/open?token=${body.devToken}` });
+    expect(open.statusCode).toBe(200);
+    expect(open.body).toContain(`intent://auth?token=${body.devToken}#Intent;scheme=balanss;package=lv.balanss.app;end`);
+    expect(open.headers['content-security-policy']).toContain("default-src 'none'");
+    const bad = await ctx.app.inject({ method: 'GET', url: '/auth/open?token=%22%3E%3Cscript%3E' });
+    expect(bad.statusCode).toBe(400);
+    expect(bad.body).not.toContain('<script>');
     // Stored hashed, never in plain text.
     const rows = await db.select().from(magicLinks);
     expect(rows[0]!.email).toBe('anna@example.lv');
@@ -174,12 +183,26 @@ describe('protected routes', () => {
 
   it('serves /health without auth', async () => {
     const res = await ctx.app.inject({ method: 'GET', url: '/health' });
-    expect(res.json()).toEqual({ ok: true });
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toMatchObject({ ok: true, db: true, email: 'fake' });
+    expect(JSON.stringify(res.json())).not.toMatch(/key|secret/i);
   });
 
   it('returns the error shape for unknown routes', async () => {
     const res = await ctx.app.inject({ method: 'GET', url: '/v1/nope' });
     expect(res.statusCode).toBe(404);
     expect(res.json().error.code).toBe('not_found');
+  });
+});
+
+describe('config on Railway', () => {
+  const base = { NODE_ENV: 'production', JWT_SECRET: 'x'.repeat(32) };
+  it('fails fast without DATABASE_URL in production', () => {
+    expect(() => loadConfig(base)).toThrow(/DATABASE_URL/);
+  });
+  it('derives PUBLIC_API_URL from RAILWAY_PUBLIC_DOMAIN', () => {
+    const c = loadConfig({ ...base, DATABASE_URL: 'postgres://x', RAILWAY_PUBLIC_DOMAIN: 'balanss-production.up.railway.app' });
+    expect(c.publicApiUrl).toBe('https://balanss-production.up.railway.app');
+    expect(loadConfig({ ...base, DATABASE_URL: 'postgres://x', RAILWAY_PUBLIC_DOMAIN: 'a.b', PUBLIC_API_URL: 'https://api.x/' }).publicApiUrl).toBe('https://api.x');
   });
 });

@@ -18,10 +18,7 @@ export function magicLinkCopy(mail: MagicLinkEmail) {
   const text = [
     'Sveiki!',
     '',
-    'Lai pieslēgtos Balanss, atver šo saiti telefonā:',
-    mail.appLink,
-    '',
-    'Ja saite neatveras lietotnē, izmanto šo:',
+    'Lai pieslēgtos Balanss, atver šo saiti telefonā, kurā ir lietotne:',
     mail.webLink,
     '',
     'Saite ir derīga 15 minūtes un izmantojama vienu reizi.',
@@ -33,8 +30,8 @@ export function magicLinkCopy(mail: MagicLinkEmail) {
 <div style="max-width:480px;margin:0 auto;background:#FFFFFF;border:1px solid #EFE8DE;border-radius:24px;padding:28px">
 <h1 style="font-size:22px;margin:0 0 12px">Pieslēgšanās Balanss</h1>
 <p style="font-size:16px;line-height:1.5;margin:0 0 20px">Atver šo saiti telefonā, lai pieslēgtos.</p>
-<p style="margin:0 0 20px"><a href="${mail.appLink}" style="display:inline-block;background:#B9532A;color:#FFFFFF;text-decoration:none;font-weight:600;padding:14px 24px;border-radius:28px">Pieslēgties</a></p>
-<p style="font-size:14px;line-height:1.5;color:#5E5850;margin:0 0 8px">Ja poga neatver lietotni, izmanto šo saiti: <a href="${mail.webLink}" style="color:#A9502A">${mail.webLink}</a></p>
+<p style="margin:0 0 20px"><a href="${mail.webLink}" style="display:inline-block;background:#B9532A;color:#FFFFFF;text-decoration:none;font-weight:600;padding:14px 24px;border-radius:28px">Pieslēgties</a></p>
+<p style="font-size:14px;line-height:1.5;color:#5E5850;margin:0 0 8px">Ja poga nestrādā, atver šo saiti: <a href="${mail.webLink}" style="color:#A9502A">${mail.webLink}</a></p>
 <p style="font-size:14px;line-height:1.5;color:#6F685E;margin:0">Saite ir derīga 15 minūtes un izmantojama vienu reizi. Ja tu nepieprasīji pieslēgšanos, vienkārši ignorē šo e-pastu.</p>
 </div></body></html>`;
   return { subject, text, html };

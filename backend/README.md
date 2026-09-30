@@ -51,7 +51,7 @@ ACCESS=$(curl -s -XPOST localhost:3000/v1/auth/magic-link/verify -H 'content-typ
 curl -s localhost:3000/v1/days/$(date +%F) -H "authorization: Bearer $ACCESS"
 ```
 
-For the Android emulator, point the app at `EXPO_PUBLIC_API_URL=http://10.0.2.2:3000/v1`.
+For the Android emulator, point the app at `EXPO_PUBLIC_API_URL=http://10.0.2.2:3000`.
 
 ### Scripts
 
@@ -90,8 +90,8 @@ npm test
 | `LOG_LEVEL` | `debug` (dev) / `info` (prod) | pino level; `silent` in tests. |
 | `DATABASE_URL` | `postgres://balanss:balanss@localhost:5432/balanss` | Railway: `${{Postgres.DATABASE_URL}}`. `sslmode=require` is honoured. |
 | `JWT_SECRET` | dev-only constant | **Required in production**, ≥ 32 chars (`openssl rand -base64 48`). Signs HS256 access tokens (15 min) and photo URLs. |
-| `PUBLIC_API_URL` | `http://localhost:$PORT` | Absolute base for signed `photoUrl`s and export `downloadUrl`s, e.g. `https://api.balanss.app`. |
-| `PUBLIC_WEB_URL` | `https://balanss.app` | Web fallback in the magic-link e-mail: `${PUBLIC_WEB_URL}/auth?token=…`. |
+| `PUBLIC_API_URL` | `https://$RAILWAY_PUBLIC_DOMAIN`, else `http://localhost:$PORT` | Absolute base for signed `photoUrl`s, export `downloadUrl`s and the magic-link page `/auth/open`. |
+| `PUBLIC_WEB_URL` | `https://balanss.app` | Public website (reserved). The magic-link e-mail links to `${PUBLIC_API_URL}/auth/open?token=…`, which opens the app. |
 | `APP_SCHEME` | `balanss` | Deep link in the magic-link e-mail: `${APP_SCHEME}://auth?token=…`. |
 | `CORS_ORIGINS` | `*` in dev, none in prod | Comma list of allowed web origins (`*` = any). The native app does not need CORS. |
 | `GOOGLE_CLIENT_IDS` | – | Comma list of OAuth client IDs accepted as the ID-token audience (Android, iOS, web). Google sign-in returns 503 `provider_not_configured` without it. |
@@ -127,12 +127,13 @@ The service builds from the **repository root** because it imports `../shared`.
    The container runs as the non-root `node` user; if the volume is not writable, set
    `RAILWAY_RUN_UID=0` on the service.
 5. Variables: `NODE_ENV=production`, `DATABASE_URL=${{Postgres.DATABASE_URL}}`,
-   `JWT_SECRET`, `PUBLIC_API_URL` (the service's public domain, `https://…`),
+   `JWT_SECRET`, `PUBLIC_API_URL` (optional on Railway),
    `PUBLIC_WEB_URL`, `GOOGLE_CLIENT_IDS`, `APPLE_BUNDLE_IDS`, `EMAIL_PROVIDER=resend`,
    `RESEND_API_KEY`, `EMAIL_FROM`, `ANTHROPIC_API_KEY`, `REVENUECAT_WEBHOOK_SECRET`,
    optionally `EXPO_ACCESS_TOKEN`.
-6. Generate a public domain (Settings → Networking) and put it in the app's
-   `EXPO_PUBLIC_API_URL` as `https://<domain>/v1`.
+6. Generate a public domain (Settings → Networking) with the same target port as `PORT`.
+   The app's default is `https://balanss-production.up.railway.app`; for another domain set
+   `EXPO_PUBLIC_API_URL=https://<domain>` (no `/v1` — the app adds it). Step-by-step: docs/RAILWAY.md.
 7. Optional: seed the demo user once with `railway run node dist/seed.js` (or a one-off shell).
 8. In RevenueCat, set the webhook URL to `https://<domain>/v1/billing/webhook` with the same
    bearer secret; use our user id as the RevenueCat `app_user_id`.

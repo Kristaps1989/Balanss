@@ -1,0 +1,19 @@
+{
+  // Self-contained config for the code shared by the app and the backend.
+  // Tools pick the nearest tsconfig.json; without this file they would use the
+  // app's root config, which extends expo/tsconfig.base and needs the app's
+  // node_modules (not installed when only the backend is built or tested).
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "types": []
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["__tests__"]
+}

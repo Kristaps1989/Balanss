@@ -36,6 +36,10 @@ async function main() {
   process.on('SIGINT', () => void shutdown('SIGINT'));
 
   await app.listen({ port: config.port, host: config.host });
+  if (config.nodeEnv === 'production' && config.emailProvider === 'console') {
+    app.log.warn('EMAIL_PROVIDER is console: sign-in e-mails are NOT sent. Set EMAIL_PROVIDER=resend and RESEND_API_KEY.');
+  }
+  if (config.aiProvider === 'fake') app.log.warn('ANTHROPIC_API_KEY is not set: AI copy uses the reviewed templates only.');
   app.log.info({ ai: config.aiProvider, emailProvider: config.emailProvider, scheduler: config.scheduler }, 'balanss api ready');
 }
 
