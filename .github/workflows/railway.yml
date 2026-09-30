@@ -1,0 +1,52 @@
+name: Railway infrastructure
+
+# Keeps Railway in sync with .railway/railway.ts:
+# - pull requests that change it show the plan (what would change on Railway);
+# - merging to main applies it;
+# - "Run workflow" (Actions tab) applies it on demand, e.g. the first time.
+# Needs the repository secret RAILWAY_TOKEN: a Railway *project token* for the
+# production environment (Railway → project Settings → Tokens). Without it the jobs skip.
+# Destructive changes (deleting a service, database, volume or variable) are never
+# applied from here: they need `railway config apply` by a person (see docs/RAILWAY.md).
+
+on:
+  pull_request:
+    paths: ['.railway/**', '.github/workflows/railway.yml']
+  push:
+    branches: [main]
+    paths: ['.railway/**', '.github/workflows/railway.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: railway-infra
+  cancel-in-progress: false
+
+jobs:
+  railway:
+    name: ${{ github.event_name == 'pull_request' && 'Railway · plan' || 'Railway · apply' }}
+    runs-on: ubuntu-latest
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - name: Skip without RAILWAY_TOKEN
+        if: env.RAILWAY_TOKEN == ''
+        run: echo "::notice::RAILWAY_TOKEN is not set; skipping (see docs/RAILWAY.md)."
+      - uses: actions/checkout@v4
+        if: env.RAILWAY_TOKEN != ''
+      - uses: actions/setup-node@v4
+        if: env.RAILWAY_TOKEN != ''
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install the IaC SDK and the Railway CLI
+        if: env.RAILWAY_TOKEN != ''
+        run: |
+          npm ci
+          npm install -g @railway/cli@^5.63.1
+          railway --version
+      - name: Plan
+        if: env.RAILWAY_TOKEN != ''
+        run: railway config plan
+      - name: Apply
+        if: env.RAILWAY_TOKEN != '' && github.event_name != 'pull_request'
+        run: railway config apply --yes

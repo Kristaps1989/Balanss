@@ -33,6 +33,7 @@ Bottom tab bar: Šodiena · Uzturs · (+) · Kustība · Miegs — five equal sl
 - **Dev loop:** `npx expo start` (Metro) + Run ▶ in Android Studio, or `npx expo run:android`. For a USB phone, run `adb reverse tcp:8081 tcp:8081`.
 - **Release/test builds:** Android Studio → Build → Generate Signed App Bundle/APK (or `cd android && ./gradlew assembleRelease`). Keep the upload keystore out of git.
 - **Backend:** Node/TypeScript API on **Railway** + Railway Postgres. The app reads `EXPO_PUBLIC_API_URL` (use the Railway URL; `http://10.0.2.2:PORT` only for a local backend on the emulator).
+- **Railway infra as code:** `.railway/railway.ts` (services, Postgres, variable references, volume, domain, region) is applied by `.github/workflows/railway.yml` on merge to main. Change infrastructure there, not only in the dashboard; secrets stay in Railway via `preserve()`. See `docs/RAILWAY.md`.
 - **Health data:** `react-native-health-connect` (Android). `minSdkVersion` ≥ 26; declare Health Connect read permissions and the permissions-rationale activity in `AndroidManifest.xml`. Later `react-native-health` (iOS HealthKit).
 - **Auth:** Sign in with Google + Sign in with Apple, plus e-mail magic link.
 - **AI:** food-photo recognition and tone-adapted tips are generated server-side. Never call AI providers or put API keys in the app.

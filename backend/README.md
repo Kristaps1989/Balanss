@@ -113,6 +113,8 @@ npm test
 
 ## Deploying to Railway (EU)
 
+Preferred: the infrastructure is code in `.railway/railway.ts`, applied by the *Railway infrastructure* GitHub workflow. See `docs/RAILWAY.md`. The manual steps below are the equivalent by hand. `railway.json` only applies while the service's Config-as-code path points to it.
+
 The service builds from the **repository root** because it imports `../shared`.
 
 1. Create a Railway project and pick an **EU region** (e.g. `europe-west4`, Amsterdam) for
