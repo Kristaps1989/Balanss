@@ -132,7 +132,7 @@ The service builds from the **repository root** because it imports `../shared`.
    `RESEND_API_KEY`, `EMAIL_FROM`, `ANTHROPIC_API_KEY`, `REVENUECAT_WEBHOOK_SECRET`,
    optionally `EXPO_ACCESS_TOKEN`.
 6. Generate a public domain (Settings → Networking) and put it in the app's
-   `EXPO_PUBLIC_API_URL` as `https://<domain>/v1`.
+   `EXPO_PUBLIC_API_URL` as `https://<domain>` (no `/v1` — the app adds it).
 7. Optional: seed the demo user once with `railway run node dist/seed.js` (or a one-off shell).
 8. In RevenueCat, set the webhook URL to `https://<domain>/v1/billing/webhook` with the same
    bearer secret; use our user id as the RevenueCat `app_user_id`.
