@@ -35,14 +35,23 @@ export default function Sleep() {
   const r = me.data.reminders;
 
   if (!n) {
+    const dev = me.data.devices;
+    const sourceName = dev.source === 'apple_health' ? 'Apple Health' : 'Health Connect';
     return (
       <Screen testID="sleep">
         {header}
-        <Card style={{ padding: 18, gap: 12 }}>
-          <Text style={type.section}>Miega dati vēl nav</Text>
-          <Text style={type.secondary}>Savieno pulksteni ar Health Connect, un katru rītu šeit redzēsi pagājušo nakti un savu miega logu.</Text>
-          <Button label="Pievienot pulksteni" size="md" onPress={() => router.push('/me/devices')} />
-        </Card>
+        {dev.connected ? (
+          <Card style={{ padding: 18, gap: 12 }}>
+            <Text style={type.section}>Gaidām pirmo nakti</Text>
+            <Text style={type.secondary}>{sourceName} ir savienots. Kad pulkstenis būs reģistrējis nakti, rītā šeit redzēsi savu miegu un miega logu.</Text>
+          </Card>
+        ) : (
+          <Card style={{ padding: 18, gap: 12 }}>
+            <Text style={type.section}>Miega dati vēl nav</Text>
+            <Text style={type.secondary}>Savieno pulksteni ar Health Connect, un katru rītu šeit redzēsi pagājušo nakti un savu miega logu.</Text>
+            <Button label="Pievienot pulksteni" size="md" onPress={() => router.push('/me/devices')} />
+          </Card>
+        )}
       </Screen>
     );
   }
