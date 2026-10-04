@@ -15,4 +15,6 @@ export interface HealthConnector {
   sync(days: number, profile: SyncProfile): Promise<boolean>;
   /** Opens the platform's store / settings to install or manage the provider. */
   openSettings(): void;
+  /** Plain-text report of what the health store holds for today and yesterday (steps per app and device), for support. */
+  diagnostics(): Promise<string>;
 }

@@ -75,7 +75,10 @@ export function DevicesScreen({ mode }: { mode: 'onboarding' | 'edit' }) {
               </View>
               <Text style={styles.okBody}>{devices?.devices.length ? `Atradām: ${devices.devices.join(', ')}` : 'Dati parādīsies pēc nākamās sinhronizācijas.'}</Text>
               {mode === 'edit' && (
-                <Button label="Pārvaldīt atļaujas" variant="light" size="sm" onPress={disconnect} style={{ alignSelf: 'flex-start', marginTop: 4 }} />
+                <View style={{ flexDirection: 'row', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                  <Button label="Pārvaldīt atļaujas" variant="light" size="sm" onPress={disconnect} />
+                  <Button label="Diagnostika" variant="light" size="sm" onPress={() => router.push('/me/health-debug')} />
+                </View>
               )}
             </View>
           ) : hcAvail === 'needs_install' ? (
