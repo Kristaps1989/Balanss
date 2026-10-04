@@ -9,4 +9,5 @@ export const health: HealthConnector = {
   connect: async () => false,
   sync: async () => false,
   openSettings: () => undefined,
+  diagnostics: async () => 'Diagnostika nav pieejama šajā ierīcē.',
 };

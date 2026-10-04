@@ -156,4 +156,66 @@ export const health: HealthConnector = {
       Linking.openURL('market://details?id=com.google.android.apps.healthdata').catch(() => undefined);
     }
   },
+
+  diagnostics: () => stepDiagnostics(),
 };
+
+const hm = (iso: string) => {
+  const d = new Date(iso);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+};
+const dhm = (iso: string) => `${toISODate(new Date(iso)).slice(5)} ${hm(iso)}`;
+
+/**
+ * What Health Connect holds for today and yesterday, per writing app and device. Used from
+ * Es → Ierīces → Diagnostika when the step count does not match the watch app. Samsung Health
+ * writes steps in long blocks (often one record per day), so the report also shows each
+ * record's time span.
+ */
+export async function stepDiagnostics(): Promise<string> {
+  const out: string[] = [];
+  const status = await getSdkStatus();
+  out.push(`Health Connect SDK: ${status === SdkAvailabilityStatus.SDK_AVAILABLE ? 'pieejams' : `statuss ${status}`}`);
+  if (!(await init())) return out.concat('Neizdevās inicializēt Health Connect.').join('\n');
+  const g = await granted();
+  out.push(`Atļaujas: ${[...g].sort().join(', ') || 'nav'}`);
+  if (!g.has('Steps')) return out.join('\n');
+
+  const now = new Date();
+  const today = toISODate(now);
+  const yesterday = addDays(today, -1);
+  for (const d of [today, yesterday]) {
+    const from = parseISODate(d);
+    const to = d === today ? now : parseISODate(addDays(d, 1));
+    const range = { operator: 'between' as const, startTime: from.toISOString(), endTime: to.toISOString() };
+    const agg = await aggregateRecord({ recordType: 'Steps', timeRangeFilter: range });
+    out.push('', `${d} (${hm(from.toISOString())}–${hm(to.toISOString())})`, `  HC kopsumma (prioritātes avots): ${agg.COUNT_TOTAL}`);
+    const recs = await readAll('Steps', range.startTime, range.endTime);
+    const byOrigin = new Map<string, { n: number; sum: number; first: string; last: string; longest: number; devices: Set<string>; methods: Set<number> }>();
+    for (const r of recs) {
+      const origin = r.metadata?.dataOrigin ?? '?';
+      const e = byOrigin.get(origin) ?? { n: 0, sum: 0, first: r.startTime, last: r.endTime, longest: 0, devices: new Set(), methods: new Set() };
+      e.n += 1;
+      e.sum += r.count;
+      if (r.startTime < e.first) e.first = r.startTime;
+      if (r.endTime > e.last) e.last = r.endTime;
+      e.longest = Math.max(e.longest, (new Date(r.endTime).getTime() - new Date(r.startTime).getTime()) / 60_000);
+      const dev = r.metadata?.device;
+      if (dev?.model || dev?.manufacturer) e.devices.add([dev.manufacturer, dev.model].filter(Boolean).join(' '));
+      if (r.metadata?.recordingMethod != null) e.methods.add(r.metadata.recordingMethod);
+      byOrigin.set(origin, e);
+    }
+    if (!byOrigin.size) out.push('  Ierakstu nav.');
+    for (const [origin, e] of byOrigin) {
+      out.push(
+        `  ${origin}: ${e.sum} soļi, ${e.n} ieraksti, ${dhm(e.first)}–${dhm(e.last)}, garākais ieraksts ${Math.round(e.longest)} min`,
+        `    ierīces: ${[...e.devices].join('; ') || 'nav norādītas'}; metode: ${[...e.methods].join(',') || '-'}`,
+      );
+    }
+  }
+  // Records that started before today's midnight but reach into today (Samsung day blocks spanning a date change).
+  const spanFrom = new Date(parseISODate(yesterday).getTime());
+  const spanning = (await readAll('Steps', spanFrom.toISOString(), now.toISOString())).filter((r) => r.startTime < parseISODate(today).toISOString() && r.endTime > parseISODate(today).toISOString());
+  if (spanning.length) out.push('', `Ieraksti pāri pusnaktij: ${spanning.map((r) => `${r.metadata?.dataOrigin ?? '?'} ${r.count} (${dhm(r.startTime)}–${dhm(r.endTime)})`).join('; ')}`);
+  return out.join('\n');
+}
