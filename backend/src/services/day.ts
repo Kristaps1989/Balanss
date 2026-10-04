@@ -42,6 +42,7 @@ import {
 import { buildHistory, careFor, findingsFor } from './analysis';
 import { dayTotals, mealsInRange } from './meals';
 import { freshPantryItems } from './pantry';
+import { likedFoods } from './taste';
 import { DEFAULT_PREFERENCES } from './users';
 
 const progress = (value: number, target: number): Progress => ({ value, target });
@@ -272,7 +273,7 @@ export async function buildToneInput(
     findingsFor(db, user, date, day.care),
     buildHistory(db, user.id, date),
   ]);
-  const pantryItems = await freshPantryItems(db, user.id, now);
+  const [pantryItems, liked] = await Promise.all([freshPantryItems(db, user.id, now), likedFoods(db, user.id, date)]);
   const stats = statsFrom(series, user);
   const window = windowFor(nights);
   const lastWeek = nights.filter((n) => n.date > addDays(date, -7));
@@ -296,6 +297,7 @@ export async function buildToneInput(
     history,
     preferences: user.preferences ?? DEFAULT_PREFERENCES,
     pantry: pantryItems,
+    likedFoods: liked,
     ...(avoidAngles.length ? { avoidAngles } : {}),
   };
 }

@@ -42,6 +42,7 @@ const BASE: Omit<ToneInput, 'tone' | 'modifiers' | 'sex' | 'care' | 'preferences
   findings: [],
   history: EMPTY_HISTORY,
   pantry: null,
+  likedFoods: [],
 };
 const DAYS: { name: string; day: Partial<ToneInput> }[] = [
   { name: 'sample', day: {} },

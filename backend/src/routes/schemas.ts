@@ -89,6 +89,7 @@ export const PreferencesPatch = z
   .object({
     diet: z.enum(['any', 'vegetarian', 'vegan', 'pescatarian']),
     avoid: z.array(z.enum(['lactose', 'gluten', 'nuts', 'fish', 'eggs', 'pork'])).max(6),
+    habits: z.string().trim().max(240),
   })
   .partial()
   .strict();

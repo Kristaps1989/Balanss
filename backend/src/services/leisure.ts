@@ -12,8 +12,11 @@ import { localNow } from '../lib/time';
 const CACHE_MS = 2 * 3600_000;
 const DAY_MIN = 1440;
 
+/** "Tonight" includes late screenings: the "today" window runs until 03:00 the next morning. */
+const TODAY_END_MIN = DAY_MIN + 3 * 60;
+
 /**
- * The time window for timed items, in the user's zone: "today" runs to local midnight;
+ * The time window for timed items, in the user's zone: "today" runs to 03:00 next morning;
  * "weekend" is Saturday 00:00 to Sunday 24:00 (from now if it is already the weekend).
  * The earliest start is always now + 30 min, so nothing already under way is suggested.
  */
@@ -21,7 +24,7 @@ export function leisureWindow(tz: string, now: Date, when: 'today' | 'weekend'):
   const local = localNow(tz, now);
   const plus = (min: number) => new Date(now.getTime() + min * 60_000);
   const earliest = plus(MIN_LEAD_MIN);
-  if (when === 'today') return { earliest, windowEnd: plus(DAY_MIN - local.minutes), localDate: local.date };
+  if (when === 'today') return { earliest, windowEnd: plus(TODAY_END_MIN - local.minutes), localDate: local.date };
   const weekend = local.weekday >= 5;
   const saturdayStart = (5 - local.weekday) * DAY_MIN - local.minutes;
   const sundayEnd = (6 - local.weekday) * DAY_MIN + (DAY_MIN - local.minutes);

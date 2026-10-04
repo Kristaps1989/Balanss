@@ -45,7 +45,9 @@ If anything goes wrong — network, refusal, invalid output or a rule violation 
 |---|---|
 | Numbers: nutrition vs targets, water, steps, sleep, sleep window, 7- and 28-day patterns | Name, e-mail, account ID |
 | Tone style (plan / novelty / gentle / neutral) and 3 on/off modifiers | Personality test answers or scores |
-| Sex, only so Latvian grammar is correct | Free text the user wrote (except text they ask us to parse) |
+| Sex, only so Latvian grammar is correct | Free text the user wrote (except text they ask us to parse, and the habits sentence below) |
+| Foods logged most often in the last 28 days and favourites (names only), and the pantry list while it is current | Health Connect raw records, device IDs |
+| "Mani ieradumi": one sentence the user writes for the AI in Ēšanas paradumi (≤ 240 characters), e.g. "Pirms katras maltītes apēdu dārzeņus" | |
 | Food preferences (diet, foods to avoid), for recipes only | Health Connect raw records, device IDs |
 | Meal photo or text — only when the user takes or types it | Location, contacts |
 
@@ -54,6 +56,8 @@ If anything goes wrong — network, refusal, invalid output or a rule violation 
 **Processor.** Anthropic acts as a processor: data sent through the API is not used to train models. Name Anthropic in the privacy policy and note that processing may happen outside the EU.
 
 ## Pantry and free-time ideas
+
+**What you eat and like.** Tips name foods the person already logs often or saved as favourites ("olas vai biezpiens"), in their own words, respecting diet and avoid-list. The meal reminder names a concrete option too. The habits sentence is followed as a habit (e.g. vegetables first); the prompt forbids turning it into a medical plan or claims about blood sugar, and the output filter still applies.
 
 **Pantry.**
 - The user types what they have at home, or takes a fridge photo. Claude lists only the products it can clearly see. The user checks the list before saving.
@@ -69,7 +73,8 @@ If anything goes wrong — network, refusal, invalid output or a rule violation 
   - Go3 items must link to go3.lv;
   - screenings and events must start at least 30 minutes from now and inside the chosen window (today, or the weekend);
   - gambling and alcohol-focused events are dropped.
-- If nothing passes, the user gets curated books and timeless ideas, with a note saying so. Events are never invented.
+- Links must open the specific film, book or event: homepages, category lists and search pages are dropped. Labels say what opens ("Atvērt Go3", "Seansi un biļetes", "Pasākums un biļetes", "Atvērt grāmatu").
+- If nothing passes, the user gets curated books (with a title search link, labelled "Meklēt grāmatu") and timeless ideas, with a note saying so. Events are never invented.
 - Results are cached for 2 hours per city and choice. Times are re-checked against the clock on every read. There is a limit of 15 live searches per user per day.
 
 ## Ethics rules

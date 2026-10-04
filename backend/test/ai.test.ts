@@ -49,6 +49,7 @@ const input: ToneInput = {
   findings: [],
   history: EMPTY_HISTORY,
   pantry: null,
+  likedFoods: [],
   preferences: { diet: 'any', avoid: [] },
 };
 
