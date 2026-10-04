@@ -47,6 +47,8 @@ export interface ToneInput {
   findings: AnalysisFinding[];
   history: ToneHistory;
   preferences: FoodPreferences;
+  /** What the user has at home (fresh list only), or null when unknown. */
+  pantry: string[] | null;
   /** Angles not to use today (reported tips). */
   avoidAngles?: TipAngle[];
 }

@@ -1,6 +1,7 @@
 import type { Config } from '../config';
 import { createClaudeClient, type ClaudeClient } from './claude';
 import { claudeFoodAi, fakeFoodAi, type FoodAi } from './food';
+import { claudeLeisureEngine, fakeLeisureEngine, type LeisureEngine } from './leisure';
 import { claudeSummaryEngine, fakeSummaryEngine, type SummaryEngine } from './insights';
 import { claudeRecipeEngine, fakeRecipeEngine, type RecipeEngine } from './recipes';
 import { claudeToneEngine, fakeToneEngine, type ToneEngine } from './tone';
@@ -13,6 +14,8 @@ export interface AiService {
   tone: ToneEngine;
   summary: SummaryEngine;
   recipes: RecipeEngine;
+  /** Free-time suggestions: user-initiated, only city + choices are sent (not personal data). */
+  leisure: LeisureEngine;
 }
 
 /** Templates and curated data only; also what users with AI personalisation off get. */
@@ -23,7 +26,7 @@ export const templateAi: Pick<AiService, 'tone' | 'summary' | 'recipes'> = {
 };
 
 export function fakeAi(): AiService {
-  return { provider: 'fake', food: fakeFoodAi, ...templateAi };
+  return { provider: 'fake', food: fakeFoodAi, leisure: fakeLeisureEngine, ...templateAi };
 }
 
 export function anthropicAi(client: ClaudeClient, model: string): AiService {
@@ -33,6 +36,7 @@ export function anthropicAi(client: ClaudeClient, model: string): AiService {
     tone: claudeToneEngine(client, model),
     summary: claudeSummaryEngine(client, model),
     recipes: claudeRecipeEngine(client, model),
+    leisure: claudeLeisureEngine(client, model),
   };
 }
 

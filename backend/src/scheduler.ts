@@ -77,7 +77,7 @@ async function sendPush(
 ): Promise<SentPush | null> {
   if (!(await claim(deps, user.id, kind, local.date, slot))) return null;
   const personality = await getPersonality(deps.db, user.id);
-  const input = await buildToneInput(deps.db, deps.config, user, personality, local.date, local.hm);
+  const input = await buildToneInput(deps.db, deps.config, user, personality, local.date, local.hm, [], deps.now());
   const copy = await copyAiFor(deps.ai, user).tone.pushCopy(kind, input, meal, log);
   try {
     const results = await deps.push.send(tokens.map((to) => ({ to, title: copy.title, body: copy.body, data: { kind, date: local.date } })));

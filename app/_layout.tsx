@@ -63,6 +63,8 @@ function Gate() {
         <Stack.Screen name="activity" options={sheet} />
         <Stack.Screen name="meal/[id]" options={sheet} />
         <Stack.Screen name="tip-report" options={sheet} />
+        <Stack.Screen name="pantry" options={sheet} />
+        <Stack.Screen name="leisure" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="summary" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="me" options={{ animation: 'slide_from_right' }} />
       </Stack.Protected>

@@ -13,6 +13,7 @@ import {
   meals,
   personalities,
   photos,
+  pantry,
   pushTokens,
   recipes,
   sleepNights,
@@ -53,7 +54,7 @@ const redact = (token: string) => (token.length > 12 ? `${token.slice(0, 12)}…
 export async function collectExport(db: Db, userId: string, now: Date) {
   const [user] = await db.select().from(users).where(eq(users.id, userId));
   if (!user) return null;
-  const [personality, mealRows, favs, water, weightRows, health, nights, workoutRows, tipRows, weekly, tokens, usage, insightRows, photoRows, summaryRows, recipeRows] =
+  const [personality, mealRows, favs, water, weightRows, health, nights, workoutRows, tipRows, weekly, tokens, usage, insightRows, photoRows, summaryRows, recipeRows, pantryRows] =
     await Promise.all([
       db.select().from(personalities).where(eq(personalities.userId, userId)),
       db.select().from(meals).where(eq(meals.userId, userId)).orderBy(asc(meals.eatenAt)),
@@ -71,6 +72,7 @@ export async function collectExport(db: Db, userId: string, now: Date) {
       db.select().from(photos).where(eq(photos.userId, userId)),
       db.select().from(weeklySummaries).where(eq(weeklySummaries.userId, userId)).orderBy(asc(weeklySummaries.date)),
       db.select().from(recipes).where(eq(recipes.userId, userId)).orderBy(asc(recipes.date), asc(recipes.position)),
+      db.select().from(pantry).where(eq(pantry.userId, userId)),
     ]);
   const items = mealRows.length ? await db.select().from(mealItems).where(inArray(mealItems.mealId, mealRows.map((m) => m.id))) : [];
   const p = personality[0];
@@ -91,6 +93,8 @@ export async function collectExport(db: Db, userId: string, now: Date) {
     targets: user.targets,
     targetsEditedManually: user.targetsEdited,
     preferences: user.preferences,
+    leisureCity: user.leisureCity,
+    pantry: pantryRows[0] ? { items: pantryRows[0].items, updatedAt: pantryRows[0].updatedAt.toISOString() } : null,
     aiPersonalization: user.aiPersonalization,
     tonePreference: user.tonePreference,
     reminders: user.reminders,

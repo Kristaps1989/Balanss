@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, gte, lte } from 'drizzle-orm';
 
 import type {
+  TipFocus,
   Day,
   HealthSource,
   MealType,
@@ -40,6 +41,7 @@ import {
 } from '../db/schema';
 import { buildHistory, careFor, findingsFor } from './analysis';
 import { dayTotals, mealsInRange } from './meals';
+import { freshPantryItems } from './pantry';
 import { DEFAULT_PREFERENCES } from './users';
 
 const progress = (value: number, target: number): Progress => ({ value, target });
@@ -71,7 +73,7 @@ export function toWorkout(w: WorkoutRow): Workout {
 }
 
 export function toTip(t: TipRow): Tip {
-  return { id: t.id, date: t.date, tone: t.tone as ToneStyle, body: t.body, highlight: t.highlight, accepted: t.accepted, aiGenerated: t.aiGenerated };
+  return { id: t.id, date: t.date, tone: t.tone as ToneStyle, angle: t.angle as TipFocus | null, body: t.body, highlight: t.highlight, accepted: t.accepted, aiGenerated: t.aiGenerated };
 }
 
 export function toWeeklyQuestion(q: WeeklyQuestionRow): WeeklyQuestion {
@@ -257,6 +259,7 @@ export async function buildToneInput(
   date: string,
   localTime?: string,
   avoidAngles: TipAngle[] = [],
+  now: Date = new Date(),
 ): Promise<ToneInput> {
   const day = await buildDay(db, config, user, date);
   const [series, nights, health, findings, history] = await Promise.all([
@@ -269,6 +272,7 @@ export async function buildToneInput(
     findingsFor(db, user, date, day.care),
     buildHistory(db, user.id, date),
   ]);
+  const pantryItems = await freshPantryItems(db, user.id, now);
   const stats = statsFrom(series, user);
   const window = windowFor(nights);
   const lastWeek = nights.filter((n) => n.date > addDays(date, -7));
@@ -291,6 +295,7 @@ export async function buildToneInput(
     findings: findings.slice(0, 5),
     history,
     preferences: user.preferences ?? DEFAULT_PREFERENCES,
+    pantry: pantryItems,
     ...(avoidAngles.length ? { avoidAngles } : {}),
   };
 }

@@ -31,9 +31,9 @@ jobs:
       - name: Skip without RAILWAY_TOKEN
         if: env.RAILWAY_TOKEN == ''
         run: echo "::notice::RAILWAY_TOKEN is not set; skipping (see docs/RAILWAY.md)."
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: env.RAILWAY_TOKEN != ''
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: env.RAILWAY_TOKEN != ''
         with:
           node-version: 22

@@ -148,6 +148,7 @@ export function buildSyncPayload(input: HcInput): HealthSyncRequest {
   };
   const rhr = byDate(input.restingHr);
   const hrv = byDate(input.hrv);
+  const estimatedRhr = estimateRestingHr(input.heartRate.flatMap((r) => r.samples));
 
   const days = input.days.map((d) => {
     const r = rhr.get(d.date);
@@ -156,7 +157,7 @@ export function buildSyncPayload(input: HcInput): HealthSyncRequest {
       date: d.date,
       steps: Math.round(d.steps),
       activeKcal: Math.round(d.activeKcal),
-      restingHr: r?.length ? Math.round(r[r.length - 1].value) : null,
+      restingHr: r?.length ? Math.round(r[r.length - 1].value) : (estimatedRhr.get(d.date) ?? null),
       hrvMs: h?.length ? Math.round(h.reduce((a, x) => a + x.value, 0) / h.length) : null,
     };
   });
@@ -201,4 +202,66 @@ export function buildSyncPayload(input: HcInput): HealthSyncRequest {
     workouts,
     weights,
   };
+}
+
+export interface HcInterval {
+  startTime: string;
+  endTime: string;
+  value: number;
+  metadata?: HcMeta;
+}
+
+/**
+ * Daily totals per local date, taking the largest total among the apps that wrote the data.
+ * Each app (phone, Samsung Health, Garmin, …) writes its own full picture of the same day, so
+ * summing apps would double-count; Health Connect's own aggregate follows the user's source
+ * priority, which often puts the phone-only counter first and misses watch steps.
+ */
+export function dailyMaxByOrigin(records: HcInterval[]): Map<string, number> {
+  const perOrigin = new Map<string, Map<string, number>>();
+  for (const r of records) {
+    const date = localDate(r.startTime);
+    const origin = r.metadata?.dataOrigin ?? 'unknown';
+    const days = perOrigin.get(origin) ?? new Map<string, number>();
+    days.set(date, (days.get(date) ?? 0) + r.value);
+    perOrigin.set(origin, days);
+  }
+  const out = new Map<string, number>();
+  for (const days of perOrigin.values()) for (const [date, v] of days) out.set(date, Math.max(out.get(date) ?? 0, v));
+  return out;
+}
+
+/**
+ * Active energy when the device only writes total energy (Samsung Health does this):
+ * total minus resting (basal) energy for the part of the day covered.
+ */
+export function activeFromTotal(totalKcal: number, bmrPerDay: number, dayFraction: number): number {
+  if (totalKcal <= 0 || bmrPerDay <= 0) return 0;
+  return Math.max(0, totalKcal - bmrPerDay * Math.min(1, Math.max(0, dayFraction)));
+}
+
+/**
+ * Resting heart rate estimated from the day's heart-rate samples, for devices that don't write
+ * a RestingHeartRate record (Samsung Health): the mean of the three lowest 30-minute averages.
+ * Needs at least 12 half-hours with readings, otherwise null (no guessing from a few samples).
+ */
+export function estimateRestingHr(samples: { time: string; beatsPerMinute: number }[]): Map<string, number> {
+  const buckets = new Map<string, Map<number, number[]>>();
+  for (const s of samples) {
+    if (s.beatsPerMinute < 30 || s.beatsPerMinute > 200) continue;
+    const t = new Date(s.time);
+    const date = toISODate(t);
+    const slot = t.getHours() * 2 + (t.getMinutes() >= 30 ? 1 : 0);
+    const day = buckets.get(date) ?? new Map<number, number[]>();
+    day.set(slot, [...(day.get(slot) ?? []), s.beatsPerMinute]);
+    buckets.set(date, day);
+  }
+  const out = new Map<string, number>();
+  for (const [date, day] of buckets) {
+    if (day.size < 12) continue;
+    const means = [...day.values()].map((v) => v.reduce((a, b) => a + b, 0) / v.length).sort((a, b) => a - b);
+    const low = means.slice(0, 3);
+    out.set(date, Math.round(low.reduce((a, b) => a + b, 0) / low.length));
+  }
+  return out;
 }

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
@@ -10,11 +10,13 @@ import { BackButton, StepHeader } from '@/components/Header';
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { health } from '@/lib/health';
+import { syncHealth, syncProfile } from '@/lib/services';
 import { colors, fonts, radius, type } from '@/theme';
 
 /** Pievieno savu pulksteni (prototype: Onb-Device.dc.html). */
 export function DevicesScreen({ mode }: { mode: 'onboarding' | 'edit' }) {
   const me = useMe();
+  const qc = useQueryClient();
   const avail = useQuery({ queryKey: ['health-availability'], queryFn: () => health.availability() });
   const [state, setState] = useState<'idle' | 'busy' | 'denied' | 'error'>('idle');
   const saveDevices = useMeMutation(api.updateDevices);
@@ -29,7 +31,7 @@ export function DevicesScreen({ mode }: { mode: 'onboarding' | 'edit' }) {
         setState('denied');
         return;
       }
-      await health.sync(14, me.data?.profile.age ?? 35);
+      await syncHealth(qc, syncProfile(me.data?.profile), true);
       await me.refetch();
       setState('idle');
     } catch {

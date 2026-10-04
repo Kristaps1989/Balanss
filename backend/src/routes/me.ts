@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 import type { Profile } from '../../../shared/api';
 import { toISODate } from '../../../shared/dates';
+import { LEISURE_CITIES } from '../../../shared/leisure';
 import { levelsFromScores, retestFrom, scoreAnswers, styleDescription, styleName, validateAnswers } from '../../../shared/personality';
 import { KCAL_FLOOR, minGoalWeight, weightLossAllowed } from '../../../shared/safety';
 import { computeTargets } from '../../../shared/targets';
@@ -86,6 +87,13 @@ export const meRoutes: FastifyPluginAsync = async (app) => {
     preferences.avoid = [...new Set(preferences.avoid)].sort();
     await db.update(users).set({ preferences, ...touch() }).where(eq(users.id, user.id));
     return me(user.id);
+  });
+
+  // City for free-time suggestions (picked from the list; no GPS).
+  app.put('/me/city', async (req) => {
+    const { city } = parse(z.object({ city: z.enum(LEISURE_CITIES) }).strict(), req.body);
+    await db.update(users).set({ leisureCity: city, ...touch() }).where(eq(users.id, req.userId));
+    return me(req.userId);
   });
 
   // AI personalisation on/off: off means no personal data goes to the AI for copy (templates instead).

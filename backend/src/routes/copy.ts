@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 import { tips, weeklyQuestions } from '../db/schema';
 import { badRequest, notFound, parse } from '../errors';
-import { getOrCreateTip, getWeeklyQuestion, nextTip, reportTip } from '../services/copy';
+import { getOrCreateTip, getWeeklyQuestion, nextTip, refreshTip, reportTip } from '../services/copy';
 import { toTip, toWeeklyQuestion } from '../services/day';
 import { userToday } from '../services/quota';
 import { getUser } from '../services/users';
@@ -23,6 +23,12 @@ export const copyRoutes: FastifyPluginAsync = async (app) => {
     const q = parse(DateQuery, req.query);
     const user = await getUser(db, req.userId);
     return nextTip(app.deps, user, q.date ?? userToday(user, app.deps.now()), req.log);
+  });
+
+  app.post('/tips/refresh', async (req) => {
+    const q = parse(DateQuery, req.query);
+    const user = await getUser(db, req.userId);
+    return refreshTip(app.deps, user, q.date ?? userToday(user, app.deps.now()), req.log);
   });
 
   app.post('/tips/:id/accept', async (req) => {

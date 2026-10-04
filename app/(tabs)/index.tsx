@@ -19,6 +19,7 @@ import { ErrorState, Loading } from '@/components/States';
 import { WaterGlass } from '@/components/WaterGlass';
 import { duration, formatNumber, greeting, kcal, litres, longDate } from '@/lib/format';
 import { GLASS_ML, useAddWater } from '@/lib/mutations';
+import { useHealthRefresh } from '@/lib/services';
 import { useToday } from '@/lib/today';
 import { colors, fonts, hit, radius, space, type } from '@/theme';
 
@@ -27,6 +28,7 @@ export default function HomeScreen() {
   const date = useToday();
   const me = useMe();
   const day = useDay(date);
+  const hr = useHealthRefresh(day.refetch);
   if (day.isPending || me.isPending) return <Loading />;
   if (day.isError || !me.data) return <ErrorState onRetry={() => day.refetch()} />;
   return (
@@ -35,8 +37,8 @@ export default function HomeScreen() {
       pro={me.data.plan === 'pro'}
       firstName={me.data.profile.firstName}
       day={day.data}
-      refreshing={day.isRefetching}
-      onRefresh={() => day.refetch()}
+      refreshing={hr.refreshing}
+      onRefresh={hr.refresh}
     />
   );
 }
@@ -168,6 +170,8 @@ function HomeContent({ date, pro, firstName, day, refreshing, onRefresh }: { dat
 
       <SummaryCard date={date} pro={pro} />
 
+      <LeisureCard />
+
       <View style={{ gap: 10, paddingTop: 4 }}>
         <Text style={[type.section, { paddingHorizontal: 2 }]}>Pievieno</Text>
         <View style={styles.quickRow}>
@@ -248,6 +252,9 @@ function TipCard({ date }: { date: string }) {
           <Chip dark label="Labi, pamēģināšu" onPress={() => accept.mutate(t.id)} disabled={accept.isPending} />
         )}
         <Chip label={next.isPending ? 'Meklēju…' : 'Cits ieteikums'} onPress={() => next.mutate()} disabled={next.isPending} />
+        {(t.angle === 'protein' || t.angle === 'fibre' || t.angle === 'meals') && (
+          <Chip label="Kas ir mājās?" onPress={() => router.push({ pathname: '/pantry', params: { date } })} testID="tip-pantry" />
+        )}
       </View>
       <View style={styles.tipFoot}>
         <View style={{ flex: 1 }}>
@@ -263,6 +270,22 @@ function TipCard({ date }: { date: string }) {
         />
       </View>
     </View>
+  );
+}
+
+/** Brīvais laiks: films, books and events in the user's city. */
+function LeisureCard() {
+  return (
+    <Card style={[styles.card, { gap: 8 }]} onPress={() => router.push('/leisure')} accessibilityLabel="Brīvais laiks: filma, grāmata vai pasākums" testID="leisure-card">
+      <View style={styles.cardHeader}>
+        <View style={styles.tipTitle}>
+          <Icon name="star" color={colors.accentDeep} size={18} />
+          <Text style={styles.tipTitleText}>Brīvais laiks</Text>
+        </View>
+        <Icon name="chevron" color={colors.caption} size={20} />
+      </View>
+      <Text style={type.secondary}>Filma kinoteātrī vai Go3, grāmata vai pasākums tavā pilsētā — tikai tas, kam vēl vari paspēt.</Text>
+    </Card>
   );
 }
 
@@ -300,9 +323,10 @@ function TipTitle() {
   );
 }
 
-function Chip({ label, dark, onPress, disabled }: { label: string; dark?: boolean; onPress?: () => void; disabled?: boolean }) {
+function Chip({ label, dark, onPress, disabled, testID }: { label: string; dark?: boolean; onPress?: () => void; disabled?: boolean; testID?: string }) {
   return (
     <Pressable
+      testID={testID}
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"

@@ -116,6 +116,13 @@ export function workoutWhen(iso: string, today: string): string {
   return label.split(',')[0];
 }
 
+/** Start of a screening or event: "Šodien 20:40", "Sestdien 18:00". */
+export function startsWhen(iso: string, today: string): string {
+  const d = new Date(iso);
+  const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return `${dayLabel(date, today).split(',')[0]} ${timeOf(iso)}`;
+}
+
 const MONTHS_GEN = ['janvāra', 'februāra', 'marta', 'aprīļa', 'maija', 'jūnija', 'jūlija', 'augusta', 'septembra', 'oktobra', 'novembra', 'decembra'];
 
 /** "2027. gada marta" */

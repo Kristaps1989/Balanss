@@ -22,6 +22,8 @@ Two stages. Our code does the analysis; the AI only phrases what the code found.
    | Weekly summary: observations, one small suggestion, one question to reflect on | Šodiena → Nedēļas kopsavilkums | Pro |
    | Recipes that fill today's largest gap and follow the user's food preferences | Uzturs → Receptes | Pro |
    | Photo analysis and text parsing | Uzturs → Foto / Citādi | all, started by the user |
+   | Pantry photo → ingredient list ("Kas ir mājās?") | Šodiena → tip → Kas ir mājās? | all, started by the user |
+   | Free-time ideas: films (cinema / Go3), books, events, using **live web search** | Šodiena → Brīvais laiks | all, started by the user |
 
 3. **Memory.** Each time we write copy, we also send what the user did before:
    - the last 4 weekly answers;
@@ -50,6 +52,25 @@ If anything goes wrong — network, refusal, invalid output or a rule violation 
 **AI switch.** With *AI personalizācija* off (Es → AI un privātums), none of the personal data above is sent. Tips, questions, reminders, the weekly summary and recipes then come from the template engine, which still uses the user's numbers but runs on our server. Photo analysis and text parsing still use Claude, because the user starts them.
 
 **Processor.** Anthropic acts as a processor: data sent through the API is not used to train models. Name Anthropic in the privacy policy and note that processing may happen outside the EU.
+
+## Pantry and free-time ideas
+
+**Pantry.**
+- The user types what they have at home, or takes a fridge photo. Claude lists only the products it can clearly see. The user checks the list before saving.
+- Only the product names are stored; the photo is not. The list counts as current for 3 days.
+- While the list is current, food ideas use only those products plus basics (salt, oil, spices). If nothing fits, the tip picks another topic.
+- With no current list, ideas stay optional ("ja tas ir mājās", plus two ordinary alternatives). A tip never reads like a shopping list.
+
+**Free time (Brīvais laiks).**
+- Claude uses the web search tool, with the user's chosen city as an approximate location. We use no GPS and send no personal data, only the city and the choices (kind, genre, cinema/Go3, today/weekend).
+- A second step turns the search notes into structured items.
+- The server then checks every item:
+  - each link must be one the search actually returned;
+  - Go3 items must link to go3.lv;
+  - screenings and events must start at least 30 minutes from now and inside the chosen window (today, or the weekend);
+  - gambling and alcohol-focused events are dropped.
+- If nothing passes, the user gets curated books and timeless ideas, with a note saying so. Events are never invented.
+- Results are cached for 2 hours per city and choice. Times are re-checked against the clock on every read. There is a limit of 15 live searches per user per day.
 
 ## Ethics rules
 

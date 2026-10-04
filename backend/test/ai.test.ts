@@ -48,6 +48,7 @@ const input: ToneInput = {
   care: false,
   findings: [],
   history: EMPTY_HISTORY,
+  pantry: null,
   preferences: { diet: 'any', avoid: [] },
 };
 

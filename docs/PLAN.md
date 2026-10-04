@@ -282,6 +282,20 @@ Prompt (6.3):
 | 9.5 | Performance: Home in one request, image upload size, list virtualisation, cold start | Sonnet 5.5 | |
 | 9.6 | Crash/analytics (Sentry), feature flags for AI endpoints, kill switch | Sonnet 5.5 | |
 
+### Milestone 10: Suggestions that fit real life (pantry + free time)
+
+Feedback from testing: a food tip that names ingredients the user doesn't have at home feels like pressure. The user also asked for ideas beyond food: films (cinema or Go3), books and local events, all real and still possible to attend.
+
+| # | Task | Model | Notes |
+|---|---|---|---|
+| 10.1 | **Pantry ("Kas ir mājās")**: `pantry` table, `GET/PUT /pantry`, `POST /pantry/scan` (fridge photo → ingredient list with Claude vision; the user confirms before saving). The list counts as fresh for 3 days. | Opus 5.5 | Only ingredient names are stored |
+| 10.2 | **Tips use the pantry**: if the pantry is fresh, food ideas use only those items plus basics (salt, oil, water, spices). If the pantry is unknown, food ideas stay flexible: "ja ir mājās", two ordinary alternatives, never a must-buy recipe. Templates do the same. | Opus 5.5 | Prompt + templates + tests |
+| 10.3 | **Tip card "Nav mājās"** opens the pantry screen (type, or take a photo). Saving it regenerates the tip without counting a dismissal. | Sonnet 5.5 | |
+| 10.4 | **Brīvais laiks** screen (from Šodiena): Filma (genre; kinoteātrī / Go3 / jebkur), Grāmata (genre), Pasākums (type; šodien / nedēļas nogalē). City is chosen once (no GPS). | Opus 5.5 | |
+| 10.5 | **Real listings via Claude web search**: stage 1 is `web_search_20260209` with the user's city (approximate location, Europe/Riga); stage 2 turns the findings into structured items. The server keeps only links that the search actually returned. It drops events and screenings that start in under 30 minutes or fall outside the chosen window. Results are cached for 2 hours; there is a daily per-user limit. | Opus 5.5 | Sends only city + choices, no personal data |
+| 10.6 | **Honest fallback**: if search fails or finds nothing, the user gets curated books and timeless ideas (walk, library). Events are never invented. | Sonnet 5.5 | |
+| 10.7 | **Tests**: unit tests (pantry-aware templates, listing validation: unknown URL / past / outside the window; two-stage engine with a stubbed client) and E2E (pantry → new tip; Brīvais laiks → film / Go3 / book / event, and a past screening is not shown). | Opus 5.5 | `AI_PROVIDER=fake` returns fixed listings, including one already started |
+
 ---
 
 ## Decisions to confirm before milestone 5

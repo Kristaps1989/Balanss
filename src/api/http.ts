@@ -185,6 +185,12 @@ export class HttpApi implements Api {
   tipToday: Api['tipToday'] = (date) => this.get(`/tips/today?date=${date}`);
   tipNext: Api['tipNext'] = (date) => this.post(`/tips/next?date=${date}`);
   acceptTip: Api['acceptTip'] = (id) => this.post(`/tips/${id}/accept`);
+  refreshTip: Api['refreshTip'] = (date) => this.post(`/tips/refresh?date=${date}`);
+  pantry: Api['pantry'] = () => this.get('/pantry');
+  savePantry: Api['savePantry'] = (items) => this.put('/pantry', { items });
+  scanPantry: Api['scanPantry'] = (imageBase64) => this.post('/pantry/scan', { imageBase64 });
+  setCity: Api['setCity'] = (city) => this.put('/me/city', { city });
+  suggestLeisure: Api['suggestLeisure'] = (req) => this.post('/leisure/suggest', req);
   reportTip: Api['reportTip'] = async (id, reason) => {
     await this.post(`/tips/${id}/report`, { reason });
   };

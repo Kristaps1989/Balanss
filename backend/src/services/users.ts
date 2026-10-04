@@ -89,6 +89,7 @@ export function toMe(user: UserRow, personality: PersonalityRow | null | undefin
     devices: user.devices,
     plan: effectivePlan(user),
     onboardingDone: user.onboardingDone,
+    leisureCity: user.leisureCity,
     createdAt: user.createdAt.toISOString(),
   };
 }
