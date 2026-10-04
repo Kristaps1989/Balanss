@@ -1,6 +1,7 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { api, type AvoidFood, type Diet } from '@/api';
+import { api, HABITS_MAX, type AvoidFood, type Diet } from '@/api';
 import { useMe, useMeMutation } from '@/api/hooks';
 import { OptionCard } from '@/components/Controls';
 import { BackButton } from '@/components/Header';
@@ -29,8 +30,12 @@ const AVOID: { value: AvoidFood; label: string }[] = [
 export default function Preferences() {
   const me = useMe();
   const save = useMeMutation(api.updatePreferences);
+  const [habits, setHabits] = useState<string | null>(null); // null = not edited since the last save
+  const saved = me.data?.preferences.habits ?? '';
   if (!me.data) return <Loading />;
   const p = me.data.preferences;
+  const draft = habits ?? saved;
+  const dirty = draft.trim() !== saved;
   const toggle = (a: AvoidFood) => save.mutate({ avoid: p.avoid.includes(a) ? p.avoid.filter((x) => x !== a) : [...p.avoid, a] });
   return (
     <Screen testID="preferences">
@@ -70,6 +75,34 @@ export default function Preferences() {
         })}
       </View>
       <Text style={type.caption}>Ja tev ir alerģija, vienmēr pārbaudi produktu sastāvu — receptes to neaizstāj.</Text>
+
+      <Text style={styles.label}>Mani ieradumi</Text>
+      <Text style={type.secondary}>Viens teikums, ko AI ņems vērā ieteikumos — piemēram, „Pirms katras maltītes apēdu dārzeņus”. Tas ir vienīgais tavs teksts, ko AI saņem, un tikai tad, ja to uzraksti.</Text>
+      <TextInput
+        value={draft}
+        onChangeText={setHabits}
+        placeholder="Piemēram: pirms katras maltītes apēdu dārzeņus"
+        placeholderTextColor={colors.muted}
+        multiline
+        maxLength={HABITS_MAX}
+        accessibilityLabel="Mani ieradumi"
+        style={styles.input}
+        testID="habits-input"
+      />
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={type.caption}>
+          {draft.length} / {HABITS_MAX}
+        </Text>
+        <Pressable
+          onPress={() => save.mutateAsync({ habits: draft.trim() }).then(() => setHabits(null), () => undefined)}
+          disabled={!dirty || save.isPending}
+          accessibilityRole="button"
+          style={[styles.saveBtn, (!dirty || save.isPending) && { opacity: 0.5 }]}
+          testID="habits-save">
+          <Text style={styles.saveText}>{save.isPending ? 'Saglabāju…' : 'Saglabāt'}</Text>
+        </Pressable>
+      </View>
+      {!dirty && saved ? <Text style={type.caption}>Saglabāts. AI to ievēros kā ieradumu, nevis kā medicīnisku plānu.</Text> : null}
     </Screen>
   );
 }
@@ -83,4 +116,19 @@ const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { height: 44, paddingHorizontal: 16, borderRadius: 22, flexDirection: 'row', alignItems: 'center', gap: 6 },
   chipText: { fontFamily: fonts.bodySemi, fontSize: 14 },
+  input: {
+    minHeight: 72,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.inputBorder,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontFamily: fonts.body,
+    fontSize: 16,
+    color: colors.ink,
+    backgroundColor: colors.white,
+    textAlignVertical: 'top',
+  },
+  saveBtn: { minHeight: 44, paddingHorizontal: 18, borderRadius: 22, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
+  saveText: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.white },
 });

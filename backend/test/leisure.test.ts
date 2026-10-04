@@ -17,10 +17,10 @@ const NOW = new Date('2026-10-02T15:00:00Z');
 const at = (min: number) => new Date(NOW.getTime() + min * 60_000).toISOString();
 
 describe('leisure window', () => {
-  it('"today" runs from now + 30 min to local midnight', () => {
+  it('"today" runs from now + 30 min to 03:00 next morning', () => {
     const w = leisureWindow('Europe/Riga', NOW, 'today');
     expect(w.earliest.toISOString()).toBe('2026-10-02T15:30:00.000Z');
-    expect(w.windowEnd.toISOString()).toBe('2026-10-02T21:00:00.000Z'); // 24:00 Riga
+    expect(w.windowEnd.toISOString()).toBe('2026-10-03T00:00:00.000Z'); // 03:00 Riga next morning: late screenings still count as tonight
     expect(w.localDate).toBe('2026-10-02');
   });
   it('"weekend" on a Friday starts on Saturday and ends Sunday night', () => {
@@ -51,27 +51,27 @@ const item = (over: Partial<RawListing>): RawListing => ({
   description: 'Apraksts.',
   startsAt: at(120),
   venue: 'Kino',
-  url: 'https://kino.lv/a',
+  url: 'https://kino.lv/filma/a-2026',
   provider: 'cinema',
   ...over,
 });
 
 describe('validateListings', () => {
-  const urls = new Set(['https://www.kino.lv/a/', 'https://go3.lv/f/1']);
+  const urls = new Set(['https://www.kino.lv/filma/a-2026/', 'https://go3.lv/movies/f-1']);
   it('keeps a screening later today with a link the search returned', () => {
     const out = validateListings([item({})], cinemaQ, urls);
     expect(out).toHaveLength(1);
-    expect(out[0]!.url).toBe('https://www.kino.lv/a/'); // the search's own URL, not the model's copy
+    expect(out[0]!.url).toBe('https://www.kino.lv/filma/a-2026/'); // the search's own URL, not the model's copy
   });
-  it('drops screenings that started, start within 30 min, or fall after midnight', () => {
-    expect(validateListings([item({ startsAt: at(-5) }), item({ startsAt: at(20) }), item({ startsAt: at(7 * 60) })], cinemaQ, urls)).toHaveLength(0);
+  it('drops screenings that started, start within 30 min, or fall after 03:00', () => {
+    expect(validateListings([item({ startsAt: at(-5) }), item({ startsAt: at(20) }), item({ startsAt: at(10 * 60) })], cinemaQ, urls)).toHaveLength(0); // 04:00 Riga: past the 03:00 cut-off
   });
   it('drops links the search never returned, and items without time', () => {
     expect(validateListings([item({ url: 'https://made-up.lv/x' }), item({ startsAt: null }), item({ startsAt: 'rīt vakarā' })], cinemaQ, urls)).toHaveLength(0);
   });
   it('Go3 items need a go3.lv link; books need neither link nor time', () => {
     const go3: LeisureQuery = { ...cinemaQ, where: 'go3', when: null };
-    expect(validateListings([item({ url: 'https://go3.lv/f/1', startsAt: null }), item({ url: 'https://www.kino.lv/a', startsAt: null })], go3, urls)).toHaveLength(1);
+    expect(validateListings([item({ url: 'https://go3.lv/movies/f-1', startsAt: null }), item({ url: 'https://www.kino.lv/filma/a-2026', startsAt: null })], go3, urls)).toHaveLength(1);
     const book: LeisureQuery = { ...cinemaQ, kind: 'book', where: null, when: null };
     expect(validateListings([item({ url: null, startsAt: null, provider: 'book' })], book, urls)).toHaveLength(1);
   });
@@ -91,13 +91,13 @@ describe('Claude leisure engine (stubbed client)', () => {
       .mockResolvedValueOnce({
         model: 'claude-opus-5-5',
         stop_reason: 'pause_turn',
-        content: [{ type: 'web_search_tool_result', tool_use_id: 't1', content: [{ type: 'web_search_result', url: 'https://kino.lv/a', title: 'Kino', encrypted_content: 'x', page_age: null }] }],
+        content: [{ type: 'web_search_tool_result', tool_use_id: 't1', content: [{ type: 'web_search_result', url: 'https://kino.lv/filma/a-2026', title: 'Kino', encrypted_content: 'x', page_age: null }] }],
         usage,
       })
       .mockResolvedValueOnce({
         model: 'claude-opus-5-5',
         stop_reason: 'end_turn',
-        content: [{ type: 'text', text: 'Komēdija "A" Kino, 20:00, https://kino.lv/a', citations: [] }],
+        content: [{ type: 'text', text: 'Komēdija "A" Kino, 20:00, https://kino.lv/filma/a-2026', citations: [] }],
         usage,
       })
       .mockResolvedValueOnce({
@@ -108,7 +108,7 @@ describe('Claude leisure engine (stubbed client)', () => {
           {
             type: 'text',
             text: JSON.stringify({
-              items: [item({ title: 'A', url: 'https://kino.lv/a' }), item({ title: 'B', url: 'https://invented.lv/b' }), item({ title: 'C', startsAt: at(-30) })],
+              items: [item({ title: 'A', url: 'https://kino.lv/filma/a-2026' }), item({ title: 'B', url: 'https://invented.lv/b' }), item({ title: 'C', startsAt: at(-30) })],
             }),
           },
         ],
@@ -128,7 +128,7 @@ describe('Claude leisure engine (stubbed client)', () => {
     // Extraction is a structured-output call that sees the search URLs.
     const third = create.mock.calls[2]![0];
     expect(third.output_config.format).toBeDefined();
-    expect(JSON.stringify(third.messages)).toContain('https://kino.lv/a');
+    expect(JSON.stringify(third.messages)).toContain('https://kino.lv/filma/a-2026');
   });
 
   it('falls back to timeless ideas (never invented events) when search fails', async () => {
@@ -163,6 +163,7 @@ describe('pantry-aware tip templates', () => {
     history: EMPTY_HISTORY,
     preferences: { diet: 'any', avoid: [] },
     pantry: ['olas', 'piens', 'auzu pārslas', 'āboli'],
+    likedFoods: [],
   };
   it('uses only what is at home', () => {
     const tip = fakeTip(base);
@@ -245,16 +246,16 @@ describe('pantry and leisure routes', () => {
     expect(later.items.every((i) => new Date(i.startsAt!).getTime() >= now.getTime() + 30 * 60_000)).toBe(true);
   });
 
-  it('Go3 shows only go3.lv links; books come from the curated list without links', async () => {
+  it('Go3 shows only go3.lv item pages; curated books link to a title search', async () => {
     const call = await user();
     await call({ method: 'PUT', url: '/v1/me/city', payload: { city: 'Liepāja' } });
     const go3 = (await call({ method: 'POST', url: '/v1/leisure/suggest', payload: { kind: 'movie', genre: 'drama', where: 'go3' } })).json() as LeisureResponse;
-    expect(go3.items).toHaveLength(2);
+    expect(go3.items).toHaveLength(2); // not the non-Go3 link, not the go3.lv homepage
     expect(go3.items.every((i) => i.url?.startsWith('https://go3.lv/'))).toBe(true);
 
     const books = (await call({ method: 'POST', url: '/v1/leisure/suggest', payload: { kind: 'book', genre: 'latvian' } })).json() as LeisureResponse;
     expect(books.items.map((i) => i.title)).toContain('Mātes piens');
-    expect(books.items.every((i) => i.url === null && i.startsAt === null)).toBe(true);
+    expect(books.items.every((i) => i.url?.includes('tbm=bks') && i.startsAt === null)).toBe(true);
   });
 
   it('validates genre and limits live searches per day', async () => {

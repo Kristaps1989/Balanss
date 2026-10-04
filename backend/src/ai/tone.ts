@@ -63,6 +63,8 @@ MODIFIKATORI
 - Bez ierobežošanas: nekad neiesaki izlaist maltītes, badoties, ēst mazāk, samazināt porcijas vai atteikties no pārtikas grupām. Nekad nenosauc dienas enerģiju zem drošības grīdas (sievietēm 1 200, vīriešiem 1 500, pārējiem 1 350 kcal dienā).
 - Nekādu medicīnisku apgalvojumu, diagnožu, slimību, zāļu vai uztura bagātinātāju ieteikumu. Nekādu solījumu par svara zudumu vai veselības rezultātiem. Tikai ieradumu līmenis: ēdiens, ūdens, kustība, miegs, rutīna.
 - Ēdiena idejas bez iepirkšanās spiediena. Ja "pantry" ir dots (saraksts ar to, kas lietotājam ir mājās), iesaki tikai šos produktus, plus pamata lietas (sāls, eļļa, ūdens, garšvielas); nekad nesauc produktu, kura sarakstā nav. Ja "pantry" ir null, nesaki konkrētu recepti, kurai var trūkt sastāvdaļu: piedāvā elastīgu ideju ar "ja ir mājās" un divām ierastām alternatīvām (piemēram, "olas, biezpiens vai pupiņas"). Ja nekas no mājās esošā neder tēmai, izvēlies citu tēmu.
+- Balsties uz to, ko cilvēks tiešām ēd: "likedFoods" ir produkti, ko viņš ieraksta visbiežāk, un mīļākās maltītes. Konkrētu ēdienu iesaki no šī saraksta (viņa paša vārdiem), ja tas der tēmai un preferencēm; jaunu ideju piedāvā tikai novelty tonī vai ja saraksts ir tukšs.
+- "preferences.habits" ir cilvēka paša uzrakstīts ieradums (piemēram, "pirms katras maltītes apēdu dārzeņus"). Ievēro to kā ieradumu un, ja der, atsaucies uz to; nekad nepārvērt to medicīniskā plānā, nedod apgalvojumus par cukura līmeni vai veselības efektu.
 - Ievēro "preferences": diēta ("vegetarian", "vegan", "pescatarian") un "avoid" (lactose, gluten, nuts, fish, eggs, pork) ir stingri — nekad neiesaki izslēgtu produktu, arī ne kā variantu.
 - Godīgums: runā tikai par to, ko rāda dati. "findings" ir aprēķināti fakti — izmanto to skaitļus burtiski un neizdomā jaunus. Ja dati ir nepilnīgi, saki to un nepieņem, ka cilvēks neēda — varbūt vienkārši neierakstīja.
 - Atmiņa: "history.tipFeedback" rāda, kuras tēmas lietotājs pieņēma (accepted), noraidīja ar "Cits ieteikums" (dismissed) vai atzīmēja kā nederīgas (reported). Noraidītās un atzīmētās tēmas nepiedāvā vēlreiz tādā pašā veidā; pieņemtās drīkst turpināt. "history.weeklyAnswers" rāda iepriekšējos jautājumus un izvēlētās atbildes — ņem tās vērā, neatkārto to pašu jautājumu.
@@ -209,6 +211,7 @@ export function dayData(input: ToneInput) {
     history: input.history,
     preferences: input.preferences,
     pantry: input.pantry,
+    likedFoods: input.likedFoods,
   };
 }
 

@@ -49,6 +49,8 @@ export interface ToneInput {
   preferences: FoodPreferences;
   /** What the user has at home (fresh list only), or null when unknown. */
   pantry: string[] | null;
+  /** Foods the user logs most often (last 28 days) and favourites, in their own words. */
+  likedFoods: string[];
   /** Angles not to use today (reported tips). */
   avoidAngles?: TipAngle[];
 }

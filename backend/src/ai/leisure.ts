@@ -64,6 +64,24 @@ function normUrl(u: string): string | null {
   }
 }
 
+const LISTING_PATH = /^\/(?:lv\/|en\/|ru\/)?(?:movies?|filmas?|films?|kino|cinema|events?|pasakumi|pasākumi|afisa|afiša|search|meklet|meklēt|catalog|katalogs|books?|gramatas|grāmatas|tv|series|serialis?)?\/?$/i;
+
+/**
+ * True when a URL points at one specific film, book or event (what the user can act on),
+ * not a homepage, a listing/category page or a search page.
+ */
+export function isItemPage(u: string): boolean {
+  try {
+    const x = new URL(u);
+    if (/[?&](q|s|query|search)=/i.test(x.search)) return false;
+    if (LISTING_PATH.test(x.pathname)) return false;
+    const segs = x.pathname.split('/').filter(Boolean);
+    return segs.length >= 2 || (segs.length === 1 && (segs[0]!.length >= 8 || /\d/.test(segs[0]!))) || /[?&]id=\d+/i.test(x.search);
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Keep only listings the server can stand behind (see module comment). `allowedUrls` are
  * the URLs the web search returned; pass null for curated data (links are then dropped
@@ -86,6 +104,8 @@ export function validateListings(raw: RawListing[], q: LeisureQuery, allowedUrls
       const n = normUrl(r.url);
       if (n && allowedUrls === null) url = r.url;
       else if (n && allowed.has(n)) url = allowed.get(n)!;
+      // Live links must open the item itself, not a homepage or a listing (a link the user can't act on is worse than none).
+      if (url && allowedUrls !== null && !isItemPage(url)) url = null;
     }
     if (q.kind === 'movie' && q.where === 'go3') {
       if (!url || !/(^|\.)go3\.lv$/.test(new URL(url).hostname)) continue;
@@ -132,13 +152,13 @@ const ListingSchema = z.object({
 export type RawListing = z.infer<typeof ListingSchema>;
 const ListingsSchema = z.object({ items: z.array(ListingSchema) });
 
-const SEARCH_SYSTEM = `You find real things to do for a user of Balanss, a Latvian wellbeing app. You search the web and report only what you actually found, with links. Never invent titles, venues, times or links. Prefer official sources (cinema and venue websites, go3.lv, biļešu tirgotāji, city event calendars). Suggestions must suit a calm, healthy free-time plan: no gambling, no alcohol-focused events, nothing adult-only. Write your findings as a plain list: title, venue or author, exact local start time (date + HH:MM, Europe/Riga) when it has one, one-sentence description, and the URL where you found it.`;
+const SEARCH_SYSTEM = `You find real things to do for a user of Balanss, a Latvian wellbeing app. You search the web and report only what you actually found, with links. Never invent titles, venues, times or links. Prefer official sources (cinema and venue websites, go3.lv, biļešu tirgotāji, city event calendars). Suggestions must suit a calm, healthy free-time plan: no gambling, no alcohol-focused events, nothing adult-only. Write your findings as a plain list: title, venue or author, exact local start time (date + HH:MM, Europe/Riga) when it has one, one-sentence description, and the URL of the page for that specific film, book or event (its own page with showtimes/tickets/details — never a homepage, category list or search results page).`;
 
 const EXTRACT_SYSTEM = `You turn search notes into structured listings for Balanss, a Latvian wellbeing app.
 
 Rules:
 - Use only items that appear in the notes. Do not add anything.
-- "url" must be copied exactly from the notes (or null if the notes have none for that item).
+- "url" must be copied exactly from the notes (or null if the notes have none for that item). Use the page of that specific item; if the notes only have a homepage or a list page for it, set null.
 - "startsAt" is an ISO 8601 date-time with the Europe/Riga offset (e.g. "2026-10-04T19:30:00+03:00") for screenings and events, otherwise null. If the notes give no exact time, use null.
 - "title" keeps the original title as listed in Latvia. "subtitle": director and year, author, or organiser. "venue": cinema or venue name, or null.
 - "description": one short, friendly sentence in Latvian (informal "tu", no emoji, no pressure), at most 200 characters.
@@ -148,14 +168,14 @@ function searchTask(q: LeisureQuery): { task: string; allowedDomains: string[] |
   const g = genreLabel(q.kind, q.genre);
   const window = `between ${q.earliest.toISOString()} and ${q.windowEnd.toISOString()} (local date today: ${q.localDate}, Europe/Riga)`;
   if (q.kind === 'movie' && q.where === 'cinema')
-    return { task: `Find today's cinema screenings in ${q.city}, Latvia, genre: ${g}. Only screenings that start ${window}. Up to 6, with cinema name, start time and the cinema page URL.`, allowedDomains: null };
+    return { task: `Find today's cinema screenings in ${q.city}, Latvia, genre: ${g}. Only screenings that start ${window}. Up to 6, with cinema name, start time and the URL of that film's page on the cinema's site (with showtimes/tickets), not the cinema homepage.`, allowedDomains: null };
   if (q.kind === 'movie' && q.where === 'go3')
-    return { task: `Find films of genre "${g}" that are currently available on Go3 (go3.lv) in Latvia. Up to 6, each with its go3.lv page URL.`, allowedDomains: ['go3.lv'] };
+    return { task: `Find films of genre "${g}" that are currently available on Go3 (go3.lv) in Latvia. Up to 6, each with the URL of its own go3.lv page (the film's page, not go3.lv itself or a category).`, allowedDomains: ['go3.lv'] };
   if (q.kind === 'movie')
-    return { task: `Suggest up to 6 well-reviewed films of genre "${g}" that are easy to watch in Latvia now (in cinemas in ${q.city}, on Go3, or other services). Give the page URL where each is available.`, allowedDomains: null };
+    return { task: `Suggest up to 6 well-reviewed films of genre "${g}" that are easy to watch in Latvia now (in cinemas in ${q.city}, on Go3, or other services). Give the URL of the film's own page on the service where it is available.`, allowedDomains: null };
   if (q.kind === 'book')
-    return { task: `Suggest up to 6 well-loved books of genre "${g}" that are available in Latvian (or widely read in Latvia). Give author and, if you find it, a page URL (publisher, bookshop or library catalogue).`, allowedDomains: null };
-  return { task: `Find public events in or near ${q.city}, Latvia, of type "${g}", that start ${window}. Up to 6, with venue, exact start time and the event page URL. Skip anything already sold out or cancelled.`, allowedDomains: null };
+    return { task: `Suggest up to 6 well-loved books of genre "${g}" that are available in Latvian (or widely read in Latvia). Give author and the URL of the book's own product page at a Latvian bookshop (e.g. Jānis Roze, Zvaigzne ABC, Globuss) or a library catalogue entry — not a shop homepage or search page.`, allowedDomains: null };
+  return { task: `Find public events in or near ${q.city}, Latvia, of type "${g}", that start ${window}. Up to 6, with venue, exact start time and the URL of that event's own page (ticket page or organiser page), not the venue homepage. Skip anything already sold out or cancelled.`, allowedDomains: null };
 }
 
 /** Step 1: a web-search turn. Returns the notes and every URL the search returned. */
@@ -278,7 +298,15 @@ export function curatedResult(q: LeisureQuery, reason: 'live_empty' | 'unavailab
   const items: RawListing[] = [];
   if (q.kind === 'book') {
     for (const [title, author] of BOOKS[q.genre] ?? BOOKS.novel!) {
-      items.push({ title, subtitle: author, description: 'Pajautā bibliotēkā vai grāmatnīcā — daudzas ir pieejamas arī e-grāmatā.', startsAt: null, venue: null, url: null, provider: 'book' });
+      items.push({
+        title,
+        subtitle: author,
+        description: 'Pajautā bibliotēkā vai grāmatnīcā — daudzas ir pieejamas arī e-grāmatā.',
+        startsAt: null,
+        venue: null,
+        url: `https://www.google.com/search?tbm=bks&q=${encodeURIComponent(`${title} ${author}`)}`,
+        provider: 'book',
+      });
     }
   } else if (q.kind === 'movie') {
     for (const [title, sub] of MOVIES[q.genre] ?? []) {
@@ -309,6 +337,8 @@ export function curatedResult(q: LeisureQuery, reason: 'live_empty' | 'unavailab
 export const fakeLeisureEngine: LeisureEngine = {
   async suggest(q) {
     const at = (min: number) => new Date(q.now.getTime() + min * 60_000).toISOString();
+    // A start that is inside the window whatever the time of day: 90 min after the earliest start, or halfway to the window end.
+    const inWindow = (plusMin = 0) => new Date(Math.min(q.earliest.getTime() + (90 + plusMin) * 60_000, (q.earliest.getTime() + q.windowEnd.getTime()) / 2 + plusMin * 60_000)).toISOString();
     const g = genreLabel(q.kind, q.genre);
     let raw: RawListing[];
     let urls: string[];
@@ -317,21 +347,22 @@ export const fakeLeisureEngine: LeisureEngine = {
         { title: `Go3 ${g.toLowerCase()} 1`, subtitle: 'Režisors A, 2024', description: 'Viegla filma vakaram.', startsAt: null, venue: null, url: 'https://go3.lv/movies/test-1', provider: 'go3' },
         { title: `Go3 ${g.toLowerCase()} 2`, subtitle: 'Režisors B, 2023', description: 'Laba izvēle kopā ar draugiem.', startsAt: null, venue: null, url: 'https://go3.lv/movies/test-2', provider: 'go3' },
         { title: 'Nav no Go3', subtitle: null, description: 'Saite nav no go3.lv, tāpēc netiek rādīta.', startsAt: null, venue: null, url: 'https://example.com/x', provider: 'go3' },
+        { title: 'Tikai sākumlapa', subtitle: null, description: 'Saite ved uz go3.lv sākumlapu, nevis filmu.', startsAt: null, venue: null, url: 'https://go3.lv/', provider: 'go3' },
       ];
-      urls = ['https://go3.lv/movies/test-1', 'https://go3.lv/movies/test-2', 'https://example.com/x'];
+      urls = ['https://go3.lv/movies/test-1', 'https://go3.lv/movies/test-2', 'https://example.com/x', 'https://go3.lv/'];
     } else if (q.kind === 'movie' && q.where === 'cinema') {
       raw = [
-        { title: 'Jau sākusies filma', subtitle: null, description: 'Sākās pirms stundas.', startsAt: at(-60), venue: 'Kino A', url: 'https://kino.example.lv/a', provider: 'cinema' },
-        { title: 'Pēc 10 minūtēm', subtitle: null, description: 'Par vēlu, lai paspētu.', startsAt: at(10), venue: 'Kino A', url: 'https://kino.example.lv/a', provider: 'cinema' },
-        { title: `Vakara seanss: ${g}`, subtitle: 'Režisors C, 2026', description: 'Seanss vēl šovakar.', startsAt: at(120), venue: 'Kino A', url: 'https://kino.example.lv/a', provider: 'cinema' },
-        { title: 'Izdomāta saite', subtitle: null, description: 'Saite nav no meklēšanas.', startsAt: at(180), venue: 'Kino B', url: 'https://invented.example.lv/b', provider: 'cinema' },
+        { title: 'Jau sākusies filma', subtitle: null, description: 'Sākās pirms stundas.', startsAt: at(-60), venue: 'Kino A', url: 'https://kino.example.lv/filma/vakara-seanss-2026', provider: 'cinema' },
+        { title: 'Pēc 10 minūtēm', subtitle: null, description: 'Par vēlu, lai paspētu.', startsAt: at(10), venue: 'Kino A', url: 'https://kino.example.lv/filma/vakara-seanss-2026', provider: 'cinema' },
+        { title: `Vakara seanss: ${g}`, subtitle: 'Režisors C, 2026', description: 'Seanss vēl šovakar.', startsAt: inWindow(), venue: 'Kino A', url: 'https://kino.example.lv/filma/vakara-seanss-2026', provider: 'cinema' },
+        { title: 'Izdomāta saite', subtitle: null, description: 'Saite nav no meklēšanas.', startsAt: inWindow(30), venue: 'Kino B', url: 'https://invented.example.lv/b', provider: 'cinema' },
       ];
-      urls = ['https://kino.example.lv/a'];
+      urls = ['https://kino.example.lv/filma/vakara-seanss-2026'];
     } else if (q.kind === 'event') {
       raw = [
-        { title: 'Jau notiek', subtitle: null, description: 'Sākās pirms 2 stundām.', startsAt: at(-120), venue: 'Zāle A', url: 'https://events.example.lv/1', provider: 'event' },
-        { title: `${g} ${q.city}`, subtitle: 'Organizators X', description: 'Mierīgs pasākums vakarā.', startsAt: at(150), venue: 'Zāle B', url: 'https://events.example.lv/2', provider: 'event' },
-        { title: 'Pēc nedēļas', subtitle: null, description: 'Ārpus izvēlētā laika.', startsAt: at(8 * 24 * 60), venue: 'Zāle C', url: 'https://events.example.lv/3', provider: 'event' },
+        { title: 'Jau notiek', subtitle: null, description: 'Sākās pirms 2 stundām.', startsAt: at(-120), venue: 'Zāle A', url: 'https://events.example.lv/event/jau-notiek', provider: 'event' },
+        { title: `${g} ${q.city}`, subtitle: 'Organizators X', description: 'Mierīgs pasākums vakarā.', startsAt: inWindow(), venue: 'Zāle B', url: 'https://events.example.lv/event/vakara-koncerts', provider: 'event' },
+        { title: 'Pēc nedēļas', subtitle: null, description: 'Ārpus izvēlētā laika.', startsAt: at(8 * 24 * 60), venue: 'Zāle C', url: 'https://events.example.lv/event/pec-nedelas', provider: 'event' },
       ];
       urls = raw.map((r) => r.url!);
     } else {

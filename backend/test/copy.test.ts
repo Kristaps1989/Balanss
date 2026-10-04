@@ -25,10 +25,9 @@ describe('tips', () => {
     const res = await call({ method: 'GET', url: `/v1/tips/today?date=${SUNDAY}` });
     expect(res.statusCode).toBe(200);
     const tip = res.json() as Tip;
-    expect(tip).toMatchObject({ date: SUNDAY, tone: 'plan', accepted: false, highlight: '42 g', aiGenerated: false });
-    expect(tip.body).toBe(
-      'Līdz olbaltumvielu mērķim trūkst 42 g. Viens viegls solis: biezpiens vai jogurts vakariņās (+18 g). Miegs bija nedaudz īsāks — tāpēc šodien bez spiediena.',
-    );
+    // Plan tone, built from the foods Ilze logs most often (seed data), softened because her sleep was short.
+    expect(tip).toMatchObject({ date: SUNDAY, tone: 'plan', accepted: false, highlight: 'olas, vārītas', aiGenerated: false });
+    expect(tip.body).toMatch(/^Olbaltumvielas: līdz olbaltumvielu mērķim trūkst 42 g\. Plāns no tā, ko ēd bieži: olas, vārītas .*vakariņās\. Miegs bija nedaudz īsāks — tāpēc šodien bez spiediena\.$/);
     const again = (await call({ method: 'GET', url: `/v1/tips/today?date=${SUNDAY}` })).json() as Tip;
     expect(again.id).toBe(tip.id);
     expect(await db.select().from(tips).where(eq(tips.date, SUNDAY))).toHaveLength(1);

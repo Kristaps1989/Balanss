@@ -135,7 +135,10 @@ export type AvoidFood = 'lactose' | 'gluten' | 'nuts' | 'fish' | 'eggs' | 'pork'
 export interface FoodPreferences {
   diet: Diet;
   avoid: AvoidFood[];
+  /** "Mani ieradumi": a sentence the user writes for the AI (≤ 240 chars), e.g. "Pirms katras maltītes apēdu dārzeņus". */
+  habits?: string;
 }
+export const HABITS_MAX = 240;
 
 /**
  * Wellbeing "care mode": when intake, weight change or goals look risky, the app

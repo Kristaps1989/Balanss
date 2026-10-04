@@ -19,7 +19,7 @@ const SECTIONS: { icon: IconName; title: string; body: string }[] = [
   {
     icon: 'lock',
     title: 'Ko AI nesaņem',
-    body: 'Tavu vārdu, e-pastu, personības testa atbildes un rezultātus. AI saņem tikai skaitļus, izvēlēto toni un to, kuri ieteikumi tev derēja. Dati netiek izmantoti AI modeļu apmācībai.',
+    body: 'Tavu vārdu, e-pastu, personības testa atbildes un rezultātus. AI saņem skaitļus, izvēlēto toni, to, kuri ieteikumi tev derēja, produktus, ko ieraksti visbiežāk, un — ja esi to uzrakstījis — savu ieradumu teikumu no Ēšanas paradumiem. Dati netiek izmantoti AI modeļu apmācībai.',
   },
   {
     icon: 'heart',

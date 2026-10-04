@@ -296,6 +296,18 @@ Feedback from testing: a food tip that names ingredients the user doesn't have a
 | 10.6 | **Honest fallback**: if search fails or finds nothing, the user gets curated books and timeless ideas (walk, library). Events are never invented. | Sonnet 5.5 | |
 | 10.7 | **Tests**: unit tests (pantry-aware templates, listing validation: unknown URL / past / outside the window; two-stage engine with a stubbed client) and E2E (pantry → new tip; Brīvais laiks → film / Go3 / book / event, and a past screening is not shown). | Opus 5.5 | `AI_PROVIDER=fake` returns fixed listings, including one already started |
 
+### Milestone 11: Tips from what you eat and like; links that open the thing itself
+
+Feedback from a tester: tips should build on what I actually eat and what I like, know my habits (e.g. "vegetables before every meal"), and name a concrete food when I haven't eaten or protein is low. Links for films, books and events should open the specific item, not a homepage.
+
+| # | Task | Model | Notes |
+|---|---|---|---|
+| 11.1 | **Taste profile**: `likedFoods` = the foods logged most often in the last 28 days plus favourites (top 8 names, in the user's own words). Sent to the tone engine; templates pick protein/fibre ideas from it when the pantry is unknown. | Opus 5.5 | Names only, no quantities |
+| 11.2 | **Habits note** ("Mani ieradumi"): an optional sentence the user writes for the AI (≤ 240 chars) in Ēšanas paradumi, e.g. "Pirms katras maltītes apēdu dārzeņus". Sent with the preferences; the prompt follows it as a habit, never as a medical plan. Shown in the AI transparency screen; included in export and delete. | Opus 5.5 | The only free text sent to the AI, by explicit choice |
+| 11.3 | **Reminders name a food**: the meal reminder and the protein tip say "e.g. olas vai biezpiens" from the pantry or liked foods, respecting diet and avoid-list. | Sonnet 5.5 | Templates + prompt |
+| 11.4 | **Deep links**: the search asks for the page of the specific film/book/event; the server rejects homepages, category and search pages; link labels say what opens ("Atvērt Go3", "Seansi un biļetes", "Pasākums un biļetes", "Atvērt grāmatu"); curated books get a title search link labelled as such. | Opus 5.5 | |
+| 11.5 | **Tests**: unit (liked-food ranking, habits in the AI payload, reminder copy, item-page validation) and E2E (habits note saved and shown; links on Brīvais laiks are item pages and a homepage listing is dropped). | Opus 5.5 | |
+
 ---
 
 ## Decisions to confirm before milestone 5

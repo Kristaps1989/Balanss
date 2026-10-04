@@ -101,17 +101,31 @@ function allowedTag(tag: FoodTag, p: ToneInput['preferences']): boolean {
   return !avoid.includes('gluten');
 }
 
-/** Items from the user's pantry that fit the angle and their preferences (at most 2, in their own words). */
-export function pantryPicks(input: ToneInput, angle: TipAngle): string[] {
-  if (!input.pantry?.length || (angle !== 'protein' && angle !== 'fibre')) return [];
+function picksFrom(list: string[] | null | undefined, input: ToneInput, angle: TipAngle): string[] {
+  if (!list?.length || (angle !== 'protein' && angle !== 'fibre')) return [];
   const table = angle === 'protein' ? PANTRY_PROTEIN : PANTRY_FIBRE;
   const picks: string[] = [];
-  for (const item of input.pantry) {
-    const hit = table.find(([re]) => re.test(item));
+  for (const item of list) {
+    const hit = table.find(([re]) => re.test(item.toLowerCase()));
     if (hit && hit[1].every((t) => allowedTag(t, input.preferences)) && !picks.includes(item)) picks.push(item);
     if (picks.length === 2) break;
   }
   return picks;
+}
+
+/** Items from the user's pantry that fit the angle and their preferences (at most 2, in their own words). */
+export const pantryPicks = (input: ToneInput, angle: TipAngle): string[] => picksFrom(input.pantry, input, angle);
+
+/** Foods the user logs often (or favourites) that fit the angle: what they already like. */
+export const likedPicks = (input: ToneInput, angle: TipAngle): string[] => picksFrom(input.likedFoods, input, angle);
+
+/** A concrete food to name in a reminder: from the pantry first, then liked foods, then a safe default. */
+export function namedFood(input: ToneInput): string {
+  const p = pantryPicks(input, 'protein');
+  if (p.length) return p.join(' vai ');
+  const l = likedPicks(input, 'protein');
+  if (l.length) return l.join(' vai ');
+  return foodIdeas(input.preferences ?? DEFAULT_PREFS).proteinEvening;
 }
 
 const both = (picks: string[]) => (picks.length === 2 ? `${picks[0]} un ${picks[1]}` : picks[0]);
@@ -140,6 +154,25 @@ function pantryTip(input: ToneInput, angle: 'protein' | 'fibre', picks: string[]
       return t(`Ja sanāk, no tā, kas jau ir mājās, ${what} der ${both(picks)}. Bez spiediena.`, picks[0]);
     default:
       return t(`No mājās esošā ${what} der ${both(picks)}.`, picks[0]);
+  }
+}
+
+/** Food tip built from what the user already eats often (no pantry known). */
+function likedTip(input: ToneInput, angle: 'protein' | 'fibre', liked: string[], t: (body: string, h: string | null) => TipResult): TipResult {
+  const n = input.nutrition;
+  const picks = liked.map((p) => p[0]!.toLowerCase() + p.slice(1)); // the user's names, mid-sentence
+  const gap = Math.max(0, Math.round(n.proteinG.target - n.proteinG.value));
+  const what = angle === 'protein' ? `līdz olbaltumvielu mērķim trūkst ${gap} g` : `šķiedrvielas ${fmtDec(n.fibreG.value)} no ${n.fibreG.target} g`;
+  const soft = input.modifiers.softer && sleepShort(input) ? ' Miegs bija nedaudz īsāks — tāpēc šodien bez spiediena.' : '';
+  switch (input.tone) {
+    case 'plan':
+      return t(`${angle === 'protein' ? 'Olbaltumvielas' : 'Šķiedrvielas'}: ${what}. Plāns no tā, ko ēd bieži: ${both(picks)} vakariņās.${soft}`, picks[0]);
+    case 'novelty':
+      return t(`Tu bieži ēd ${picks[0]} — šodien pamēģini to citā veidā nekā parasti. ${what[0].toUpperCase()}${what.slice(1)}.`, picks[0]);
+    case 'gentle':
+      return t(`Ja sanāk, vakariņās der ${both(picks)} — tas tev jau garšo. Bez spiediena.`, picks[0]);
+    default:
+      return t(`${what[0].toUpperCase()}${what.slice(1)}. Der ${both(picks)} — tu to ēd bieži.`, picks[0]);
   }
 }
 
@@ -173,6 +206,8 @@ export function templateTip(input: ToneInput, angle: TipAngle): TipResult {
 
   const picks = pantryPicks(input, angle);
   if (picks.length && (angle === 'protein' || angle === 'fibre')) return pantryTip(input, angle, picks, t);
+  const liked = !input.pantry?.length ? likedPicks(input, angle) : [];
+  if (liked.length && (angle === 'protein' || angle === 'fibre')) return likedTip(input, angle, liked, t);
 
   switch (input.tone) {
     case 'plan':
@@ -384,15 +419,17 @@ export function fakePushCopy(kind: PushKind, input: ToneInput, meal: 'lunch' | '
   if (input.care) {
     return { title: 'Balanss', body: `Vai ${meal === 'lunch' ? 'pusdienām' : 'vakariņām'} jau ir atrasts brīdis? Regulāra maltīte palīdz justies labāk.` };
   }
+  // Name a concrete option (pantry → liked foods → default) so the reminder is usable, not just a nudge to log.
+  const food = namedFood(input);
   switch (input.tone) {
     case 'plan':
-      return { title: mealWord, body: `${mealWord} vēl nav ierakstītas. Viens foto — un dienas plāns būs pilns.` };
+      return { title: mealWord, body: `${mealWord} vēl nav ierakstītas. Ātrs variants: ${food}. Viens foto — un plāns būs pilns.` };
     case 'novelty':
-      return { title: `Kas šodien uz šķīvja?`, body: `Nofotografē ${meal === 'lunch' ? 'pusdienas' : 'vakariņas'} — varbūt tur ir kaut kas jauns.` };
+      return { title: `Kas šodien uz šķīvja?`, body: `${mealWord} vēl nav. Ja gribi ko ātru — ${food}; ja ko jaunu, nofotografē, kas sanāk.` };
     case 'gentle':
-      return { title: 'Balanss', body: `Ja sanāk, pievieno ${meal === 'lunch' ? 'pusdienas' : 'vakariņas'}. Arī aptuveni ir labi.` };
+      return { title: 'Balanss', body: `Ja sanāk, paēd ${meal === 'lunch' ? 'pusdienas' : 'vakariņas'} — kaut vai ${food}. Arī aptuveni ir labi.` };
     default:
-      return { title: mealWord, body: `${mealWord} vēl nav pievienotas.` };
+      return { title: mealWord, body: `${mealWord} vēl nav pievienotas. Der ${food}.` };
   }
 }
 

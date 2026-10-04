@@ -125,6 +125,22 @@ export default function Leisure() {
   );
 }
 
+/** What the link opens, so the user knows before tapping. */
+function linkLabel(i: LeisureItem, live: boolean): string {
+  if (i.provider === 'go3') return 'Atvērt Go3';
+  if (i.provider === 'cinema') return 'Seansi un biļetes';
+  if (i.provider === 'event') return 'Pasākums un biļetes';
+  if (i.provider === 'book') return live ? 'Atvērt grāmatu' : 'Meklēt grāmatu';
+  return 'Atvērt';
+}
+const hostOf = (u: string) => {
+  try {
+    return new URL(u).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+};
+
 function Results({ data, today }: { data: LeisureResponse; today: string }) {
   return (
     <View style={{ gap: 12 }} testID="leisure-results">
@@ -141,7 +157,8 @@ function Results({ data, today }: { data: LeisureResponse; today: string }) {
           <Text style={type.secondary}>{i.description}</Text>
           {i.url && (
             <Pressable onPress={() => Linking.openURL(i.url!)} accessibilityRole="link" style={styles.open} hitSlop={8}>
-              <Text style={type.link}>{i.provider === 'go3' ? 'Atvērt Go3' : 'Atvērt saiti'}</Text>
+              <Text style={type.link}>{linkLabel(i, data.live)}</Text>
+              <Text style={type.caption}>{hostOf(i.url!)}</Text>
               <Icon name="arrowRight" color={colors.accentText} size={16} />
             </Pressable>
           )}
@@ -149,7 +166,7 @@ function Results({ data, today }: { data: LeisureResponse; today: string }) {
       ))}
       {data.items.length > 0 && (
         <Text style={type.caption}>
-          {data.live ? 'Atrasts tīmeklī pirms brīža. Laikus un biļetes pārbaudi saitē pirms došanās.' : 'Balanss idejas bez konkrēta laika.'}
+          {data.live ? 'Atrasts tīmeklī pirms brīža. Saite ved tieši uz filmu, grāmatu vai pasākumu; laikus un biļetes pārbaudi tur.' : 'Balanss idejas bez konkrēta laika.'}
         </Text>
       )}
     </View>
