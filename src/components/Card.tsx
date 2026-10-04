@@ -8,13 +8,15 @@ interface Props {
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
   accessibilityLabel?: string;
+  testID?: string;
 }
 
-export function Card({ children, style, onPress, accessibilityLabel }: Props) {
+export function Card({ children, style, onPress, accessibilityLabel, testID }: Props) {
   if (onPress) {
     return (
       <Pressable
         onPress={onPress}
+        testID={testID}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
         style={({ pressed }) => [styles.card, pressed && styles.pressed, style]}>
@@ -22,7 +24,11 @@ export function Card({ children, style, onPress, accessibilityLabel }: Props) {
       </Pressable>
     );
   }
-  return <View style={[styles.card, style]}>{children}</View>;
+  return (
+    <View style={[styles.card, style]} testID={testID}>
+      {children}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

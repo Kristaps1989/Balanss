@@ -184,10 +184,14 @@ export interface ExportResponse {
 
 // ---------------------------------------------------------------- AI copy
 
+/** What a tip is about; food tips (protein, fibre, meals) offer "Kas ir mājās?". */
+export type TipFocus = 'protein' | 'water' | 'steps' | 'fibre' | 'sleep' | 'meals' | 'overall';
+
 export interface Tip {
   id: string;
   date: string;
   tone: ToneStyle;
+  angle: TipFocus | null;
   body: string;
   /** Short fragment of `body` to emphasise, e.g. "42 g". */
   highlight: string | null;

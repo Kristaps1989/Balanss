@@ -206,6 +206,7 @@ const styles = StyleSheet.create({
   round: { width: hit, height: hit, borderRadius: hit / 2, alignItems: 'center', justifyContent: 'center' },
   pill: { flex: 1, height: 52, borderRadius: 26, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   pillText: { fontFamily: fonts.bodySemi, fontSize: 15 },
+  chip: { minHeight: 44, borderRadius: 22, borderWidth: 1, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
   seg: { flexDirection: 'row', backgroundColor: colors.chip, borderRadius: 22, padding: 4, gap: 4 },
   segItem: { flex: 1, minHeight: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
   segOn: {
@@ -235,3 +236,34 @@ const styles = StyleSheet.create({
   checkTitle: { fontFamily: fonts.bodySemi, fontSize: 15, lineHeight: 20, color: colors.ink },
   checkHint: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.text2 },
 });
+
+/** Wrapping single-choice chips (genres, cities). Each chip ≥ 44 px tall. */
+export function ChipGroup<T extends string>({
+  options,
+  value,
+  onChange,
+  label,
+}: {
+  options: { value: T; label: string }[];
+  value: T | null;
+  onChange: (v: T) => void;
+  label: string;
+}) {
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }} accessibilityRole="radiogroup" accessibilityLabel={label}>
+      {options.map((o) => {
+        const on = o.value === value;
+        return (
+          <Pressable
+            key={o.value}
+            onPress={() => onChange(o.value)}
+            accessibilityRole="radio"
+            aria-checked={on}
+            style={[styles.chip, { backgroundColor: on ? colors.ink : colors.white, borderColor: on ? colors.ink : colors.inputBorder }]}>
+            <Text style={[styles.pillText, { color: on ? colors.white : colors.ink }]}>{o.label}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}

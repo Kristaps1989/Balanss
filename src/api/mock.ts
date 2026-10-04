@@ -5,6 +5,10 @@
  * enough for UI work; the backend is the source of truth.
  */
 import type {
+  LeisureItem,
+  LeisureRequest,
+  LeisureResponse,
+  TipFocus,
   AnalyzeMealResponse,
   AuthTokens,
   CreateMealRequest,
@@ -24,6 +28,7 @@ import type {
   WeeklySummary,
   Workout,
 } from '@shared/api';
+import { PANTRY_FRESH_DAYS } from '@shared/api';
 import { addDays, lastNDates, mondayOf, parseISODate, toISODate } from '@shared/dates';
 import { itemsTotals, mealTypeForTime, scale } from '@shared/nutrition';
 import {
@@ -36,6 +41,7 @@ import {
   styleName,
   validateAnswers,
 } from '@shared/personality';
+import { genreLabel } from '@shared/leisure';
 import { computeSleepWindow, sleepScore } from '@shared/sleep';
 import { computeTargets } from '@shared/targets';
 
@@ -68,6 +74,7 @@ interface State {
   tips: Tip[];
   questions: WeeklyQuestion[];
   analysesByDate: Record<string, number>;
+  pantry: { items: string[]; updatedAt: string | null };
 }
 
 const today = () => toISODate(new Date());
@@ -124,6 +131,7 @@ function newMe(email: string, seeded: boolean): Me {
       : { source: null, connected: false, devices: [], lastSyncAt: null },
     plan: 'free',
     onboardingDone: seeded,
+    leisureCity: seeded ? 'Rīga' : null,
     createdAt: new Date().toISOString(),
     preferences: { diet: 'any', avoid: [] },
     aiPersonalization: true,
@@ -244,6 +252,7 @@ function seed(): State {
     tips: [],
     questions: [],
     analysesByDate: {},
+    pantry: { items: [], updatedAt: null },
   };
 }
 
@@ -281,6 +290,33 @@ function fmt(n: number) {
   return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 }
 
+const pantryFresh = () => {
+  const p = S().pantry;
+  return !!p.updatedAt && p.items.length > 0 && Date.now() - new Date(p.updatedAt).getTime() < PANTRY_FRESH_DAYS * 86_400_000;
+};
+
+/** Offline listings: always in the future, with links only where a search would give one. */
+function mockLeisure(req: LeisureRequest, city: string): LeisureResponse {
+  const now = Date.now();
+  const at = (min: number) => new Date(now + min * 60_000).toISOString();
+  const g = genreLabel(req.kind, req.genre);
+  const base = { subtitle: null, venue: null, url: null, startsAt: null };
+  let items: LeisureItem[];
+  if (req.kind === 'book') {
+    items = [
+      { ...base, id: 'b1', title: 'Mātes piens', subtitle: 'Nora Ikstena', description: 'Pajautā bibliotēkā vai grāmatnīcā.', provider: 'book' },
+      { ...base, id: 'b2', title: 'Paisums', subtitle: 'Inga Ābele', description: 'Pajautā bibliotēkā vai grāmatnīcā.', provider: 'book' },
+    ];
+  } else if (req.kind === 'movie' && req.where === 'go3') {
+    items = [{ ...base, id: 'g1', title: `Go3: ${g}`, subtitle: '2024', description: 'Viegla filma vakaram.', url: 'https://go3.lv', provider: 'go3' }];
+  } else if (req.kind === 'movie') {
+    items = [{ ...base, id: 'c1', title: `Vakara seanss: ${g}`, venue: `Kino, ${city}`, description: 'Seanss vēl šovakar.', startsAt: at(120), url: 'https://www.forumcinemas.lv', provider: 'cinema' }];
+  } else {
+    items = [{ ...base, id: 'e1', title: `${g}: ${city}`, venue: city, description: 'Mierīgs pasākums vakarā.', startsAt: at(150), url: 'https://www.bilesuserviss.lv', provider: 'event' }];
+  }
+  return { items, city, live: req.kind !== 'book', note: null, generatedAt: new Date(now).toISOString() };
+}
+
 function makeTip(date: string, variant: number): Tip {
   const s = S();
   const d = dayFor(date);
@@ -289,32 +325,35 @@ function makeTip(date: string, variant: number): Tip {
   const tone: ToneStyle = s.me.tone;
   const soft = s.me.personality?.levels.emotionalStability === 'low';
   const shortSleep = (d.sleep?.totalMin ?? 450) < s.me.targets.sleepMin;
-  const options: { body: string; highlight: string | null }[] = [];
-  if (proteinLeft > 10) {
+  const options: { body: string; highlight: string | null; angle: TipFocus }[] = [];
+  const home = pantryFresh() ? s.pantry.items.slice(0, 2) : [];
+  if (home.length && proteinLeft > 10) {
+    options.push({ body: `No tā, kas ir mājās: ${home.join(' un ')} vakariņās — līdz olbaltumvielu mērķim trūkst ${proteinLeft} g.`, highlight: home[0]!, angle: 'protein' });
+  } else if (proteinLeft > 10) {
     const h = `${proteinLeft} g`;
     options.push(
       tone === 'plan'
-        ? { body: `Līdz olbaltumvielu mērķim trūkst ${h}. Viens viegls solis: biezpiens vai jogurts vakariņās (+18 g).${soft && shortSleep ? ' Miegs bija nedaudz īsāks — tāpēc šodien bez spiediena.' : ''}`, highlight: h }
+        ? { body: `Līdz olbaltumvielu mērķim trūkst ${h}. Viens viegls solis: biezpiens vai jogurts vakariņās (+18 g).${soft && shortSleep ? ' Miegs bija nedaudz īsāks — tāpēc šodien bez spiediena.' : ''}`, highlight: h, angle: 'protein' as const }
         : tone === 'novelty'
-          ? { body: `Ideja vakariņām: lēcu zupa ar ciedru riekstiem — tā pietuvinās olbaltumvielu mērķim, kam vēl trūkst ${h}.`, highlight: h }
+          ? { body: `Ideja vakariņām, ja tas ir mājās: lēcu zupa — tā pietuvinās olbaltumvielu mērķim, kam vēl trūkst ${h}.`, highlight: h, angle: 'protein' as const }
           : tone === 'gentle'
-            ? { body: `Ja sanāk, vakariņās pievieno kaut ko ar olbaltumvielām — vēl ${h}. Arī šodiena jau ir laba.`, highlight: h }
-            : { body: `Olbaltumvielām šodien vēl ${h}. Der jogurts, biezpiens vai pākšaugi.`, highlight: h },
+            ? { body: `Ja sanāk, vakariņās pievieno kaut ko ar olbaltumvielām — vēl ${h}. Arī šodiena jau ir laba.`, highlight: h, angle: 'protein' as const }
+            : { body: `Olbaltumvielām šodien vēl ${h}. Der jogurts, biezpiens vai pākšaugi.`, highlight: h, angle: 'protein' as const },
     );
   }
   if (waterLeft > 300) {
     const h = `${(waterLeft / 1000).toFixed(1).replace('.', ',')} l`;
     options.push(
       tone === 'plan'
-        ? { body: `Ūdenim vēl ${h}. Plāns: glāze tagad un glāze pie katras maltītes.`, highlight: h }
+        ? { body: `Ūdenim vēl ${h}. Plāns: glāze tagad un glāze pie katras maltītes.`, highlight: h, angle: 'water' as const }
         : tone === 'novelty'
-          ? { body: `Pamēģini ūdeni ar gurķi un piparmētru — līdz mērķim vēl ${h}.`, highlight: h }
-          : { body: `Ja ērti, iedzer malku ūdens. Līdz mērķim vēl ${h}, nekas nav nokavēts.`, highlight: h },
+          ? { body: `Pamēģini ūdeni ar gurķi un piparmētru — līdz mērķim vēl ${h}.`, highlight: h, angle: 'water' as const }
+          : { body: `Ja ērti, iedzer malku ūdens. Līdz mērķim vēl ${h}, nekas nav nokavēts.`, highlight: h, angle: 'water' as const },
     );
   }
-  options.push({ body: 'Īsa pastaiga pēc vakariņām palīdz arī miegam. 15 minūtes ir gana.', highlight: '15 minūtes' });
+  options.push({ body: 'Īsa pastaiga pēc vakariņām palīdz arī miegam. 15 minūtes ir gana.', highlight: '15 minūtes', angle: 'steps' });
   const pick = options[variant % options.length];
-  return { id: id('tip'), date, tone, body: pick.body, highlight: pick.highlight, accepted: false, aiGenerated: false };
+  return { id: id('tip'), date, tone, angle: pick.angle, body: pick.body, highlight: pick.highlight, accepted: false, aiGenerated: false };
 }
 
 function weeklyQuestionFor(date: string): WeeklyQuestion | null {
@@ -722,6 +761,36 @@ export class MockApi implements Api {
     if (!q) throw new ApiError(404, 'not_found', 'Question not found');
     q.answerIndex = optionIndex;
     return q;
+  };
+
+  refreshTip: Api['refreshTip'] = async (date) => {
+    await delay(300);
+    const s = S();
+    s.tips = s.tips.filter((t) => t.date !== date || t.accepted);
+    const t = makeTip(date, 0);
+    s.tips.push(t);
+    return t;
+  };
+  pantry: Api['pantry'] = async () => ({ ...S().pantry, fresh: pantryFresh() });
+  savePantry: Api['savePantry'] = async (items) => {
+    const clean = [...new Set(items.map((i) => i.trim().toLowerCase()).filter(Boolean))];
+    S().pantry = { items: clean, updatedAt: new Date().toISOString() };
+    return this.pantry();
+  };
+  scanPantry: Api['scanPantry'] = async () => {
+    await delay(800);
+    return { items: ['olas', 'piens', 'auzu pārslas', 'āboli', 'burkāni', 'siers'] };
+  };
+  setCity: Api['setCity'] = async (city) => {
+    const s = S();
+    s.me = { ...s.me, leisureCity: city };
+    return s.me;
+  };
+  suggestLeisure: Api['suggestLeisure'] = async (req) => {
+    await delay(700);
+    const city = S().me.leisureCity;
+    if (!city) throw new ApiError(400, 'city_required', 'Choose a city first');
+    return mockLeisure(req, city);
   };
 
   reportTip: Api['reportTip'] = async (tipId) => {

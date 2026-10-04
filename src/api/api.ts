@@ -1,4 +1,8 @@
 import type {
+  LeisureRequest,
+  LeisureResponse,
+  Pantry,
+  PantryScanResponse,
   AddWaterResponse,
   AnalyzeMealRequest,
   AnalyzeMealResponse,
@@ -89,6 +93,15 @@ export interface Api {
   tipNext(date: string): Promise<Tip>;
   acceptTip(id: string): Promise<Tip>;
   reportTip(id: string, reason: TipReportReason): Promise<void>;
+  /** After a pantry change: a new tip from what is at home (not counted as "Cits ieteikums"). */
+  refreshTip(date: string): Promise<Tip>;
+
+  // pantry + free time
+  pantry(): Promise<Pantry>;
+  savePantry(items: string[]): Promise<Pantry>;
+  scanPantry(imageBase64: string): Promise<PantryScanResponse>;
+  setCity(city: string): Promise<Me>;
+  suggestLeisure(req: LeisureRequest): Promise<LeisureResponse>;
   weeklySummary(date: string): Promise<WeeklySummary>;
   recipes(date: string): Promise<RecipesResponse>;
   logRecipe(id: string, date: string): Promise<Meal>;

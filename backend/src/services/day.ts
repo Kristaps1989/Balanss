@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, gte, lte } from 'drizzle-orm';
 
 import type {
+  TipFocus,
   Day,
   HealthSource,
   MealType,
@@ -72,7 +73,7 @@ export function toWorkout(w: WorkoutRow): Workout {
 }
 
 export function toTip(t: TipRow): Tip {
-  return { id: t.id, date: t.date, tone: t.tone as ToneStyle, body: t.body, highlight: t.highlight, accepted: t.accepted, aiGenerated: t.aiGenerated };
+  return { id: t.id, date: t.date, tone: t.tone as ToneStyle, angle: t.angle as TipFocus | null, body: t.body, highlight: t.highlight, accepted: t.accepted, aiGenerated: t.aiGenerated };
 }
 
 export function toWeeklyQuestion(q: WeeklyQuestionRow): WeeklyQuestion {
