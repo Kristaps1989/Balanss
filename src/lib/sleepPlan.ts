@@ -32,8 +32,12 @@ export function eveningAxisPos(hm: string): number {
 }
 
 /** Short Latvian trend label for resting HR over 7 days. */
+/** No value in the whole window: the device doesn't send this metric to Health Connect / Apple Health. */
+const NO_DEVICE_DATA = 'ierīce šos datus nenodod';
+
 export function hrTrend(series: (number | null)[]): string {
   const v = series.filter((x): x is number => x !== null);
+  if (v.length === 0) return NO_DEVICE_DATA;
   if (v.length < 3) return 'vēl maz datu';
   const range = Math.max(...v) - Math.min(...v);
   const today = v[v.length - 1];
@@ -44,6 +48,7 @@ export function hrTrend(series: (number | null)[]): string {
 
 export function hrvTrend(series: (number | null)[]): string {
   const v = series.filter((x): x is number => x !== null);
+  if (v.length === 0) return NO_DEVICE_DATA;
   if (v.length < 3) return 'vēl maz datu';
   const avg = v.reduce((a, b) => a + b, 0) / v.length;
   const today = v[v.length - 1];

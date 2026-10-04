@@ -15,6 +15,7 @@ import { SourceNote } from '@/components/SourceNote';
 import { ErrorState, Loading } from '@/components/States';
 import { duration } from '@/lib/format';
 import { eveningAxisPos, windDownSteps } from '@/lib/sleepPlan';
+import { useHealthRefresh } from '@/lib/services';
 import { useToday } from '@/lib/today';
 import { eveningMinutes, fromEveningMinutes } from '@shared/sleep';
 import { colors, fonts, radius, type } from '@/theme';
@@ -26,6 +27,7 @@ export default function Sleep() {
   const date = useToday();
   const me = useMe();
   const sl = useSleep(date);
+  const hr = useHealthRefresh(sl.refetch);
   const reminders = useMeMutation(api.updateReminders);
   const header = <TitleRow title="Miegs" right={<Avatar name={me.data?.profile.firstName || '?'} onPress={() => router.push('/me')} />} />;
   if (sl.isPending || !me.data) return <Screen>{header}<Loading /></Screen>;
@@ -63,7 +65,7 @@ export default function Sleep() {
   const y = (hm: string) => Math.max(0, Math.min(136, eveningMinutes(hm) - axisStart - 7));
 
   return (
-    <Screen refreshing={sl.isRefetching} onRefresh={() => sl.refetch()} testID="sleep">
+    <Screen refreshing={hr.refreshing} onRefresh={hr.refresh} testID="sleep">
       {header}
       <View style={styles.night}>
         <View style={styles.nightTop}>

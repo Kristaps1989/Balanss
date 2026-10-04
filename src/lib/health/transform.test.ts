@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildSyncPayload, deviceName, hrZones, sleepNight } from './transform';
+import { activeFromTotal, buildSyncPayload, dailyMaxByOrigin, deviceName, estimateRestingHr, hrZones, sleepNight } from './transform';
 
 const iso = (d: string, hm: string) => new Date(`${d}T${hm}:00`).toISOString();
 
@@ -63,5 +63,58 @@ describe('health transform', () => {
     expect(p.workouts[0]).toMatchObject({ externalId: 'x1', type: 'walk', durationMin: 42, avgHr: 112, device: 'Polar H10' });
     expect(p.weights).toEqual([{ date: '2026-09-28', kg: 71 }]);
     expect(p.devices.sort()).toEqual(['Apple Watch', 'Polar H10']);
+  });
+});
+
+describe('Samsung Health and multi-source data', () => {
+  const rec = (d: string, hm: string, value: number, origin: string) => ({
+    startTime: iso(d, hm),
+    endTime: iso(d, hm),
+    value,
+    metadata: { dataOrigin: origin },
+  });
+
+  it('takes the largest per-app daily total instead of summing apps', () => {
+    const totals = dailyMaxByOrigin([
+      // Phone-only counter (what Health Connect often prioritises): 3 323
+      rec('2026-10-04', '08:00', 1200, 'android'),
+      rec('2026-10-04', '09:30', 2123, 'android'),
+      // Samsung Health, phone + watch merged: 7 815
+      rec('2026-10-04', '08:39', 6100, 'com.sec.android.app.shealth'),
+      rec('2026-10-04', '09:45', 1715, 'com.sec.android.app.shealth'),
+      rec('2026-10-03', '12:00', 4000, 'com.sec.android.app.shealth'),
+    ]);
+    expect(totals.get('2026-10-04')).toBe(7815);
+    expect(totals.get('2026-10-03')).toBe(4000);
+  });
+
+  it('derives active energy from total minus resting energy', () => {
+    expect(activeFromTotal(2077, 1600, 1)).toBe(477);
+    expect(activeFromTotal(1000, 1600, 0.5)).toBe(200);
+    expect(activeFromTotal(500, 1600, 0.5)).toBe(0); // never negative
+    expect(activeFromTotal(0, 1600, 1)).toBe(0);
+  });
+
+  it('estimates resting HR from a day of samples, but not from a few readings', () => {
+    const samples = Array.from({ length: 24 }, (_, h) => ({
+      time: iso('2026-10-04', `${String(h).padStart(2, '0')}:10`),
+      beatsPerMinute: h >= 1 && h <= 3 ? 58 + h : 80,
+    }));
+    expect(estimateRestingHr(samples).get('2026-10-04')).toBe(60); // (59+60+61)/3
+    expect(estimateRestingHr(samples.slice(0, 5)).size).toBe(0);
+  });
+
+  it('uses the estimate only when the device wrote no resting HR record', () => {
+    const heartRate = [
+      {
+        samples: Array.from({ length: 20 }, (_, h) => ({ time: iso('2026-10-04', `${String(h).padStart(2, '0')}:05`), beatsPerMinute: 64 })),
+        metadata: { dataOrigin: 'com.sec.android.app.shealth' },
+      },
+    ];
+    const base = { days: [{ date: '2026-10-04', steps: 7815, activeKcal: 477 }], hrv: [], sleep: [], exercise: [], heartRate, weights: [], age: 34 };
+    expect(buildSyncPayload({ ...base, restingHr: [] }).days[0].restingHr).toBe(64);
+    const withRecord = buildSyncPayload({ ...base, restingHr: [{ time: iso('2026-10-04', '07:00'), value: 58 }] });
+    expect(withRecord.days[0].restingHr).toBe(58);
+    expect(withRecord.days[0].hrvMs).toBeNull();
   });
 });

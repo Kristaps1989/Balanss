@@ -14,6 +14,7 @@ import { Screen } from '@/components/Screen';
 import { SourceNote } from '@/components/SourceNote';
 import { ErrorState, Loading } from '@/components/States';
 import { formatNumber, workoutWhen } from '@/lib/format';
+import { useHealthRefresh } from '@/lib/services';
 import { hrTrend, hrvTrend } from '@/lib/sleepPlan';
 import { useToday } from '@/lib/today';
 import { colors, fonts, radius, type } from '@/theme';
@@ -33,6 +34,7 @@ export default function Movement() {
   const date = useToday();
   const me = useMe();
   const mv = useMovement(date);
+  const hr = useHealthRefresh(mv.refetch);
   const header = <TitleRow title="Kustība" right={<Avatar name={me.data?.profile.firstName || '?'} onPress={() => router.push('/me')} />} />;
   if (mv.isPending) return <Screen>{header}<Loading /></Screen>;
   if (mv.isError) return <ErrorState onRetry={() => mv.refetch()} />;
@@ -42,7 +44,7 @@ export default function Movement() {
   const max = Math.max(m.today.steps.target * 1.35, ...m.days.map((d) => d.steps));
 
   return (
-    <Screen refreshing={mv.isRefetching} onRefresh={() => mv.refetch()} testID="movement">
+    <Screen refreshing={hr.refreshing} onRefresh={hr.refresh} testID="movement">
       {header}
       <Card style={styles.card}>
         <View style={styles.stepsHead}>

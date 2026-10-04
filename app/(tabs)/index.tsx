@@ -19,6 +19,7 @@ import { ErrorState, Loading } from '@/components/States';
 import { WaterGlass } from '@/components/WaterGlass';
 import { duration, formatNumber, greeting, kcal, litres, longDate } from '@/lib/format';
 import { GLASS_ML, useAddWater } from '@/lib/mutations';
+import { useHealthRefresh } from '@/lib/services';
 import { useToday } from '@/lib/today';
 import { colors, fonts, hit, radius, space, type } from '@/theme';
 
@@ -27,6 +28,7 @@ export default function HomeScreen() {
   const date = useToday();
   const me = useMe();
   const day = useDay(date);
+  const hr = useHealthRefresh(day.refetch);
   if (day.isPending || me.isPending) return <Loading />;
   if (day.isError || !me.data) return <ErrorState onRetry={() => day.refetch()} />;
   return (
@@ -35,8 +37,8 @@ export default function HomeScreen() {
       pro={me.data.plan === 'pro'}
       firstName={me.data.profile.firstName}
       day={day.data}
-      refreshing={day.isRefetching}
-      onRefresh={() => day.refetch()}
+      refreshing={hr.refreshing}
+      onRefresh={hr.refresh}
     />
   );
 }
