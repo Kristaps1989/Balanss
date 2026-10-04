@@ -164,6 +164,8 @@ export interface Me {
   devices: Devices;
   plan: Plan;
   onboardingDone: boolean;
+  /** City for free-time suggestions (chosen by the user; no GPS). */
+  leisureCity: string | null;
   createdAt: string;
 }
 
@@ -587,6 +589,13 @@ export interface ApiErrorBody {
  * POST   /tips/:id/report             TipReportRequest        → { ok: true }   (hides the tip, next one is generated)
  * GET    /insights/weekly?date        (Pro; 402 pro_required) → WeeklySummary
  * GET    /recipes?date                (Pro; 402 pro_required) → RecipesResponse
+ *
+ * GET    /pantry                                              → Pantry
+ * PUT    /pantry                      PantryUpdate            → Pantry
+ * POST   /pantry/scan                 PantryScanRequest       → PantryScanResponse   (fridge photo → ingredients; not saved)
+ * POST   /tips/refresh?date                                   → Tip   (after a pantry change; not counted as "Cits ieteikums")
+ * PUT    /me/city                     { city }                → Me
+ * POST   /leisure/suggest             LeisureRequest          → LeisureResponse      (429 leisure_limit after 15/day)
  * POST   /recipes/:id/log             { date }                → Meal
  * GET    /weekly-question?date                                → WeeklyQuestion | null
  * POST   /weekly-question/:id/answer  { optionIndex }         → WeeklyQuestion
@@ -596,3 +605,61 @@ export interface ApiErrorBody {
  *
  * GET    /health                      (liveness, no /v1 prefix) → { ok: true }
  */
+
+// ---------------------------------------------------------------- pantry
+
+/** What the user has at home. Fresh for PANTRY_FRESH_DAYS after the last update. */
+export interface Pantry {
+  items: string[];
+  updatedAt: string | null;
+  fresh: boolean;
+}
+export interface PantryUpdate {
+  items: string[];
+}
+export interface PantryScanRequest {
+  imageBase64: string;
+}
+export interface PantryScanResponse {
+  items: string[];
+}
+export const PANTRY_FRESH_DAYS = 3;
+
+// ---------------------------------------------------------------- free time
+
+export type LeisureKind = 'movie' | 'book' | 'event';
+/** Films: in a cinema, on Go3, or anything (cinema, Go3 or other streaming). */
+export type MovieWhere = 'cinema' | 'go3' | 'any';
+export type EventWhen = 'today' | 'weekend';
+
+export interface LeisureRequest {
+  kind: LeisureKind;
+  /** Key from LEISURE_GENRES[kind]. */
+  genre: string;
+  where?: MovieWhere;
+  when?: EventWhen;
+}
+
+export interface LeisureItem {
+  id: string;
+  title: string;
+  /** Author, director/year, or venue line. */
+  subtitle: string | null;
+  description: string;
+  /** Screening or event start (ISO); null for books, streaming and timeless ideas. */
+  startsAt: string | null;
+  venue: string | null;
+  /** Link from the web search (cinema page, go3.lv, event page); never invented. */
+  url: string | null;
+  provider: 'cinema' | 'go3' | 'streaming' | 'book' | 'event' | 'idea';
+}
+
+export interface LeisureResponse {
+  items: LeisureItem[];
+  city: string;
+  /** True when the items come from a live web search done now (or cached within 2 h). */
+  live: boolean;
+  /** Short Latvian note, e.g. why nothing live was found. */
+  note: string | null;
+  generatedAt: string;
+}

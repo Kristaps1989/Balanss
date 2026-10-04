@@ -57,6 +57,7 @@ const base: Omit<ToneInput, 'tone' | 'modifiers'> = {
   care: false,
   findings: [],
   history: EMPTY_HISTORY,
+  pantry: null,
   preferences: { diet: 'any', avoid: [] },
 };
 

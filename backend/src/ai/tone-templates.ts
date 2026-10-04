@@ -66,6 +66,83 @@ function readyWord(input: Pick<ToneInput, 'sex'>): string {
   return input.sex === 'm' ? 'kad jūties gatavs' : input.sex === 'f' ? 'kad jūties gatava' : 'kad sajūti, ka ir laiks';
 }
 
+type FoodTag = 'dairy' | 'egg' | 'fish' | 'meat' | 'pork' | 'nuts' | 'gluten';
+/** Stems of common products, by what they help with; tags let us respect diet and avoid-lists. */
+const PANTRY_PROTEIN: [RegExp, FoodTag[]][] = [
+  [/^ola|olas\b/, ['egg']],
+  [/biezpien/, ['dairy']],
+  [/jogurt/, ['dairy']],
+  [/kefīr/, ['dairy']],
+  [/sier/, ['dairy']],
+  [/pupiņ|lēc|zirņ|aunazirņ|tofu/, []],
+  [/vist|tītar|liellop|gaļ/, ['meat']],
+  [/cūk|šķiņķ|bekon/, ['meat', 'pork']],
+  [/zivs|zivis|las[is]|tunzi|siļķ|menc/, ['fish']],
+  [/riekst/, ['nuts']],
+];
+const PANTRY_FIBRE: [RegExp, FoodTag[]][] = [
+  [/auzu|pārsl/, ['gluten']],
+  [/rupjmaiz|pilngrauda/, ['gluten']],
+  [/griķ|brūnie rīsi|kvinoj/, []],
+  [/ābol|bumbier|ogas|ogu|banān|plūm/, []],
+  [/burkān|kāpost|brokol|biete|dārzeņ|ķirb/, []],
+  [/pupiņ|lēc|zirņ/, []],
+];
+
+function allowedTag(tag: FoodTag, p: ToneInput['preferences']): boolean {
+  const avoid = p?.avoid ?? [];
+  const diet = p?.diet ?? 'any';
+  if (tag === 'dairy') return diet !== 'vegan' && !avoid.includes('lactose');
+  if (tag === 'egg') return diet !== 'vegan' && !avoid.includes('eggs');
+  if (tag === 'fish') return diet !== 'vegan' && diet !== 'vegetarian' && !avoid.includes('fish');
+  if (tag === 'meat') return diet === 'any';
+  if (tag === 'pork') return !avoid.includes('pork');
+  if (tag === 'nuts') return !avoid.includes('nuts');
+  return !avoid.includes('gluten');
+}
+
+/** Items from the user's pantry that fit the angle and their preferences (at most 2, in their own words). */
+export function pantryPicks(input: ToneInput, angle: TipAngle): string[] {
+  if (!input.pantry?.length || (angle !== 'protein' && angle !== 'fibre')) return [];
+  const table = angle === 'protein' ? PANTRY_PROTEIN : PANTRY_FIBRE;
+  const picks: string[] = [];
+  for (const item of input.pantry) {
+    const hit = table.find(([re]) => re.test(item));
+    if (hit && hit[1].every((t) => allowedTag(t, input.preferences)) && !picks.includes(item)) picks.push(item);
+    if (picks.length === 2) break;
+  }
+  return picks;
+}
+
+const both = (picks: string[]) => (picks.length === 2 ? `${picks[0]} un ${picks[1]}` : picks[0]);
+
+/** Food tip built only from what is at home. */
+function pantryTip(input: ToneInput, angle: 'protein' | 'fibre', picks: string[], t: (body: string, h: string | null) => TipResult): TipResult {
+  const n = input.nutrition;
+  const what = angle === 'protein' ? 'olbaltumvielām' : 'šķiedrvielām';
+  const gap = angle === 'protein' ? Math.max(0, Math.round(n.proteinG.target - n.proteinG.value)) : null;
+  switch (input.tone) {
+    case 'plan':
+      return t(
+        angle === 'protein'
+          ? `No tā, kas ir mājās: ${both(picks)} vakariņās — līdz olbaltumvielu mērķim trūkst ${gap} g.`
+          : `No tā, kas ir mājās: ${both(picks)} — šķiedrvielas ${fmtDec(n.fibreG.value)} no ${n.fibreG.target} g.`,
+        picks[0],
+      );
+    case 'novelty':
+      return t(
+        picks.length === 2
+          ? `Ideja no tā, kas jau ir mājās: ${picks[0]} kopā ar ${picks[1]} — jauna kombinācija ${what}, bez iepirkšanās.`
+          : `Ideja no tā, kas jau ir mājās: ${picks[0]} citā veidā nekā parasti — ${what}, bez iepirkšanās.`,
+        picks[0],
+      );
+    case 'gentle':
+      return t(`Ja sanāk, no tā, kas jau ir mājās, ${what} der ${both(picks)}. Bez spiediena.`, picks[0]);
+    default:
+      return t(`No mājās esošā ${what} der ${both(picks)}.`, picks[0]);
+  }
+}
+
 export function templateTip(input: ToneInput, angle: TipAngle): TipResult {
   const n = input.nutrition;
   const proteinGap = Math.max(0, Math.round(n.proteinG.target - n.proteinG.value));
@@ -94,6 +171,9 @@ export function templateTip(input: ToneInput, angle: TipAngle): TipResult {
     if (angle === 'overall') return t('Šodien svarīgākais ir regulāras maltītes un atpūta. Nekas nav jāsasniedz.', 'regulāras maltītes un atpūta');
   }
 
+  const picks = pantryPicks(input, angle);
+  if (picks.length && (angle === 'protein' || angle === 'fibre')) return pantryTip(input, angle, picks, t);
+
   switch (input.tone) {
     case 'plan':
       switch (angle) {
@@ -121,13 +201,13 @@ export function templateTip(input: ToneInput, angle: TipAngle): TipResult {
     case 'novelty':
       switch (angle) {
         case 'protein':
-          return t(`Ideja šodienai: vakariņās pamēģini ${food.proteinNovelty} — jauna garša un ${proteinGap} g olbaltumvielu tuvāk mērķim.`, food.proteinNovelty);
+          return t(`Ideja šodienai, ja tas ir mājās: ${food.proteinNovelty}. Ja nav — der arī ${food.proteinList}.`, food.proteinNovelty);
         case 'water':
           return t('Pamēģini ūdeni ar gurķi un piparmētru — tā pati glāze, cita garša.', 'gurķi un piparmētru');
         case 'steps':
           return t(`Ideja: šodien izpēti jaunu maršrutu pa apkārtni — vēl ${fmtInt(stepsGap)} soļu, un varbūt atradīsi jaunu iecienītu vietu.`, 'jaunu maršrutu');
         case 'fibre':
-          return t(`Ideja šodienai: izmēģini jaunu recepti — ${food.fibreNovelty}. Tā aizpildīs šķiedrvielas, un kaut kas jauns.`, food.fibreNovelty);
+          return t(`Ideja šodienai, ja tas ir mājās: ${food.fibreNovelty}. Ja nav — der arī ${food.fibreList}.`, food.fibreNovelty);
         case 'sleep':
           return t(`Šovakar kaut kas jauns: liepziedu tēja un 10 minūtes papīra grāmatas telefona vietā. Miega logs sākas ${start}.`, 'liepziedu tēja');
         default:
@@ -173,6 +253,8 @@ export function fakeTip(input: ToneInput, exclude: string[] = []): TipResult {
   const rest = (['protein', 'water', 'steps', 'fibre', 'overall'] as TipAngle[]).filter((a) => !angles.includes(a) && !avoid.has(a));
   for (const a of [...angles, ...rest]) {
     if (a === 'sleep' && !input.sleep) continue;
+    // With a known pantry, skip food angles nothing at home fits (no shopping lists).
+    if (input.pantry?.length && (a === 'protein' || a === 'fibre') && !pantryPicks(input, a).length) continue;
     const tip = templateTip(input, a);
     if (!exclude.includes(tip.body)) return tip;
   }

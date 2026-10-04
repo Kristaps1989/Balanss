@@ -85,14 +85,39 @@ Rules:
 - "confidence" 0..1; alternatives only for items below 0.6 (up to 3, with grams and per-100 g nutrients), otherwise an empty list.
 - Ignore words that are not food. If nothing is food, return an empty "items" list.`;
 
+export const PANTRY_SYSTEM = `You are the pantry step of Balanss, a Latvian nutrition app. The user photographs the inside of their fridge or kitchen shelf so the app can suggest food ideas that need no shopping. Return the food products you can actually see.
+
+Rules:
+- One entry per distinct product, Latvian, lower case, short, plural where natural: "olas", "piens", "biezpiens", "burkāni", "auzu pārslas", "vistas fileja".
+- Only what is clearly visible. If you are unsure what a package is, leave it out rather than guess. Do not list brands, non-food items, cleaning products or medicines.
+- At most 30 entries. If the image shows no food, return an empty "items" list.
+- Return only the data.`;
+
+const PantrySchema = z.object({ items: z.array(z.string()) });
+
+/** Normalise an ingredient list: trimmed, lower case, unique, at most 40 entries of 40 characters. */
+export function cleanPantryItems(items: string[]): string[] {
+  const out: string[] = [];
+  for (const raw of items) {
+    const v = raw.replace(/\s+/g, ' ').trim().toLowerCase().slice(0, 40);
+    if (v && !out.includes(v)) out.push(v);
+  }
+  return out.slice(0, 40);
+}
+
 export interface FoodAi {
   analyzeMeal(imageBase64: string, mediaType: 'image/jpeg' | 'image/png' | 'image/webp', log: FastifyBaseLogger): Promise<FoodItemDraft[]>;
   parseText(text: string, log: FastifyBaseLogger): Promise<FoodItemDraft[]>;
+  /** Fridge photo → ingredient names. Empty on failure (never a guessed list). */
+  scanPantry(imageBase64: string, mediaType: 'image/jpeg' | 'image/png' | 'image/webp', log: FastifyBaseLogger): Promise<string[]>;
 }
+
+export const FAKE_PANTRY = ['olas', 'piens', 'auzu pārslas', 'āboli', 'burkāni', 'siers'];
 
 export const fakeFoodAi: FoodAi = {
   analyzeMeal: async () => fakeAnalyzeMeal(),
   parseText: async (text) => fakeParseText(text),
+  scanPantry: async () => FAKE_PANTRY,
 };
 
 export function claudeFoodAi(client: ClaudeClient, model: string): FoodAi {
@@ -129,6 +154,25 @@ export function claudeFoodAi(client: ClaudeClient, model: string): FoodAi {
       } catch (err) {
         logAiFailure(log, 'meals.parse-text', err);
         return fakeParseText(text);
+      }
+    },
+    async scanPantry(imageBase64, mediaType, log) {
+      try {
+        const out = await callStructured(client, model, log, {
+          route: 'pantry.scan',
+          system: PANTRY_SYSTEM,
+          effort: 'low',
+          maxTokens: 4000,
+          schema: PantrySchema,
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } },
+            { type: 'text', text: 'Kas ir redzams šajā ledusskapī vai plauktā?' },
+          ],
+        });
+        return cleanPantryItems(out.items).slice(0, 30);
+      } catch (err) {
+        logAiFailure(log, 'pantry.scan', err);
+        return [];
       }
     },
   };

@@ -40,6 +40,21 @@ export async function nextTip(deps: AppDeps, user: UserRow, date: string, log: F
   return createTip(deps, user, date, log);
 }
 
+/**
+ * After the pantry changes: the tip on screen is replaced by one that uses what is at home.
+ * Not a "Cits ieteikums" (no dismissal is recorded); an accepted tip is kept in history.
+ */
+export async function refreshTip(deps: AppDeps, user: UserRow, date: string, log: FastifyBaseLogger): Promise<Tip> {
+  const [current] = await deps.db
+    .select()
+    .from(tips)
+    .where(and(eq(tips.userId, user.id), eq(tips.date, date), eq(tips.hidden, false)))
+    .orderBy(desc(tips.createdAt))
+    .limit(1);
+  if (current && !current.accepted) await deps.db.delete(tips).where(eq(tips.id, current.id));
+  return createTip(deps, user, date, log);
+}
+
 /** Reported tips are hidden for good; the reason is stored for review. The next GET /tips/today avoids its angle. */
 export async function reportTip(deps: AppDeps, userId: string, id: string, reason: TipReportReason): Promise<void> {
   const rows = await deps.db
@@ -57,7 +72,7 @@ async function createTip(deps: AppDeps, user: UserRow, date: string, log: Fastif
     .where(and(eq(tips.userId, user.id), eq(tips.date, date)));
   const avoid = [...new Set(earlier.filter((t) => t.hidden && t.angle).map((t) => t.angle as TipAngle))];
   const personality = await getPersonality(deps.db, user.id);
-  const input = await buildToneInput(deps.db, deps.config, user, personality, date, undefined, avoid);
+  const input = await buildToneInput(deps.db, deps.config, user, personality, date, undefined, avoid, deps.now());
   const tip = await copyAiFor(deps.ai, user).tone.tip(
     input,
     earlier.map((p) => p.body),
@@ -85,7 +100,7 @@ export async function getWeeklyQuestion(deps: AppDeps, user: UserRow, date: stri
   if (weekdayOf(date) < 4) return null;
 
   const personality = await getPersonality(deps.db, user.id);
-  const input = await buildToneInput(deps.db, deps.config, user, personality, date);
+  const input = await buildToneInput(deps.db, deps.config, user, personality, date, undefined, [], deps.now());
   const q = await copyAiFor(deps.ai, user).tone.weeklyQuestion(input, log);
   await deps.db
     .insert(weeklyQuestions)

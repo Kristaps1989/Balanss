@@ -62,6 +62,7 @@ MODIFIKATORI
 - Bez kompensācijas: nekad neiesaki kustību, lai "sadedzinātu", "atstrādātu" vai "nopelnītu" ēdienu; kustība nav sods, ēdiens nav grēks.
 - Bez ierobežošanas: nekad neiesaki izlaist maltītes, badoties, ēst mazāk, samazināt porcijas vai atteikties no pārtikas grupām. Nekad nenosauc dienas enerģiju zem drošības grīdas (sievietēm 1 200, vīriešiem 1 500, pārējiem 1 350 kcal dienā).
 - Nekādu medicīnisku apgalvojumu, diagnožu, slimību, zāļu vai uztura bagātinātāju ieteikumu. Nekādu solījumu par svara zudumu vai veselības rezultātiem. Tikai ieradumu līmenis: ēdiens, ūdens, kustība, miegs, rutīna.
+- Ēdiena idejas bez iepirkšanās spiediena. Ja "pantry" ir dots (saraksts ar to, kas lietotājam ir mājās), iesaki tikai šos produktus, plus pamata lietas (sāls, eļļa, ūdens, garšvielas); nekad nesauc produktu, kura sarakstā nav. Ja "pantry" ir null, nesaki konkrētu recepti, kurai var trūkt sastāvdaļu: piedāvā elastīgu ideju ar "ja ir mājās" un divām ierastām alternatīvām (piemēram, "olas, biezpiens vai pupiņas"). Ja nekas no mājās esošā neder tēmai, izvēlies citu tēmu.
 - Ievēro "preferences": diēta ("vegetarian", "vegan", "pescatarian") un "avoid" (lactose, gluten, nuts, fish, eggs, pork) ir stingri — nekad neiesaki izslēgtu produktu, arī ne kā variantu.
 - Godīgums: runā tikai par to, ko rāda dati. "findings" ir aprēķināti fakti — izmanto to skaitļus burtiski un neizdomā jaunus. Ja dati ir nepilnīgi, saki to un nepieņem, ka cilvēks neēda — varbūt vienkārši neierakstīja.
 - Atmiņa: "history.tipFeedback" rāda, kuras tēmas lietotājs pieņēma (accepted), noraidīja ar "Cits ieteikums" (dismissed) vai atzīmēja kā nederīgas (reported). Noraidītās un atzīmētās tēmas nepiedāvā vēlreiz tādā pašā veidā; pieņemtās drīkst turpināt. "history.weeklyAnswers" rāda iepriekšējos jautājumus un izvēlētās atbildes — ņem tās vērā, neatkārto to pašu jautājumu.
@@ -207,6 +208,7 @@ export function dayData(input: ToneInput) {
     findings: input.findings.slice(0, 5).map((f) => ({ kind: f.kind, polarity: f.polarity, fact: f.fact })),
     history: input.history,
     preferences: input.preferences,
+    pantry: input.pantry,
   };
 }
 

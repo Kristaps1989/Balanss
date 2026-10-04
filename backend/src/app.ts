@@ -11,6 +11,7 @@ import { copyRoutes } from './routes/copy';
 import { dayRoutes } from './routes/day';
 import { healthRoutes } from './routes/health';
 import { insightRoutes } from './routes/insights';
+import { leisureRoutes } from './routes/leisure';
 import { mealRoutes } from './routes/meals';
 import { magicLinkPage } from './routes/magic-link-page';
 import { meRoutes } from './routes/me';
@@ -140,6 +141,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
         await secured.register(copyRoutes);
         await secured.register(insightRoutes);
         await secured.register(pushRoutes);
+        await secured.register(leisureRoutes);
       });
     },
     { prefix: '/v1' },

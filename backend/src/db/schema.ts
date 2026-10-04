@@ -20,6 +20,7 @@ import type {
   FoodItemDraft,
   FoodPreferences,
   HrZones,
+  LeisureItem,
   Nutrients,
   PersonalityLevels,
   Profile,
@@ -61,6 +62,8 @@ export const users = pgTable('users', {
   planExpiresAt: ts('plan_expires_at'),
   onboardingDone: boolean('onboarding_done').notNull().default(false),
   timezone: text('timezone').notNull().default('Europe/Riga'),
+  /** City for free-time suggestions, chosen by the user (no location tracking). */
+  leisureCity: text('leisure_city'),
   createdAt: ts('created_at').notNull().defaultNow(),
   updatedAt: ts('updated_at').notNull().defaultNow(),
 });
@@ -176,6 +179,29 @@ export const analysisUsage = pgTable(
   { userId: userRef(), date: day('date').notNull(), count: integer('count').notNull() },
   (t) => [primaryKey({ columns: [t.userId, t.date] })],
 );
+
+/** What the user has at home (ingredient names only), for food ideas that need no shopping. */
+export const pantry = pgTable('pantry', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  items: jsonb('items').$type<string[]>().notNull(),
+  updatedAt: ts('updated_at').notNull().defaultNow(),
+});
+
+/** Live free-time searches per user-day (each costs a web search). */
+export const leisureUsage = pgTable(
+  'leisure_usage',
+  { userId: userRef(), date: day('date').notNull(), count: integer('count').notNull() },
+  (t) => [primaryKey({ columns: [t.userId, t.date] })],
+);
+
+/** Shared cache of live listings per city + choice (no user data), 2 h. */
+export const leisureCache = pgTable('leisure_cache', {
+  key: text('key').primaryKey(),
+  items: jsonb('items').$type<LeisureItem[]>().notNull(),
+  fetchedAt: ts('fetched_at').notNull().defaultNow(),
+});
 
 export const barcodeCache = pgTable('barcode_cache', {
   ean: text('ean').primaryKey(),
