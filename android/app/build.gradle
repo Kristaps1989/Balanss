@@ -92,8 +92,8 @@ android {
         applicationId 'lv.balanss.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "0.1.0"
+        versionCode 3
+        versionName "0.2.1"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
@@ -144,6 +144,11 @@ android {
     androidResources {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
+}
+
+// Name build outputs after the version, e.g. balanss-0.2.1-release.apk / .aab.
+base {
+    archivesName = "balanss-${android.defaultConfig.versionName}"
 }
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`

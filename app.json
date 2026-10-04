@@ -2,7 +2,7 @@
   "expo": {
     "name": "Balanss",
     "slug": "balanss",
-    "version": "0.1.0",
+    "version": "0.2.1",
     "scheme": "balanss",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
