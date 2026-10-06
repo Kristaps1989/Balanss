@@ -7,12 +7,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { api, type MealType } from '@/api';
 import { invalidateDay } from '@/api/hooks';
 import { Button } from '@/components/Button';
-import { Segmented } from '@/components/Controls';
+import { RoundButton, Segmented } from '@/components/Controls';
 import { IconButton } from '@/components/Header';
 import { Icon } from '@/components/Icon';
 import { Slider } from '@/components/Slider';
 import { formatNumber, grams as fmtGrams, plural } from '@/lib/format';
 import { useMealDraft, type DraftItem } from '@/lib/mealDraft';
+import { portionMax } from '@/lib/portion';
 import { useToday } from '@/lib/today';
 import { MEAL_LABEL, MEAL_ORDER, itemsTotals, scale } from '@shared/nutrition';
 import { colors, fonts, radius, type } from '@/theme';
@@ -128,7 +129,11 @@ function ItemCard({ item }: { item: DraftItem }) {
   const remove = useMealDraft((s) => s.removeItem);
   const t = scale(item.per100g, item.grams);
   const unsure = item.confidence < 0.6 && item.alternatives.length > 0 && !item.picked;
-  const max = Math.max(300, Math.ceil((item.grams * 2) / 50) * 50);
+  // Range fixed from the first estimate: recomputing it from the current grams made each drag
+  // raise the maximum, which raised the value again (180 g → millions). Alternatives may set more.
+  const [baseMax] = useState(() => portionMax(item.grams));
+  const max = Math.max(baseMax, item.grams);
+  const nudge = (d: number) => update(item.key, { grams: Math.max(0, Math.min(max, item.grams + d)), portionLabel: null });
   return (
     <View style={styles.item}>
       <View style={styles.itemHead}>
@@ -144,14 +149,21 @@ function ItemCard({ item }: { item: DraftItem }) {
           <Icon name="close" color={colors.caption} size={16} />
         </Pressable>
       </View>
-      <Slider
-        label={`Porcija: ${item.name}`}
-        value={item.grams}
-        min={0}
-        max={max}
-        step={5}
-        onChange={(g) => update(item.key, { grams: g, portionLabel: null })}
-      />
+      <View style={styles.sliderRow}>
+        <RoundButton icon="minus" label={`Mazāk: ${item.name}, −10 g`} onPress={() => nudge(-10)} />
+        <View style={{ flex: 1 }}>
+          <Slider
+            label={`Porcija: ${item.name}`}
+            value={item.grams}
+            min={0}
+            max={max}
+            step={5}
+            onChange={(g) => update(item.key, { grams: g, portionLabel: null })}
+            testID="portion-slider"
+          />
+        </View>
+        <RoundButton icon="plus" label={`Vairāk: ${item.name}, +10 g`} onPress={() => nudge(10)} />
+      </View>
       {unsure && (
         <View style={styles.unsure}>
           <Text style={styles.unsureTitle}>{item.name} atpazinu neskaidri — precizē?</Text>
@@ -181,6 +193,7 @@ function ItemCard({ item }: { item: DraftItem }) {
 }
 
 const styles = StyleSheet.create({
+  sliderRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   root: { flex: 1, backgroundColor: colors.bg },
   photo: { backgroundColor: '#5B4E43', overflow: 'hidden' },
   body: { paddingTop: 18, paddingHorizontal: 20, gap: 12 },

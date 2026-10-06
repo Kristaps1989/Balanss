@@ -53,6 +53,24 @@ test('log a meal from a photo with portion changes', async ({ page }) => {
   // Clarify the uncertain sauce
   await page.getByRole('button', { name: 'Bez mērces' }).click();
   await expect(page.getByTestId('result-total')).not.toHaveText(totalBefore);
+  // Portion slider: the range is fixed from the estimate (150 g → 0–300 g). Dragging to the end
+  // again and again must stay at 300 g (the range used to grow with every drag: 180 g → millions).
+  const slider = page.getByTestId('portion-slider').first();
+  const box = (await slider.boundingBox())!;
+  const y = box.y + box.height / 2;
+  for (let i = 0; i < 3; i++) {
+    await page.mouse.move(box.x + box.width * 0.5, y);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width - 1, y, { steps: 8 });
+    await page.mouse.up();
+  }
+  await expect(page.getByText(/^300 g · /)).toBeVisible();
+  await expect(page.getByTestId('result-total')).not.toContainText(/\d{2} \d{3} \d{3}/);
+  // Fine control: + stays at the end of the range, − takes 10 g off.
+  await page.getByRole('button', { name: 'Vairāk: Vistas krūtiņa, +10 g' }).click();
+  await expect(page.getByText(/^300 g · /)).toBeVisible();
+  await page.getByRole('button', { name: 'Mazāk: Vistas krūtiņa, −10 g' }).click();
+  await expect(page.getByText(/^290 g · /)).toBeVisible();
   // Remove one item
   await page.getByRole('button', { name: /Noņemt: Salāti/ }).click();
   await page.getByTestId('save-meal').click();
