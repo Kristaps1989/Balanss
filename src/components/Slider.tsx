@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react';
 import { StyleSheet, View, type GestureResponderEvent, type LayoutChangeEvent } from 'react-native';
 
+import { valueAt } from '@/lib/portion';
+
 import { colors } from '@/theme';
 
 interface Props {
@@ -18,11 +20,24 @@ interface Props {
 export function Slider({ value, min, max, step = 1, onChange, color = colors.accent, label, testID }: Props) {
   const [width, setWidth] = useState(0);
   const widthRef = useRef(0);
+  const viewRef = useRef<View>(null);
+  // Track's left edge on screen, measured at touch start. pageX - left is reliable on Android,
+  // where locationX can be relative to whatever view is under the finger during a move.
+  const leftRef = useRef<number | null>(null);
 
-  const fromEvent = (e: GestureResponderEvent) => {
-    const ratio = Math.max(0, Math.min(1, e.nativeEvent.locationX / Math.max(1, widthRef.current)));
-    onChange(Math.round((min + ratio * (max - min)) / step) * step);
+  const emit = (x: number) => {
+    const v = valueAt(x, widthRef.current, min, max, step);
+    if (v !== value) onChange(v);
   };
+  const onGrant = (e: GestureResponderEvent) => {
+    const { pageX, locationX } = e.nativeEvent;
+    leftRef.current = pageX - locationX;
+    emit(locationX);
+    viewRef.current?.measure((_x, _y, _w, _h, px) => {
+      if (Number.isFinite(px)) leftRef.current = px;
+    });
+  };
+  const onMove = (e: GestureResponderEvent) => emit(e.nativeEvent.pageX - (leftRef.current ?? 0));
 
   const ratio = max > min ? (Math.min(max, Math.max(min, value)) - min) / (max - min) : 0;
   const onLayout = (e: LayoutChangeEvent) => {
@@ -32,6 +47,7 @@ export function Slider({ value, min, max, step = 1, onChange, color = colors.acc
 
   return (
     <View
+      ref={viewRef}
       testID={testID}
       style={styles.hit}
       onLayout={onLayout}
@@ -46,8 +62,8 @@ export function Slider({ value, min, max, step = 1, onChange, color = colors.acc
       onStartShouldSetResponder={() => true}
       onMoveShouldSetResponder={() => true}
       onResponderTerminationRequest={() => false}
-      onResponderGrant={fromEvent}
-      onResponderMove={fromEvent}>
+      onResponderGrant={onGrant}
+      onResponderMove={onMove}>
       <View style={styles.track} pointerEvents="none">
         <View style={[styles.fill, { width: width * ratio, backgroundColor: color }]} />
       </View>
