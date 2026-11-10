@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Polyline } from 'react-native-svg';
 
-import { colors, fonts } from '@/theme';
+import { colors, fonts, themed } from '@/theme';
 
 /** Latvian weekday initials, Monday first (prototype: P O T C Pk S Sv). */
 export const WEEKDAY_SHORT = ['Sv', 'P', 'O', 'T', 'C', 'Pk', 'S'];
@@ -25,7 +25,7 @@ interface BarProps {
   accessibilityLabel: string;
 }
 
-/** Vertical bar chart with an optional dashed target line (prototype: Food-Trends, Move). */
+/** Vertical bar chart: thin 10 px rounded columns, optional dashed target line. */
 export function BarChart({ values, labels, max, height = 150, target, color, mutedColor = colors.barMuted, highlight, accessibilityLabel }: BarProps) {
   const h = (v: number) => Math.max(2, Math.min(1, v / max) * height);
   return (
@@ -37,7 +37,9 @@ export function BarChart({ values, labels, max, height = 150, target, color, mut
           </View>
         )}
         {values.map((v, i) => (
-          <View key={i} style={{ flex: 1, height: h(v), borderRadius: 8, backgroundColor: i === highlight ? color : mutedColor }} />
+          <View key={i} style={styles.slot}>
+            <View style={[styles.column, { height: h(v), backgroundColor: i === highlight ? color : mutedColor }]} />
+          </View>
         ))}
       </View>
       <View style={styles.labels}>
@@ -69,7 +71,9 @@ export function Sparkline({ values, color, width = 130, height = 40 }: { values:
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
+  slot: { flex: 1, alignItems: 'center', justifyContent: 'flex-end' },
+  column: { width: 10, borderRadius: 5 },
   targetLine: {
     position: 'absolute',
     left: 0,
@@ -91,4 +95,4 @@ const styles = StyleSheet.create({
   },
   labels: { flexDirection: 'row', gap: 8, marginTop: 8 },
   label: { flex: 1, textAlign: 'center', fontFamily: fonts.bodySemi, fontSize: 12, color: colors.caption },
-});
+}));

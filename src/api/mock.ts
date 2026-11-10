@@ -328,14 +328,14 @@ function makeTip(date: string, variant: number): Tip {
   const options: { body: string; highlight: string | null; angle: TipFocus }[] = [];
   const home = pantryFresh() ? s.pantry.items.slice(0, 2) : [];
   if (home.length && proteinLeft > 10) {
-    options.push({ body: `No tā, kas ir mājās: ${home.join(' un ')} vakariņās — līdz olbaltumvielu mērķim trūkst ${proteinLeft} g.`, highlight: home[0]!, angle: 'protein' });
+    options.push({ body: `No tā, kas ir mājās: ${home.join(' un ')} vakariņās — vēl ${proteinLeft} g olbaltumvielu.`, highlight: home[0]!, angle: 'protein' });
   } else if (proteinLeft > 10) {
     const h = `${proteinLeft} g`;
     options.push(
       tone === 'plan'
-        ? { body: `Līdz olbaltumvielu mērķim trūkst ${h}. Viens viegls solis: biezpiens vai jogurts vakariņās (+18 g).${soft && shortSleep ? ' Miegs bija nedaudz īsāks — tāpēc šodien bez spiediena.' : ''}`, highlight: h, angle: 'protein' as const }
+        ? { body: `Olbaltumvielām vēl ${h}. Viens viegls solis: biezpiens vai jogurts vakariņās (+18 g).${soft && shortSleep ? ' Miegs bija nedaudz īsāks — tāpēc šodien bez spiediena.' : ''}`, highlight: h, angle: 'protein' as const }
         : tone === 'novelty'
-          ? { body: `Ideja vakariņām, ja tas ir mājās: lēcu zupa — tā pietuvinās olbaltumvielu mērķim, kam vēl trūkst ${h}.`, highlight: h, angle: 'protein' as const }
+          ? { body: `Ideja vakariņām, ja tas ir mājās: lēcu zupa — tā dos daļu no atlikušajiem ${h} olbaltumvielu.`, highlight: h, angle: 'protein' as const }
           : tone === 'gentle'
             ? { body: `Ja sanāk, vakariņās pievieno kaut ko ar olbaltumvielām — vēl ${h}. Arī šodiena jau ir laba.`, highlight: h, angle: 'protein' as const }
             : { body: `Olbaltumvielām šodien vēl ${h}. Der jogurts, biezpiens vai pākšaugi.`, highlight: h, angle: 'protein' as const },
@@ -398,9 +398,11 @@ function dayFor(date: string): Day {
       carbsG: { value: tot.carbsG, target: T.carbsG },
       fatG: { value: tot.fatG, target: T.fatG },
       fibreG: { value: tot.fibreG, target: T.fibreG },
+      calciumMg: { value: tot.calciumMg ?? 0, target: T.calciumMg ?? 950 },
       waterMl: { value: s.water[date] ?? 0, target: T.waterMl },
     },
     meals,
+    week: { loggedDays: new Set(s.meals.filter((m) => m.date <= date && m.date >= addDays(date, -6)).map((m) => m.date)).size, days: 7 },
     movement: {
       steps: { value: h?.steps ?? 0, target: T.steps },
       activeKcal: h?.activeKcal ?? 0,
@@ -666,7 +668,7 @@ export class MockApi implements Api {
       targetKcal: s.me.targets.kcal,
       targetProteinG: s.me.targets.proteinG,
       insight:
-        'Enerģija turas tuvu mērķim. Olbaltumvielas visbiežāk pietrūkst vakaros — ja gribi, vakariņām pievieno vienu olbaltumvielu avotu.',
+        'Enerģija turas tuvu mērķim. Vakariņas ir labākā vieta olbaltumvielām — ja gribi, vakariņām pievieno vienu olbaltumvielu avotu.',
     };
   };
 

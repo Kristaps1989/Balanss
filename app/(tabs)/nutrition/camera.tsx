@@ -11,7 +11,7 @@ import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { useMealDraft } from '@/lib/mealDraft';
 import { preparePhoto } from '@/lib/photo';
-import { colors, fonts } from '@/theme';
+import { colors, fonts, themed } from '@/theme';
 
 type Mode = 'barcode' | 'photo';
 
@@ -197,7 +197,7 @@ function ModeTab({ label, on, onPress }: { label: string; on: boolean; onPress: 
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { flex: 1, backgroundColor: '#1D1B19' },
   noCam: { backgroundColor: '#4A4038', alignItems: 'center', justifyContent: 'center', gap: 16, padding: 32, paddingBottom: 220 },
   noCamText: { fontFamily: fonts.bodySemi, fontSize: 16, color: colors.white, textAlign: 'center', lineHeight: 22 },
@@ -221,4 +221,4 @@ const styles = StyleSheet.create({
   shutterInner: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.white },
   proLink: { height: 56, paddingHorizontal: 18, borderRadius: 28, backgroundColor: colors.accent, justifyContent: 'center' },
   proText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.white },
-});
+}));

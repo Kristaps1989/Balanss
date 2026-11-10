@@ -8,11 +8,12 @@ import { invalidateDay, useFavourites } from '@/api/hooks';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Sheet } from '@/components/Sheet';
+import { confirmLogged } from '@/components/Toast';
 import { formatNumber } from '@/lib/format';
 import { useMealDraft } from '@/lib/mealDraft';
 import { useToday } from '@/lib/today';
 import { itemsTotals, mealTypeForTime, scale } from '@shared/nutrition';
-import { colors, fonts, type } from '@/theme';
+import { colors, fonts, type, themed } from '@/theme';
 
 function useDebounced<T>(value: T, ms: number) {
   const [v, setV] = useState(value);
@@ -46,6 +47,7 @@ export default function FoodAdd() {
     mutationFn: (req: Pick<CreateMealRequest, 'items' | 'source'>) =>
       api.createMeal({ ...req, date, type: mealTypeForTime(new Date()), eatenAt: new Date().toISOString() }),
     onSuccess: () => {
+      confirmLogged();
       invalidateDay(qc, date);
       router.back();
     },
@@ -157,14 +159,14 @@ export default function FoodAdd() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   label: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.ink },
   input: {
     height: 52,
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: colors.accent,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     paddingHorizontal: 14,
     fontFamily: fonts.body,
     fontSize: 16,
@@ -177,8 +179,8 @@ const styles = StyleSheet.create({
   previewKcal: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
   barcode: { minHeight: 64, borderRadius: 18, backgroundColor: colors.chip, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 14 },
   barcodeTitle: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.ink },
-  fav: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56, borderBottomWidth: 1, borderBottomColor: '#F0EAE1' },
+  fav: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56, borderBottomWidth: 1, borderBottomColor: colors.divider },
   favName: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.ink },
   favAdd: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
   error: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentDeep },
-});
+}));

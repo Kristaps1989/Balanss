@@ -18,7 +18,7 @@ import { eveningAxisPos, windDownSteps } from '@/lib/sleepPlan';
 import { useHealthRefresh } from '@/lib/services';
 import { useToday } from '@/lib/today';
 import { eveningMinutes, fromEveningMinutes } from '@shared/sleep';
-import { colors, fonts, radius, type } from '@/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 
 const LEADS = [30, 45, 60] as const;
 
@@ -140,7 +140,7 @@ export default function Sleep() {
         <Card style={styles.card}>
           <View style={styles.window}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Icon name="moon" color="#C9D1EA" size={18} />
+              <Icon name="moon" color={colors.sleepWindowText} size={18} />
               <Text style={styles.windowLabel}>Tavs miega logs šovakar</Text>
             </View>
             <Text style={styles.windowTime} testID="sleep-window">
@@ -227,37 +227,37 @@ function Stage({ color, label, min }: { color: string; label: string; min: numbe
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   card: { padding: 18, gap: 14 },
   small: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.text2 },
   night: { backgroundColor: colors.sleepSoft, borderRadius: radius.card, padding: 18, gap: 14 },
   nightTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  nightLabel: { fontFamily: fonts.body, fontSize: 14, color: '#414B6E' },
-  nightDur: { fontFamily: fonts.heading, fontSize: 38, lineHeight: 44, color: '#1F2A4D' },
-  nightTimes: { fontFamily: fonts.body, fontSize: 15, color: '#414B6E' },
-  score: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center' },
-  scoreValue: { fontFamily: fonts.heading, fontSize: 24, lineHeight: 26, color: colors.sleepDeep },
+  nightLabel: { fontFamily: fonts.body, fontSize: 14, color: colors.sleepText2 },
+  nightDur: { fontFamily: fonts.number, fontSize: 38, lineHeight: 44, color: colors.sleepInk },
+  nightTimes: { fontFamily: fonts.body, fontSize: 15, color: colors.sleepText2 },
+  score: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center' },
+  scoreValue: { fontFamily: fonts.number, fontSize: 24, lineHeight: 26, color: colors.sleepDeep },
   scoreLabel: { fontFamily: fonts.bodyBold, fontSize: 10, color: colors.sleepDeep },
   stages: { flexDirection: 'row', height: 18, borderRadius: 9, overflow: 'hidden', gap: 3 },
-  stageLabel: { fontFamily: fonts.body, fontSize: 13, color: '#414B6E' },
-  stageValue: { fontFamily: fonts.bodyBold, fontSize: 16, color: '#1F2A4D' },
-  nightSource: { fontFamily: fonts.body, fontSize: 12, color: '#414B6E' },
+  stageLabel: { fontFamily: fonts.body, fontSize: 13, color: colors.sleepText2 },
+  stageValue: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.sleepInk },
+  nightSource: { fontFamily: fonts.body, fontSize: 12, color: colors.sleepText2 },
   axis: { position: 'absolute', fontFamily: fonts.bodySemi, fontSize: 11, color: colors.caption },
   band: { position: 'absolute', left: 0, right: 0, height: 30, borderRadius: 8, backgroundColor: colors.sleepSoft },
-  grid: { position: 'absolute', left: 0, right: 0, borderTopWidth: 1, borderTopColor: '#F0EAE1' },
+  grid: { position: 'absolute', left: 0, right: 0, borderTopWidth: 1, borderTopColor: colors.divider },
   dot: { position: 'absolute', width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: colors.white },
   day: { flex: 1, textAlign: 'center', fontFamily: fonts.bodySemi, fontSize: 12, color: colors.text2 },
   window: { borderRadius: 18, backgroundColor: colors.sleepWindow, padding: 16, gap: 6 },
-  windowLabel: { fontFamily: fonts.bodySemi, fontSize: 13, color: '#C9D1EA' },
-  windowTime: { fontFamily: fonts.heading, fontSize: 34, lineHeight: 38, color: colors.white },
-  windowText: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: '#C9D1EA' },
-  axisBar: { height: 10, borderRadius: 5, backgroundColor: '#3A4670', marginTop: 8 },
-  axisWindow: { position: 'absolute', top: 0, bottom: 0, borderRadius: 5, backgroundColor: '#F5B48F' },
-  axisNudge: { position: 'absolute', top: 0, bottom: 0, width: 3, borderRadius: 2, backgroundColor: colors.white },
+  windowLabel: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.sleepWindowText },
+  windowTime: { fontFamily: fonts.number, fontSize: 34, lineHeight: 38, color: colors.white },
+  windowText: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.sleepWindowText },
+  axisBar: { height: 10, borderRadius: 5, backgroundColor: colors.sleepWindowBar, marginTop: 8 },
+  axisWindow: { position: 'absolute', top: 0, bottom: 0, borderRadius: 5, backgroundColor: colors.glow },
+  axisNudge: { position: 'absolute', top: 0, bottom: 0, width: 3, borderRadius: 2, backgroundColor: colors.card },
   axisLabels: { flexDirection: 'row', justifyContent: 'space-between' },
-  axisLabel: { fontFamily: fonts.bodySemi, fontSize: 11, color: '#C9D1EA' },
+  axisLabel: { fontFamily: fonts.bodySemi, fontSize: 11, color: colors.sleepWindowText },
   step: { flexDirection: 'row', gap: 8, alignItems: 'stretch' },
-  stepTime: { width: 48, fontFamily: fonts.heading, fontSize: 15, color: colors.ink, paddingTop: 1 },
+  stepTime: { width: 48, fontFamily: fonts.number, fontSize: 15, color: colors.ink, paddingTop: 1 },
   stepDot: { width: 12, height: 12, borderRadius: 6, marginTop: 4 },
   stepTitle: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
-});
+}));

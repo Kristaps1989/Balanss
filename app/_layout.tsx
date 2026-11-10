@@ -4,25 +4,35 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { queryClient, useMe } from '@/api/hooks';
 import { ConfirmHost } from '@/components/Confirm';
 import { ErrorState } from '@/components/States';
+import { ToastHost } from '@/components/Toast';
 import { useAppServices } from '@/lib/services';
 import { useSession } from '@/lib/session';
+import { useActiveTheme } from '@/lib/theme';
 import { appFonts, colors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(appFonts);
+  const theme = useActiveTheme();
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        <StatusBar style="dark" />
-        {fontsLoaded || fontError ? <Gate /> : null}
-        <ConfirmHost />
+        {/* A theme switch remounts the tree so every screen re-reads the palette. */}
+        {theme && (
+          <View key={theme} style={{ flex: 1, backgroundColor: colors.bg }}>
+            <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+            {fontsLoaded || fontError ? <Gate /> : null}
+            <ConfirmHost />
+            <ToastHost />
+          </View>
+        )}
       </QueryClientProvider>
     </SafeAreaProvider>
   );

@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import type { Personality } from '@/api';
 import { levelLabel, scorePercent, TRAITS, TRAIT_LABEL, TRAIT_LABEL_SHORT } from '@shared/personality';
-import { colors, fonts } from '@/theme';
+import { colors, fonts, themed } from '@/theme';
 
 /** Five trait bars with low / medium / high labels (prototype: Onb-Result, Me). */
 export function TraitBars({ personality, short }: { personality: Personality; short?: boolean }) {
@@ -33,12 +33,12 @@ export function TraitBars({ personality, short }: { personality: Personality; sh
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   name: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.ink },
   level: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.text2 },
-  track: { height: 10, borderRadius: 5, backgroundColor: '#F0E9DF' },
+  track: { height: 10, borderRadius: 5, backgroundColor: colors.track },
   fill: { height: 10, borderRadius: 5, backgroundColor: colors.accent },
   scale: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: 2 },
   scaleText: { fontFamily: fonts.body, fontSize: 12, color: colors.caption },
-});
+}));

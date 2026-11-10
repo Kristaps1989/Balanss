@@ -7,28 +7,28 @@ import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { Loading } from '@/components/States';
 import { selectTone } from '@shared/personality';
-import { colors, fonts, radius, type } from '@/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 
 /** Reference copy from prototype/Tone-Compare.dc.html. */
-const TONES: { value: Exclude<TonePreference, 'auto'>; title: string; chip: [string, string]; tip: string; water: string }[] = [
+const TONES: { value: Exclude<TonePreference, 'auto'>; title: string; chip: [string, string]; tip: string; water: string }[] = themed(() => [
   {
     value: 'plan',
     title: 'Plāns un skaitļi',
-    chip: [colors.sleepSoft, '#2E3B66'],
-    tip: 'Šodien trūkst 42 g olbaltumvielu. Plāns: biezpiens brokastīs (+18 g), vista pusdienās (+30 g).',
+    chip: [colors.sleepSoft, colors.sleepInk],
+    tip: 'Olbaltumvielas: 68 g jau ir, vēl 42 g. Plāns: biezpiens brokastīs (+18 g), vista pusdienās (+30 g).',
     water: 'Ūdens: 1,2 no 2,3 l. Viena glāze tagad — un līdz 16:00 būsi pie 1,7 l.',
   },
   {
     value: 'novelty',
     title: 'Dažādība un jaunais',
-    chip: ['#F6E7CF', '#5E420F'],
+    chip: [colors.noticeSoft, colors.notice],
     tip: 'Ideja šodienai: izmēģini jaunu recepti — lēcu zupu ar ciedru riekstiem.',
     water: 'Pamēģini ūdeni ar gurķi un piparmētru — tā pati glāze, cita garša.',
   },
   {
     value: 'gentle',
     title: 'Maigi, bez spiediena',
-    chip: [colors.moveSoft, '#24503B'],
+    chip: [colors.moveSoft, colors.moveDeep],
     tip: 'Miegs bija īsāks, tas ir normāli. Šodien — bez spiediena.',
     water: 'Ja ērti, iedzer malku ūdens. Nekas nav nokavēts.',
   },
@@ -39,7 +39,7 @@ const TONES: { value: Exclude<TonePreference, 'auto'>; title: string; chip: [str
     tip: 'Olbaltumvielām šodien vēl 42 g. Der jogurts, biezpiens vai pākšaugi.',
     water: 'Ūdens: 1,2 no 2,3 l.',
   },
-];
+]);
 
 /** "Tie paši dati, cits tonis": choose how tips are written. */
 export default function TonePicker() {
@@ -104,7 +104,7 @@ function Option({ selected, onPress, title, hint }: { selected: boolean; onPress
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
   card: { backgroundColor: colors.card, borderRadius: radius.card, padding: 18, gap: 6 },
   cardHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
@@ -112,4 +112,4 @@ const styles = StyleSheet.create({
   chipText: { fontFamily: fonts.bodyBold, fontSize: 13 },
   label: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.caption, textTransform: 'uppercase', letterSpacing: 0.4, marginTop: 4 },
   body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 21, color: colors.ink },
-});
+}));

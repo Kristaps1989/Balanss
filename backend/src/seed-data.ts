@@ -39,7 +39,21 @@ export const HISTORY_DAYS = 28;
 
 const n = (kcal: number, proteinG: number, carbsG: number, fatG: number, fibreG: number): Nutrients => ({ kcal, proteinG, carbsG, fatG, fibreG });
 type Item = CreateMealRequest['items'][number];
-const item = (name: string, grams: number, per100g: Nutrients, portionLabel: string | null = null): Item => ({ name, grams, per100g, portionLabel });
+/** Calcium per 100 g (food-composition tables), added to the seeded items by name. */
+const CALCIUM_MG: Record<string, number> = {
+  'Auzu putra ar ogām': 60, Baltmaize: 150, 'Baltmaizes grauzdiņš ar sieru': 260, Banāns: 5, 'Biezpiens, 5 %': 85, 'Burkānu salāti': 30,
+  'Cepti dārzeņi ar eļļu': 25, 'Dārzeņu zupa': 25, 'Griķi, vārīti': 7, 'Gurķu salāti': 18, 'Jogurts ar granolu': 110, 'Jogurts ar ogām': 110,
+  'Jogurts, dabīgs': 140, 'Kafija ar pienu': 60, 'Kartupeļi, vārīti': 8, Kefīrs: 120, 'Lasis, cepts': 15, 'Liellopa gaļas sautējums': 15,
+  'Mencas fileja': 16, Mērce: 20, 'Olas, vārītas': 50, 'Omlete ar dārzeņiem': 55, 'Pilngraudu makaroni ar tomātu mērci': 25, Rieksti: 100,
+  Rupjmaize: 40, 'Rīsi, vārīti': 10, Salāti: 36, 'Salātu mērce ar eļļu': 5, Tomāts: 10, Tēja: 0, 'Tītara fileja': 11, 'Vistas fileja': 15,
+  'Vistas krūtiņa': 15, 'Vistas zupa': 12, Ābols: 6,
+};
+const item = (name: string, grams: number, per100g: Nutrients, portionLabel: string | null = null): Item => ({
+  name,
+  grams,
+  per100g: { ...per100g, calciumMg: CALCIUM_MG[name] ?? 0 },
+  portionLabel,
+});
 type SeedMeal = { type: MealType; time: string; items: Item[] };
 
 export const ILZE_PROFILE: Profile = {
@@ -375,7 +389,7 @@ export async function seedIlze(db: Db, today: string, now: Date = new Date()): P
       date: addDays(today, -4),
       tone: 'plan',
       angle: 'protein',
-      body: 'Šodien trūkst 30 g olbaltumvielu. Plāns: biezpiens vai jogurts vakariņās (+18 g) un sauja riekstu uzkodām (+6 g).',
+      body: 'Olbaltumvielas: 80 g jau ir, vēl 30 g. Plāns: biezpiens vai jogurts vakariņās (+18 g) un sauja riekstu uzkodām (+6 g).',
       highlight: '30 g',
       accepted: true,
       createdAt: zonedTime(addDays(today, -4), '05:00', SEED_TZ),
@@ -385,7 +399,7 @@ export async function seedIlze(db: Db, today: string, now: Date = new Date()): P
       date: addDays(today, -2),
       tone: 'plan',
       angle: 'steps',
-      body: 'Līdz 8 000 soļiem trūkst 3 100. Plāns: 20 minūšu pastaiga pēc pusdienām — tas ir ap 2 000 soļu.',
+      body: 'Soļi: 4 900 jau ir, līdz 8 000 vēl 3 100. Plāns: 20 minūšu pastaiga pēc pusdienām — tas ir ap 2 000 soļu.',
       highlight: '3 100',
       dismissed: true,
       createdAt: zonedTime(addDays(today, -2), '05:00', SEED_TZ),
@@ -395,7 +409,7 @@ export async function seedIlze(db: Db, today: string, now: Date = new Date()): P
       date: addDays(today, -2),
       tone: 'plan',
       angle: 'water',
-      body: 'Ūdens: 0,8 no 2,3 l. Plāns: glāze tagad un pa glāzei pēc katras maltītes — tā pietrūkstošie 1,5 l sanāks līdz vakaram.',
+      body: 'Ūdens: 0,8 no 2,3 l. Plāns: glāze tagad un pa glāzei pēc katras maltītes — tā atlikušie 1,5 l sanāks līdz vakaram.',
       highlight: '1,5 l',
       accepted: true,
       createdAt: zonedTime(addDays(today, -2), '09:40', SEED_TZ),

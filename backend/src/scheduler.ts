@@ -26,6 +26,13 @@ export const DUE_WINDOW_MIN = 30;
 export const QUIET_START = 22 * 60 + 30;
 export const QUIET_END = 8 * 60;
 export const TIP_SLOT = '05:00';
+/** Reminders pause after this many days without opening the app, and resume on the next visit. */
+export const IGNORED_DAYS = 3;
+
+/** True when reminders have gone unanswered long enough that more of them would only nag. */
+export function remindersPaused(user: Pick<UserRow, 'lastActiveAt'>, now: Date): boolean {
+  return !!user.lastActiveAt && now.getTime() - user.lastActiveAt.getTime() > IGNORED_DAYS * 24 * 60 * 60 * 1000;
+}
 
 export const WATER_SLOTS: Record<ReminderFrequency, string[]> = {
   low: ['11:00', '15:00'],
@@ -100,6 +107,9 @@ async function tickUser(deps: AppDeps, log: FastifyBaseLogger, user: UserRow, to
     await getOrCreateTip(deps, user, local.date, log);
     result.tipsGenerated.push(user.id);
   }
+
+  // Three days without opening the app: stay quiet instead of nagging (no "you missed" messages).
+  if (remindersPaused(user, now)) return;
 
   // Wind-down before the sleep window (allowed during quiet hours).
   if (r.sleepWindow) {

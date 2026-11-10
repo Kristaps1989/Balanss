@@ -50,12 +50,16 @@ export function createClaudeClient(apiKey: string): ClaudeClient {
   return new Anthropic({ apiKey, timeout: 90_000, maxRetries: 2 });
 }
 
+/** Speed budgets (ms) per route; a slower call is logged as a warning. Photo analysis must feel instant-ish. */
+export const SPEED_BUDGET_MS: Record<string, number> = { 'meals.analyze': 6000, 'meals.parse-text': 4000, 'pantry.scan': 6000 };
+
 export async function callStructured<S extends z.ZodType>(
   client: ClaudeClient,
   model: string,
   log: FastifyBaseLogger,
   call: StructuredCall<S>,
 ): Promise<z.infer<S>> {
+  const started = Date.now();
   const response = await client.beta.messages.create({
     model,
     max_tokens: call.maxTokens ?? 16_000,
@@ -67,10 +71,14 @@ export async function callStructured<S extends z.ZodType>(
   });
 
   const usage = response.usage;
-  log.info(
+  const durationMs = Date.now() - started;
+  const budget = SPEED_BUDGET_MS[call.route];
+  log[budget && durationMs > budget ? 'warn' : 'info'](
     {
       ai: {
         route: call.route,
+        durationMs,
+        ...(budget ? { budgetMs: budget, overBudget: durationMs > budget } : {}),
         model: response.model,
         stopReason: response.stop_reason,
         inputTokens: usage.input_tokens,

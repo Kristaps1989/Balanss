@@ -135,7 +135,7 @@ describe('tip report, dismiss and ranking', () => {
 
   it('a reported tip is hidden and today’s next tip avoids its angle', async () => {
     const first = (await call({ method: 'GET', url: `/v1/tips/today?date=${TODAY}` })).json() as Tip;
-    expect(first.body).toContain('olbaltumvielu');
+    expect(first.body).toMatch(/olbaltumviel/i);
     const res = await call({ method: 'POST', url: `/v1/tips/${first.id}/report`, payload: { reason: 'not_relevant' } });
     expect(res.json()).toEqual({ ok: true });
     const [row] = await db.select().from(tips).where(eq(tips.id, first.id));
@@ -143,7 +143,7 @@ describe('tip report, dismiss and ranking', () => {
 
     const next = (await call({ method: 'GET', url: `/v1/tips/today?date=${TODAY}` })).json() as Tip;
     expect(next.id).not.toBe(first.id);
-    expect(next.body).not.toContain('olbaltumvielu');
+    expect(next.body).not.toMatch(/olbaltumviel/i);
     const [nextRow] = await db.select().from(tips).where(eq(tips.id, next.id));
     expect(nextRow!.angle).not.toBe('protein');
     expect(((await call({ method: 'GET', url: `/v1/days/${TODAY}` })).json() as Day).tip?.id).toBe(next.id);
@@ -263,7 +263,7 @@ describe('weekly summary and recipes (Pro)', () => {
     expect(meal).toMatchObject({ date: TODAY, type: 'dinner', source: 'manual' });
     expect(meal.items).toHaveLength(1);
     expect(meal.items[0]).toMatchObject({ name: 'Griķi ar vistas fileju un gurķu salātiem', portionLabel: '1 porcija' });
-    expect(meal.totals).toEqual(r.recipes[0]!.perServing);
+    expect(meal.totals).toEqual({ ...r.recipes[0]!.perServing, calciumMg: 0 });
     const after = ((await call({ method: 'GET', url: `/v1/days/${TODAY}` })).json() as Day).nutrition.kcal.value;
     expect(after).toBe(before + r.recipes[0]!.perServing.kcal);
     expect((await call({ method: 'POST', url: `/v1/recipes/${r.recipes[0]!.id}/log`, payload: {} })).statusCode).toBe(400);

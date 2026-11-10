@@ -19,7 +19,7 @@ beforeEach(async () => {
   call = authed(ctx.app, tokens.accessToken);
 });
 
-const egg = { kcal: 156, proteinG: 12.6, carbsG: 1.1, fatG: 10.6, fibreG: 0 };
+const egg = { kcal: 156, proteinG: 12.6, carbsG: 1.1, fatG: 10.6, fibreG: 0, calciumMg: 50 };
 const bread = { kcal: 229, proteinG: 6.1, carbsG: 44, fatG: 1.4, fibreG: 7.5 };
 
 const analyze = () =>
@@ -43,9 +43,9 @@ describe('meals CRUD', () => {
     });
     expect(created.statusCode).toBe(200);
     const meal = created.json() as Meal;
-    expect(meal.items[0]!.totals).toEqual({ kcal: 156, proteinG: 12.6, carbsG: 1.1, fatG: 10.6, fibreG: 0 });
+    expect(meal.items[0]!.totals).toEqual({ kcal: 156, proteinG: 12.6, carbsG: 1.1, fatG: 10.6, fibreG: 0, calciumMg: 50 });
     expect(meal.items[1]!.totals.kcal).toBe(80);
-    expect(meal.totals).toEqual({ kcal: 236, proteinG: 14.7, carbsG: 16.5, fatG: 11.1, fibreG: 2.6 });
+    expect(meal.totals).toEqual({ kcal: 236, proteinG: 14.7, carbsG: 16.5, fatG: 11.1, fibreG: 2.6, calciumMg: 50 });
     expect(meal.photoUrl).toBeNull();
 
     const patched = await call({

@@ -20,12 +20,14 @@ import type {
 import { addDays, lastNDates, mondayOf } from '../../../shared/dates';
 import { effectiveTone, toneModifiers } from '../../../shared/personality';
 import { computeSleepWindow, eveningMinutes, sleepScore } from '../../../shared/sleep';
+import { withDefaults } from '../../../shared/targets';
 import type { ToneInput, TrendsInput } from '../ai/tone';
 import type { TipAngle } from '../ai/tone-types';
 import type { Config } from '../config';
 import type { Db } from '../db/client';
 import {
   healthDays,
+  meals as mealsTable,
   sleepNights,
   tips,
   waterDays,
@@ -176,8 +178,8 @@ export async function waterFor(db: Db, userId: string, date: string): Promise<nu
 }
 
 export async function buildDay(db: Db, config: Config, user: UserRow, date: string): Promise<Day> {
-  const t = user.targets;
-  const [meals, waterMl, [health], nights, [tip], [wq], [weight], care] = await Promise.all([
+  const t = withDefaults(user.targets, user.profile);
+  const [meals, waterMl, [health], nights, [tip], [wq], [weight], care, logged] = await Promise.all([
     mealsInRange(db, config, user.id, date, date),
     waterFor(db, user.id, date),
     db.select().from(healthDays).where(and(eq(healthDays.userId, user.id), eq(healthDays.date, date))),
@@ -191,6 +193,10 @@ export async function buildDay(db: Db, config: Config, user: UserRow, date: stri
     db.select().from(weeklyQuestions).where(and(eq(weeklyQuestions.userId, user.id), eq(weeklyQuestions.week, mondayOf(date)))),
     db.select().from(weights).where(and(eq(weights.userId, user.id), lte(weights.date, date))).orderBy(desc(weights.date)).limit(1),
     careFor(db, user, date),
+    db
+      .selectDistinct({ date: mealsTable.date })
+      .from(mealsTable)
+      .where(and(eq(mealsTable.userId, user.id), gte(mealsTable.date, addDays(date, -6)), lte(mealsTable.date, date))),
   ]);
   const totals = dayTotals(meals);
   const window = windowFor(nights);
@@ -203,9 +209,11 @@ export async function buildDay(db: Db, config: Config, user: UserRow, date: stri
       carbsG: progress(totals.carbsG, t.carbsG),
       fatG: progress(totals.fatG, t.fatG),
       fibreG: progress(totals.fibreG, t.fibreG),
+      calciumMg: progress(totals.calciumMg ?? 0, t.calciumMg),
       waterMl: progress(waterMl, t.waterMl),
     },
     meals,
+    week: { loggedDays: logged.length, days: 7 },
     movement: {
       steps: progress(health?.steps ?? 0, t.steps),
       activeKcal: health?.activeKcal ?? 0,

@@ -13,14 +13,14 @@ import { Loading } from '@/components/States';
 import { duration, formatNumber, litres } from '@/lib/format';
 import { KCAL_FLOOR, minGoalWeight, weightLossAllowed } from '@shared/safety';
 import { computeTargets, targetSources, weeksToGoal } from '@shared/targets';
-import { colors, fonts, radius, type } from '@/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 
-const GOALS: { value: Goal; label: string; hint: string; icon: IconName; bg: string; fg: string }[] = [
-  { value: 'health', label: 'Justies veselīgāk', hint: 'Vairāk enerģijas un labāks miegs', icon: 'heart', bg: '#FCE7EA', fg: '#A8364C' },
+const GOALS: { value: Goal; label: string; hint: string; icon: IconName; bg: string; fg: string }[] = themed(() => [
+  { value: 'health', label: 'Justies veselīgāk', hint: 'Vairāk enerģijas un labāks miegs', icon: 'heart', bg: colors.healthSoft, fg: colors.health },
   { value: 'fit', label: 'Uzturēt formu', hint: 'Saglabāt to, kas jau ir labi', icon: 'movement', bg: colors.moveSoft, fg: colors.moveDeep },
   { value: 'weight', label: 'Sasniegt vēlamo svaru', hint: 'Samazināt vai palielināt — mierīgā tempā', icon: 'scale', bg: colors.accentSoft, fg: colors.accentText },
   { value: 'routine', label: 'Izveidot rutīnu', hint: 'Regulāras maltītes, ūdens un gulētiešana', icon: 'clock', bg: colors.sleepSoft, fg: colors.sleepDeep },
-];
+]);
 
 type TargetKey = 'kcal' | 'waterMl' | 'steps' | 'sleepMin' | 'proteinG';
 
@@ -106,7 +106,7 @@ function GoalsForm({ mode, me }: { mode: 'onboarding' | 'edit'; me: Me }) {
         {GOALS.map((g) => {
           const on = goals.includes(g.value);
           return (
-            <View key={g.value} style={[styles.goal, { backgroundColor: on ? colors.accentSoft : colors.white, borderColor: on ? colors.accent : colors.inputBorder }]}>
+            <View key={g.value} style={[styles.goal, { backgroundColor: on ? colors.accentSoft : colors.card, borderColor: on ? colors.accent : colors.inputBorder }]}>
               <Pressable
                 onPress={() => toggle(g.value)}
                 accessibilityRole="checkbox"
@@ -120,8 +120,8 @@ function GoalsForm({ mode, me }: { mode: 'onboarding' | 'edit'; me: Me }) {
                   <Text style={styles.goalLabel}>{g.label}</Text>
                   <Text style={type.secondary}>{g.hint}</Text>
                 </View>
-                <View style={[styles.check, { borderColor: on ? colors.accent : colors.inputBorder, backgroundColor: on ? colors.accent : colors.white }]}>
-                  {on && <Icon name="check" color={colors.white} size={16} strokeWidth={3} />}
+                <View style={[styles.check, { borderColor: on ? colors.accent : colors.inputBorder, backgroundColor: on ? colors.accent : colors.card }]}>
+                  {on && <Icon name="check" color={colors.onAccent} size={16} strokeWidth={3} />}
                 </View>
               </Pressable>
               {on && g.value === 'weight' && (
@@ -139,7 +139,7 @@ function GoalsForm({ mode, me }: { mode: 'onboarding' | 'edit'; me: Me }) {
                           accessibilityRole="radio"
                           aria-checked={sel}
                           style={[styles.dir, sel && { backgroundColor: colors.ink }]}>
-                          <Text style={[styles.dirText, sel && { color: colors.white }]}>{d === 'down' ? 'Samazināt' : 'Palielināt'}</Text>
+                          <Text style={[styles.dirText, sel && { color: colors.onInk }]}>{d === 'down' ? 'Samazināt' : 'Palielināt'}</Text>
                         </Pressable>
                       );
                     })}
@@ -152,10 +152,10 @@ function GoalsForm({ mode, me }: { mode: 'onboarding' | 'edit'; me: Me }) {
                     <RoundButton
                       icon="minus"
                       label="Vēlamais svars: mazāk"
-                      bg={colors.white}
+                      bg={colors.card}
                       onPress={() => setGoalKg((k) => Math.max(dir === 'down' ? minKg : Math.ceil(p.weightKg), k - 1))}
                     />
-                    <RoundButton icon="plus" label="Vēlamais svars: vairāk" bg={colors.white} onPress={() => setGoalKg((k) => Math.min(250, k + 1))} />
+                    <RoundButton icon="plus" label="Vēlamais svars: vairāk" bg={colors.card} onPress={() => setGoalKg((k) => Math.min(250, k + 1))} />
                   </View>
                   <Text style={type.secondary}>{pace}</Text>
                   {!lossOk && (
@@ -204,7 +204,7 @@ function GoalsForm({ mode, me }: { mode: 'onboarding' | 'edit'; me: Me }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
   label: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
   goal: { borderRadius: radius.option, borderWidth: 1.5 },
@@ -213,13 +213,13 @@ const styles = StyleSheet.create({
   goalLabel: { fontFamily: fonts.bodyBold, fontSize: 17, color: colors.ink },
   check: { width: 24, height: 24, borderRadius: 7, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   weight: { paddingHorizontal: 16, paddingBottom: 14, gap: 10 },
-  dirs: { flexDirection: 'row', gap: 4, padding: 4, borderRadius: 14, backgroundColor: colors.white },
+  dirs: { flexDirection: 'row', gap: 4, padding: 4, borderRadius: 14, backgroundColor: colors.card },
   dir: { flex: 1, height: 40, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   dirText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.ink },
-  big: { fontFamily: fonts.heading, fontSize: 22, lineHeight: 28, color: colors.ink },
-  targets: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.optionBorder, borderRadius: 22, paddingVertical: 6, paddingHorizontal: 16 },
-  target: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F0EAE1' },
+  big: { fontFamily: fonts.number, fontSize: 22, lineHeight: 28, color: colors.ink },
+  targets: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.optionBorder, borderRadius: 22, paddingVertical: 6, paddingHorizontal: 16 },
+  target: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.divider },
   src: { flex: 1, fontFamily: fonts.body, fontSize: 12, lineHeight: 16, color: colors.caption },
   disclaimer: { fontFamily: fonts.body, fontSize: 12, lineHeight: 17, color: colors.caption, paddingHorizontal: 4 },
   error: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentDeep, textAlign: 'center' },
-});
+}));

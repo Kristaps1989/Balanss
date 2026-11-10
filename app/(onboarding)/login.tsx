@@ -8,7 +8,7 @@ import { Button } from '@/components/Button';
 import { BackButton } from '@/components/Header';
 import { Screen } from '@/components/Screen';
 import { appleAvailable, googleAvailable, SignInCancelled, signInWithApple, signInWithGoogle } from '@/lib/auth';
-import { colors, fonts, type } from '@/theme';
+import { colors, fonts, type, themed } from '@/theme';
 
 const TERMS_URL = process.env.EXPO_PUBLIC_TERMS_URL ?? 'https://balanss.app/noteikumi';
 const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL ?? 'https://balanss.app/privatums';
@@ -69,7 +69,7 @@ export default function Login() {
       <View style={{ flexGrow: 1, minHeight: 24 }} />
       <View style={{ gap: 12 }}>
         {appleAvailable && (
-          <Button label="Turpināt ar Apple" variant="dark" style={{ backgroundColor: '#000' }} loading={busy === 'apple'} onPress={() => run('apple', signInWithApple)} />
+          <Button label="Turpināt ar Apple" variant="dark" loading={busy === 'apple'} onPress={() => run('apple', signInWithApple)} />
         )}
         {googleAvailable && (
           <Button label="Turpināt ar Google" variant="light" loading={busy === 'google'} onPress={() => run('google', signInWithGoogle)} />
@@ -142,7 +142,7 @@ export default function Login() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   hero: { alignItems: 'center', gap: 12, paddingTop: 12 },
   title: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 34, color: colors.ink, textAlign: 'center', marginTop: 4 },
   sub: { fontFamily: fonts.body, fontSize: 16, lineHeight: 23, color: colors.text2, textAlign: 'center', maxWidth: 300 },
@@ -154,17 +154,17 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: colors.accent,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     paddingHorizontal: 16,
     fontFamily: fonts.body,
     fontSize: 16,
     color: colors.ink,
   },
-  sent: { borderRadius: 18, backgroundColor: '#EAF3EE', paddingVertical: 14, paddingHorizontal: 16, gap: 6 },
-  sentTitle: { fontFamily: fonts.bodyBold, fontSize: 15, color: '#24503B' },
-  sentBody: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: '#3D4B43' },
-  sentLink: { fontFamily: fonts.bodyBold, fontSize: 14, color: '#24503B', paddingTop: 4, minHeight: 32 },
+  sent: { borderRadius: 18, backgroundColor: colors.moveSoft, paddingVertical: 14, paddingHorizontal: 16, gap: 6 },
+  sentTitle: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.moveDeep },
+  sentBody: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.text2 },
+  sentLink: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.moveDeep, paddingTop: 4, minHeight: 32 },
   error: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentDeep, textAlign: 'center' },
   legal: { fontFamily: fonts.body, fontSize: 13, lineHeight: 19, color: colors.caption, textAlign: 'center' },
   legalLink: { fontFamily: fonts.bodySemi, color: colors.accentText },
-});
+}));

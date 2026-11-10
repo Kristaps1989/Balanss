@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 
 interface Props {
   children: ReactNode;
@@ -31,13 +31,11 @@ export function Card({ children, style, onPress, accessibilityLabel, testID }: P
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   card: {
     backgroundColor: colors.card,
-    borderColor: colors.border,
-    borderWidth: 1,
     borderRadius: radius.card,
     padding: space.xl,
   },
   pressed: { opacity: 0.85 },
-});
+}));

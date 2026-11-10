@@ -12,6 +12,7 @@ const NutrientsSchema = z.object({
   carbsG: z.number(),
   fatG: z.number(),
   fibreG: z.number(),
+  calciumMg: z.number(),
 });
 
 const FoodItemsSchema = z.object({
@@ -34,6 +35,7 @@ const clampNutrients = (v: z.infer<typeof NutrientsSchema>) => ({
   carbsG: Math.max(0, Math.min(100, round1(v.carbsG))),
   fatG: Math.max(0, Math.min(100, round1(v.fatG))),
   fibreG: Math.max(0, Math.min(100, round1(v.fibreG))),
+  calciumMg: Math.max(0, Math.min(2000, Math.round(v.calciumMg))),
 });
 
 /** Second, domain-level validation of the model's output: clamp ranges, keep alternatives only for unsure items. */
@@ -66,7 +68,7 @@ export const ANALYZE_SYSTEM = `You are the food-recognition step of Balanss, a L
 Rules:
 - Identify each distinct food or drink that is visible (e.g. "Vistas krūtiņa", "Rīsi, vārīti", "Salāti", "Mērce"). Do not merge separate components; do not list garnish that weighs under 5 g.
 - Estimate the grams of each item from its visible volume, using the plate (a standard dinner plate is about 26 cm), bowl, glass or cutlery as a size reference. Cooked weight as served.
-- Give nutrients per 100 g of the item as served (kcal, proteinG, carbsG, fatG, fibreG), using standard food-composition tables (e.g. USDA FoodData Central, Fineli, the Latvian food composition data). Use one decimal for grams of macronutrients, whole kcal.
+- Give nutrients per 100 g of the item as served (kcal, proteinG, carbsG, fatG, fibreG, calciumMg), using standard food-composition tables (e.g. USDA FoodData Central, Fineli, the Latvian food composition data). Use one decimal for grams of macronutrients, whole kcal and whole mg of calcium. Calcium is an estimate from the food type (dairy, cheese, leafy greens, tofu, sardines and fortified drinks are the main sources); use 0 only when the food has essentially none.
 - "name" is the Latvian name of the food, short, capitalised, in the style "Rīsi, vārīti", "Auzu putra ar ogām", "Rupjmaize".
 - "confidence" is 0..1: how sure you are about both the identity and the amount. Sauces, dressings, oils and mixed dishes are usually below 0.6.
 - For items with confidence below 0.6, give up to 3 "alternatives" the user can pick instead (e.g. for a sauce: "Jogurta mērce", "Majonēze"), each with grams and per-100 g nutrients, and always include a "none" option such as "Bez mērces" with 0 g and zero nutrients. For items with confidence 0.6 or above, "alternatives" is an empty list.
@@ -81,7 +83,7 @@ Rules:
 - Latvian food names, short and capitalised, e.g. "Olas, vārītas", "Rupjmaize", "Biezpiens", "Kafija ar pienu".
 - Convert quantities to grams using typical Latvian portions: 1 egg 50 g, 1 slice of rye bread 35 g, 1 glass 250 ml, 1 cup of coffee 200 ml, 1 portion of porridge 250 g. If no quantity is given, assume one typical portion.
 - "portionLabel" repeats the user's unit in Latvian ("2 gab.", "1 šķēle", "1 glāze"), or null when the user gave grams.
-- Nutrients per 100 g from standard food-composition tables; whole kcal, one decimal for grams.
+- Nutrients per 100 g from standard food-composition tables; whole kcal, one decimal for grams, whole mg of calcium (calciumMg; dairy, cheese, leafy greens and fortified drinks are the main sources).
 - "confidence" 0..1; alternatives only for items below 0.6 (up to 3, with grams and per-100 g nutrients), otherwise an empty list.
 - Ignore words that are not food. If nothing is food, return an empty "items" list.`;
 

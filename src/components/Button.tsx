@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, fonts, space } from '@/theme';
+import { colors, fonts, space, themed } from '@/theme';
 
 import { Icon, type IconName } from './Icon';
 
@@ -21,22 +21,22 @@ interface Props {
   testID?: string;
 }
 
-const BG: Record<Variant, string> = {
+const BG: Record<Variant, string> = themed(() => ({
   dark: colors.ink,
-  light: colors.white,
+  light: colors.card,
   accent: colors.commit,
   soft: colors.chip,
   ghost: 'transparent',
-  danger: colors.white,
-};
-const FG: Record<Variant, string> = {
-  dark: colors.white,
+  danger: colors.card,
+}));
+const FG: Record<Variant, string> = themed(() => ({
+  dark: colors.onInk,
   light: colors.ink,
-  accent: colors.white,
+  accent: colors.onAccent,
   soft: colors.ink,
   ghost: colors.text2,
   danger: colors.accentDeep,
-};
+}));
 const H = { lg: 56, md: 48, sm: 40 };
 
 /** Pill button (prototype: "Tālāk", "Saglabāt", "Foto"). */
@@ -82,7 +82,7 @@ export function BottomBar({ children }: { children: ReactNode }) {
   return <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 16) + 16 }]}>{children}</View>;
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   btn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -94,4 +94,4 @@ const styles = StyleSheet.create({
   label: { fontFamily: fonts.bodySemi },
   disabled: { opacity: 0.4 },
   bar: { paddingHorizontal: space.screen, paddingTop: 16, backgroundColor: colors.bg, gap: 10 },
-});
+}));

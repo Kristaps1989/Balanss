@@ -12,7 +12,7 @@ import { Screen } from '@/components/Screen';
 import { ErrorState, Loading } from '@/components/States';
 import { duration, formatNumber } from '@/lib/format';
 import { useToday } from '@/lib/today';
-import { colors, fonts, radius, type } from '@/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 
 /** Nedēļas AI kopsavilkums (Pro): patterns from the last weeks, phrased in the user's tone. */
 export default function Summary() {
@@ -118,16 +118,16 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   over: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentText },
   h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  stat: { flexGrow: 1, minWidth: '22%', backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: 16, padding: 12, gap: 2 },
-  statValue: { fontFamily: fonts.heading, fontSize: 18, color: colors.ink },
+  stat: { flexGrow: 1, minWidth: '22%', backgroundColor: colors.card, borderRadius: 16, padding: 12, gap: 2 },
+  statValue: { fontFamily: fonts.number, fontSize: 18, color: colors.ink },
   card: { padding: 18, gap: 8 },
   body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: colors.ink },
   suggestion: { backgroundColor: colors.accentSoft, borderRadius: radius.card, padding: 18, gap: 8 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   sugTitle: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.accentDeep },
   finding: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', paddingTop: 4 },
-});
+}));

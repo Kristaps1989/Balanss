@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 
 import type { CareStatus, Devices, FoodPreferences, Me, Personality, Plan, Profile, Reminders, TonePreference } from '../../../shared/api';
 import { effectiveTone } from '../../../shared/personality';
-import { computeTargets } from '../../../shared/targets';
+import { computeTargets, withDefaults } from '../../../shared/targets';
 import type { Db } from '../db/client';
 import { personalities, users, type PersonalityRow, type UserRow } from '../db/schema';
 import { AppError, unauthorized } from '../errors';
@@ -78,7 +78,7 @@ export function toMe(user: UserRow, personality: PersonalityRow | null | undefin
     id: user.id,
     email: user.email,
     profile: user.profile,
-    targets: user.targets,
+    targets: withDefaults(user.targets, user.profile),
     preferences: user.preferences ?? DEFAULT_PREFERENCES,
     aiPersonalization: user.aiPersonalization,
     care,

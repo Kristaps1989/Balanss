@@ -1,7 +1,7 @@
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { CARE_COPY } from '@shared/safety';
-import { colors, fonts, radius } from '@/theme';
+import { colors, fonts, radius, themed } from '@/theme';
 
 import { Icon } from './Icon';
 
@@ -21,10 +21,10 @@ export function CareCard() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   card: { backgroundColor: colors.moveSoft, borderRadius: radius.card, padding: 18, gap: 8 },
   title: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  titleText: { fontFamily: fonts.bodyBold, fontSize: 15, color: '#24503B' },
-  body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: '#24503B' },
+  titleText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.moveDeep },
+  body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: colors.moveDeep },
   support: { fontFamily: fonts.bodySemi, fontSize: 14, lineHeight: 20, color: colors.moveDeep, textDecorationLine: 'underline' },
-});
+}));

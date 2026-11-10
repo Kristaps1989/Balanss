@@ -11,12 +11,13 @@ import { RoundButton, Segmented } from '@/components/Controls';
 import { IconButton } from '@/components/Header';
 import { Icon } from '@/components/Icon';
 import { Slider } from '@/components/Slider';
+import { confirmLogged } from '@/components/Toast';
 import { formatNumber, grams as fmtGrams, plural } from '@/lib/format';
 import { useMealDraft, type DraftItem } from '@/lib/mealDraft';
 import { portionMax } from '@/lib/portion';
 import { useToday } from '@/lib/today';
 import { MEAL_LABEL, MEAL_ORDER, itemsTotals, scale } from '@shared/nutrition';
-import { colors, fonts, radius, type } from '@/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 
 /** Foto · rezultāts (prototype: Food-Result.dc.html). */
 export default function Result() {
@@ -39,6 +40,7 @@ export default function Result() {
         items: items.filter((i) => i.grams > 0).map((i) => ({ name: i.name, grams: i.grams, per100g: i.per100g, portionLabel: i.portionLabel ?? null })),
       }),
     onSuccess: () => {
+      confirmLogged();
       invalidateDay(qc, date);
       draft.reset();
       router.dismissTo('/nutrition');
@@ -114,7 +116,7 @@ export default function Result() {
             kopā
           </Text>
           <Text style={styles.totalsText}>
-            olb. {Math.round(totals.proteinG)} g · ogļh. {Math.round(totals.carbsG)} g · tauki {Math.round(totals.fatG)} g
+            olb. {Math.round(totals.proteinG)} g · ogļh. {Math.round(totals.carbsG)} g · tauki {Math.round(totals.fatG)} g · kalcijs ~{formatNumber(totals.calciumMg ?? 0)} mg
           </Text>
         </View>
         {save.isError && <Text style={styles.error}>Neizdevās saglabāt. Mēģini vēlreiz.</Text>}
@@ -192,10 +194,10 @@ function ItemCard({ item }: { item: DraftItem }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   sliderRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   root: { flex: 1, backgroundColor: colors.bg },
-  photo: { backgroundColor: '#5B4E43', overflow: 'hidden' },
+  photo: { backgroundColor: colors.avatar, overflow: 'hidden' },
   body: { paddingTop: 18, paddingHorizontal: 20, gap: 12 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
   title: { fontFamily: fonts.heading, fontSize: 24, lineHeight: 30, color: colors.ink, flexShrink: 1 },
@@ -204,7 +206,7 @@ const styles = StyleSheet.create({
     minHeight: 36,
     paddingHorizontal: 12,
     borderRadius: 18,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.inputBorder,
     flexDirection: 'row',
@@ -212,31 +214,31 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   typeText: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.ink },
-  item: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: radius.option, paddingTop: 14, paddingHorizontal: 16, paddingBottom: 6, gap: 2 },
+  item: { backgroundColor: colors.card, borderRadius: radius.option, paddingTop: 14, paddingHorizontal: 16, paddingBottom: 6, gap: 2 },
   itemHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 },
   itemName: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.ink, flexShrink: 1 },
   itemKcal: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
   itemMeta: { fontFamily: fonts.body, fontSize: 13, color: colors.text2 },
   remove: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
   unsure: { marginTop: 4, marginBottom: 8, borderRadius: 14, backgroundColor: colors.accentSoft, paddingVertical: 10, paddingHorizontal: 12, gap: 8 },
-  unsureTitle: { fontFamily: fonts.bodySemi, fontSize: 14, color: '#6E3A1F' },
-  altChip: { height: 36, paddingHorizontal: 12, borderRadius: 18, backgroundColor: colors.white, justifyContent: 'center' },
+  unsureTitle: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentDeep },
+  altChip: { height: 36, paddingHorizontal: 12, borderRadius: 18, backgroundColor: colors.card, justifyContent: 'center' },
   altText: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.ink },
   addMissing: {
     height: 48,
     borderRadius: 16,
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: '#D8CFC2',
+    borderColor: colors.inputBorder,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
   },
   addMissingText: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.text2 },
-  footer: { backgroundColor: colors.white, borderTopWidth: 1, borderTopColor: colors.navBorder, paddingTop: 12, paddingHorizontal: 20, gap: 10 },
+  footer: { backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.navBorder, paddingTop: 12, paddingHorizontal: 20, gap: 10 },
   totals: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 4 },
   totalsText: { fontFamily: fonts.body, fontSize: 14, color: colors.text2 },
-  totalKcal: { fontFamily: fonts.heading, fontSize: 18, color: colors.ink },
+  totalKcal: { fontFamily: fonts.number, fontSize: 18, color: colors.ink },
   error: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentDeep },
-});
+}));

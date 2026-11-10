@@ -10,7 +10,7 @@ import { Segmented } from '@/components/Controls';
 import { Sheet } from '@/components/Sheet';
 import { formatNumber, grams, timeOf } from '@/lib/format';
 import { MEAL_LABEL, MEAL_ORDER, itemsTotals } from '@shared/nutrition';
-import { colors, fonts, type } from '@/theme';
+import { colors, fonts, type, themed } from '@/theme';
 
 /** All meals logged in one slot (e.g. Vakariņas) of a day: move, save as favourite, delete. */
 export default function MealSheet() {
@@ -70,7 +70,7 @@ function MealBlock({ meal, date, showDivider, alone }: { meal: Meal; date: strin
               <Text style={type.bodySemi}>{i.name}</Text>
               <Text style={type.caption}>
                 {i.portionLabel ? `${i.portionLabel} · ` : ''}
-                {grams(i.grams)} g · {grams(Math.round(i.totals.proteinG))} g olb.
+                {grams(i.grams)} g · {grams(Math.round(i.totals.proteinG))} g olb.{i.totals.calciumMg ? ` · ~${formatNumber(i.totals.calciumMg)} mg kalcija` : ''}
               </Text>
             </View>
             <Text style={styles.kcal}>{formatNumber(i.totals.kcal)} kcal</Text>
@@ -106,9 +106,9 @@ function MealBlock({ meal, date, showDivider, alone }: { meal: Meal; date: strin
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   divider: { borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 16 },
   time: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 4 },
   kcal: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
-});
+}));

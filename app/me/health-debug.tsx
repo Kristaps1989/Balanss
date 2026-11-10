@@ -10,7 +10,7 @@ import { formatNumber } from '@/lib/format';
 import { health } from '@/lib/health';
 import { syncHealth, syncProfile } from '@/lib/services';
 import { useToday } from '@/lib/today';
-import { colors, fonts, radius, type } from '@/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 
 /**
  * Health Connect diagnostics: syncs now, then shows what the store holds per app and device
@@ -64,7 +64,7 @@ export default function HealthDebug() {
   );
 }
 
-const styles = StyleSheet.create({
-  box: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, borderRadius: radius.option, padding: 14 },
+const styles = themed(() => StyleSheet.create({
+  box: { backgroundColor: colors.card, borderRadius: radius.option, padding: 14 },
   mono: { fontFamily: fonts.body, fontSize: 13, lineHeight: 19, color: colors.ink },
-});
+}));

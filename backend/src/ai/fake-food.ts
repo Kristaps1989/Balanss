@@ -5,28 +5,29 @@ import type { FoodItemDraft, Nutrients } from '../../../shared/api';
  * fallback when a Claude call fails.
  */
 
-const n = (kcal: number, proteinG: number, carbsG: number, fatG: number, fibreG: number): Nutrients => ({
+const n = (kcal: number, proteinG: number, carbsG: number, fatG: number, fibreG: number, calciumMg = 0): Nutrients => ({
   kcal,
   proteinG,
   carbsG,
   fatG,
   fibreG,
+  calciumMg,
 });
 
 /** The prototype's Food-Result screen: chicken, rice, salad and an uncertain sauce (514 kcal). */
 export function fakeAnalyzeMeal(): FoodItemDraft[] {
   return [
-    { name: 'Vistas krūtiņa', grams: 150, per100g: n(165, 30.7, 0, 3.6, 0), confidence: 0.92, alternatives: [], portionLabel: null },
-    { name: 'Rīsi, vārīti', grams: 120, per100g: n(130, 2.7, 28, 0.3, 0.4), confidence: 0.88, alternatives: [], portionLabel: null },
-    { name: 'Salāti', grams: 80, per100g: n(18, 1.2, 3, 0.2, 1.5), confidence: 0.81, alternatives: [], portionLabel: null },
+    { name: 'Vistas krūtiņa', grams: 150, per100g: n(165, 30.7, 0, 3.6, 0, 15), confidence: 0.92, alternatives: [], portionLabel: null },
+    { name: 'Rīsi, vārīti', grams: 120, per100g: n(130, 2.7, 28, 0.3, 0.4, 10), confidence: 0.88, alternatives: [], portionLabel: null },
+    { name: 'Salāti', grams: 80, per100g: n(18, 1.2, 3, 0.2, 1.5, 36), confidence: 0.81, alternatives: [], portionLabel: null },
     {
       name: 'Mērce',
       grams: 30,
-      per100g: n(320, 1, 6, 33, 0),
+      per100g: n(320, 1, 6, 33, 0, 20),
       confidence: 0.45,
       alternatives: [
-        { label: 'Jogurta mērce', grams: 30, per100g: n(90, 3.5, 5, 6, 0) },
-        { label: 'Majonēze', grams: 30, per100g: n(680, 1, 1, 75, 0) },
+        { label: 'Jogurta mērce', grams: 30, per100g: n(90, 3.5, 5, 6, 0, 110) },
+        { label: 'Majonēze', grams: 30, per100g: n(680, 1, 1, 75, 0, 8) },
         { label: 'Bez mērces', grams: 0, per100g: n(0, 0, 0, 0, 0) },
       ],
       portionLabel: null,
@@ -56,30 +57,30 @@ function fmtCount(c: number): string {
 
 /** Order matters: more specific entries first (kafija ar pienu before piens, biezpiens before piens). */
 const DICT: DictEntry[] = [
-  { match: /auzu\s*putr|auzu\s*pārsl|putr/, name: 'Auzu putra', per100g: n(88, 3, 15, 1.7, 1.7), unitG: 250, unitLabel: porcija },
-  { match: /kafij/, name: 'Kafija ar pienu', per100g: n(30, 1.6, 2.4, 1.5, 0), unitG: 200, unitLabel: tase },
-  { match: /biezpien/, name: 'Biezpiens', per100g: n(121, 17, 3, 5, 0), unitG: 100, unitLabel: porcija },
-  { match: /jogurt/, name: 'Jogurts, dabīgs', per100g: n(66, 4.2, 5.5, 3, 0), unitG: 150, unitLabel: trauciņš },
-  { match: /\bol(a|as|u|ām|e)\b|\bolu\b/, name: 'Olas, vārītas', per100g: n(156, 12.6, 1.1, 10.6, 0), unitG: 50, unitLabel: gab },
-  { match: /rupjmaiz|maiz/, name: 'Rupjmaize', per100g: n(229, 6.1, 44, 1.4, 7.5), unitG: 35, unitLabel: skele },
-  { match: /banān/, name: 'Banāns', per100g: n(89, 1.1, 22.8, 0.3, 2.6), unitG: 120, unitLabel: gab },
-  { match: /ābol/, name: 'Ābols', per100g: n(52, 0.3, 14, 0.2, 2.4), unitG: 180, unitLabel: gab },
+  { match: /auzu\s*putr|auzu\s*pārsl|putr/, name: 'Auzu putra', per100g: n(88, 3, 15, 1.7, 1.7, 80), unitG: 250, unitLabel: porcija },
+  { match: /kafij/, name: 'Kafija ar pienu', per100g: n(30, 1.6, 2.4, 1.5, 0, 60), unitG: 200, unitLabel: tase },
+  { match: /biezpien/, name: 'Biezpiens', per100g: n(121, 17, 3, 5, 0, 85), unitG: 100, unitLabel: porcija },
+  { match: /jogurt/, name: 'Jogurts, dabīgs', per100g: n(66, 4.2, 5.5, 3, 0, 140), unitG: 150, unitLabel: trauciņš },
+  { match: /\bol(a|as|u|ām|e)\b|\bolu\b/, name: 'Olas, vārītas', per100g: n(156, 12.6, 1.1, 10.6, 0, 50), unitG: 50, unitLabel: gab },
+  { match: /rupjmaiz|maiz/, name: 'Rupjmaize', per100g: n(229, 6.1, 44, 1.4, 7.5, 40), unitG: 35, unitLabel: skele },
+  { match: /banān/, name: 'Banāns', per100g: n(89, 1.1, 22.8, 0.3, 2.6, 5), unitG: 120, unitLabel: gab },
+  { match: /ābol/, name: 'Ābols', per100g: n(52, 0.3, 14, 0.2, 2.4, 6), unitG: 180, unitLabel: gab },
   { match: /tēj/, name: 'Tēja', per100g: n(1, 0, 0.2, 0, 0), unitG: 250, unitLabel: tase },
-  { match: /pien/, name: 'Piens, 2 %', per100g: n(50, 3.3, 4.8, 2, 0), unitG: 250, unitLabel: glaze },
-  { match: /vist/, name: 'Vistas krūtiņa', per100g: n(165, 31, 0, 3.6, 0), unitG: 150, unitLabel: porcija },
-  { match: /rīs/, name: 'Rīsi, vārīti', per100g: n(130, 2.7, 28, 0.3, 0.4), unitG: 150, unitLabel: porcija },
-  { match: /kartupe/, name: 'Kartupeļi, vārīti', per100g: n(87, 1.9, 20, 0.1, 1.8), unitG: 150, unitLabel: porcija },
-  { match: /salāt/, name: 'Salāti', per100g: n(18, 1.2, 3, 0.2, 1.5), unitG: 100, unitLabel: porcija },
-  { match: /sier/, name: 'Siers', per100g: n(350, 25, 1, 27, 0), unitG: 20, unitLabel: skele },
-  { match: /sviest/, name: 'Sviests', per100g: n(717, 0.9, 0.1, 81, 0), unitG: 10, unitLabel: porcija },
-  { match: /lasi|zivs|zivi/, name: 'Lasis, cepts', per100g: n(206, 22, 0, 13, 0), unitG: 120, unitLabel: porcija },
-  { match: /griķ/, name: 'Griķi, vārīti', per100g: n(92, 3.4, 20, 0.6, 2.7), unitG: 150, unitLabel: porcija },
-  { match: /zup/, name: 'Dārzeņu zupa', per100g: n(40, 1.5, 6, 1, 1.5), unitG: 300, unitLabel: porcija },
-  { match: /riekst/, name: 'Rieksti', per100g: n(607, 20, 13, 54, 7), unitG: 30, unitLabel: porcija },
-  { match: /granol|musli|müsli/, name: 'Granola', per100g: n(470, 10, 60, 20, 7), unitG: 50, unitLabel: porcija },
-  { match: /ogas|ogām|mellen|zemen/, name: 'Ogas', per100g: n(45, 0.8, 10, 0.3, 3), unitG: 100, unitLabel: porcija },
-  { match: /tomāt/, name: 'Tomāts', per100g: n(18, 0.9, 3.9, 0.2, 1.2), unitG: 120, unitLabel: gab },
-  { match: /gurķ/, name: 'Gurķis', per100g: n(15, 0.7, 3.6, 0.1, 0.5), unitG: 150, unitLabel: gab },
+  { match: /pien/, name: 'Piens, 2 %', per100g: n(50, 3.3, 4.8, 2, 0, 120), unitG: 250, unitLabel: glaze },
+  { match: /vist/, name: 'Vistas krūtiņa', per100g: n(165, 31, 0, 3.6, 0, 15), unitG: 150, unitLabel: porcija },
+  { match: /rīs/, name: 'Rīsi, vārīti', per100g: n(130, 2.7, 28, 0.3, 0.4, 10), unitG: 150, unitLabel: porcija },
+  { match: /kartupe/, name: 'Kartupeļi, vārīti', per100g: n(87, 1.9, 20, 0.1, 1.8, 8), unitG: 150, unitLabel: porcija },
+  { match: /salāt/, name: 'Salāti', per100g: n(18, 1.2, 3, 0.2, 1.5, 36), unitG: 100, unitLabel: porcija },
+  { match: /sier/, name: 'Siers', per100g: n(350, 25, 1, 27, 0, 800), unitG: 20, unitLabel: skele },
+  { match: /sviest/, name: 'Sviests', per100g: n(717, 0.9, 0.1, 81, 0, 24), unitG: 10, unitLabel: porcija },
+  { match: /lasi|zivs|zivi/, name: 'Lasis, cepts', per100g: n(206, 22, 0, 13, 0, 15), unitG: 120, unitLabel: porcija },
+  { match: /griķ/, name: 'Griķi, vārīti', per100g: n(92, 3.4, 20, 0.6, 2.7, 7), unitG: 150, unitLabel: porcija },
+  { match: /zup/, name: 'Dārzeņu zupa', per100g: n(40, 1.5, 6, 1, 1.5, 25), unitG: 300, unitLabel: porcija },
+  { match: /riekst/, name: 'Rieksti', per100g: n(607, 20, 13, 54, 7, 100), unitG: 30, unitLabel: porcija },
+  { match: /granol|musli|müsli/, name: 'Granola', per100g: n(470, 10, 60, 20, 7, 60), unitG: 50, unitLabel: porcija },
+  { match: /ogas|ogām|mellen|zemen/, name: 'Ogas', per100g: n(45, 0.8, 10, 0.3, 3, 20), unitG: 100, unitLabel: porcija },
+  { match: /tomāt/, name: 'Tomāts', per100g: n(18, 0.9, 3.9, 0.2, 1.2, 10), unitG: 120, unitLabel: gab },
+  { match: /gurķ/, name: 'Gurķis', per100g: n(15, 0.7, 3.6, 0.1, 0.5, 16), unitG: 150, unitLabel: gab },
 ];
 
 const NUMBER_WORDS: Record<string, number> = {

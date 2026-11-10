@@ -17,15 +17,15 @@ import { formatNumber, workoutWhen } from '@/lib/format';
 import { useHealthRefresh } from '@/lib/services';
 import { hrTrend, hrvTrend } from '@/lib/sleepPlan';
 import { useToday } from '@/lib/today';
-import { colors, fonts, radius, type } from '@/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 
-const ZONES = [
-  { name: '1 · Ļoti viegli', c: '#CBD3EA' },
+const ZONES = themed(() => [
+  { name: '1 · Ļoti viegli', c: colors.sleepLight },
   { name: '2 · Viegli', c: colors.sleepRem },
   { name: '3 · Vidēji', c: colors.steps },
   { name: '4 · Intensīvi', c: colors.carbs },
   { name: '5 · Maksimāli', c: colors.accent },
-];
+]);
 
 const WORKOUT_ICON: Partial<Record<WorkoutType, IconName>> = { yoga: 'heart', swim: 'drop', strength: 'target' };
 
@@ -57,7 +57,7 @@ export default function Movement() {
           </View>
           <Text style={[type.secondary, { paddingBottom: 6 }]}>{formatNumber(m.today.activeKcal)} aktīvās kcal</Text>
         </View>
-        <ProgressBar progress={m.today.steps.value / m.today.steps.target} color={colors.steps} trackColor={colors.stepsTrack} height={10} />
+        <ProgressBar progress={m.today.steps.value / m.today.steps.target} color={colors.steps} trackColor={colors.stepsTrack} />
         <View style={{ marginTop: 6 }}>
           <BarChart
             values={m.days.map((d) => d.steps)}
@@ -66,7 +66,7 @@ export default function Movement() {
             height={96}
             target={{ value: m.today.steps.target, label: '' }}
             color={colors.steps}
-            mutedColor="#C9D9CF"
+            mutedColor={colors.stepsTrack}
             highlight={m.days.length - 1}
             accessibilityLabel={`Soļi 7 dienās: ${m.days.map((d) => formatNumber(d.steps)).join(', ')}`}
           />
@@ -155,18 +155,18 @@ function WorkoutRow({ w, today }: { w: Workout; today: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   card: { padding: 18, gap: 12 },
   stepsHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
-  huge: { fontFamily: fonts.heading, fontSize: 36, lineHeight: 42, color: colors.ink },
+  huge: { fontFamily: fonts.number, fontSize: 36, lineHeight: 42, color: colors.ink },
   unit: { fontFamily: fonts.body, fontSize: 15, color: colors.text2 },
   half: { flex: 1, padding: 16, gap: 6, borderRadius: 22 },
   small: { fontFamily: fonts.body, fontSize: 13, color: colors.text2 },
-  mid: { fontFamily: fonts.heading, fontSize: 28, color: colors.ink },
+  mid: { fontFamily: fonts.number, fontSize: 28, color: colors.ink },
   unitSm: { fontFamily: fonts.body, fontSize: 13, color: colors.text2 },
   list: { paddingVertical: 8, paddingHorizontal: 18 },
   listHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 6, paddingBottom: 6 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 68, borderTopWidth: 1, borderTopColor: '#F0EAE1' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 68, borderTopWidth: 1, borderTopColor: colors.divider },
   wIcon: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.moveSoft, alignItems: 'center', justifyContent: 'center' },
   wName: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
   zone: { flexDirection: 'row', alignItems: 'center', gap: 10 },
@@ -174,4 +174,4 @@ const styles = StyleSheet.create({
   zoneTrack: { flex: 1, height: 12, borderRadius: 6, backgroundColor: colors.chip, overflow: 'hidden' },
   zoneMin: { width: 48, textAlign: 'right', fontFamily: fonts.bodyBold, fontSize: 13, color: colors.ink },
   radius: { borderRadius: radius.card },
-});
+}));

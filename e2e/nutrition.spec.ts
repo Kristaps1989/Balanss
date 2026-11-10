@@ -12,9 +12,15 @@ test('home shows the seeded sample day', async ({ page }) => {
   await signIn(page, 'ilze@piemers.lv');
   const home = page.getByTestId('home');
   await expect(home).toBeVisible();
-  await expect(home.getByText('1 480', { exact: true })).toBeVisible();
-  await expect(home.getByText('Vēl 270 kcal')).toBeVisible();
+  // One hero number: what is left today; the eaten total sits under the ring.
+  await expect(page.getByTestId('kcal-hero')).toHaveText('270');
+  await expect(home.getByText('kcal vēl šodien')).toBeVisible();
+  await expect(page.getByTestId('kcal-line')).toHaveText('1 480 no 1 750 kcal');
   await expect(home.getByText('68 / 110 g')).toBeVisible();
+  // Calcium is estimated from the foods and marked as such.
+  await expect(home.getByLabel(/^Kalcijs, aptuveni: \d[\d ]* \/ 950 mg/)).toBeVisible();
+  // Neutral fact, never a streak.
+  await expect(page.getByTestId('week-logged')).toHaveText(/^Šonedēļ maltītes pierakstītas \d no 7 dienām$/);
   await expect(page.getByTestId('water-total')).toContainText('1,2 l');
   await expect(home.getByText('6 430')).toBeVisible();
   await expect(home.getByText('6 h 40 min')).toBeVisible();
@@ -23,6 +29,7 @@ test('home shows the seeded sample day', async ({ page }) => {
   // Water: one tap adds a glass, and it persists
   await page.getByTestId('water-add').click();
   await expect(page.getByTestId('water-total')).toContainText('1,45 l');
+  await expect(page.getByTestId('toast')).toHaveText('Pierakstīts');
   await page.reload();
   await expect(page.getByTestId('water-total')).toContainText('1,45 l');
 
@@ -31,7 +38,9 @@ test('home shows the seeded sample day', async ({ page }) => {
   const before = await page.getByTestId('tip-card').innerText();
   await page.getByRole('button', { name: 'Cits ieteikums' }).click();
   await expect.poll(async () => page.getByTestId('tip-card').innerText()).not.toBe(before);
-  await page.getByRole('button', { name: 'Labi, pamēģināšu' }).click();
+  // One action per tip ("+250 ml" on a water tip, else "Labi, pamēģināšu"), and the tone it is written in.
+  await expect(page.getByTestId('tip-tone')).toHaveText(/^Tavā stilā: /);
+  await page.getByTestId('tip-card').getByRole('button', { name: /^(Labi, pamēģināšu|Pievienot 250 ml)$/ }).click();
   await expect(page.getByText('Pieņemts')).toBeVisible();
 });
 
@@ -40,7 +49,7 @@ test('log a meal from a photo with portion changes', async ({ page }) => {
   await page.getByRole('tab', { name: 'Uzturs' }).click();
   await expect(page.getByTestId('log-kcal')).toContainText('1 480');
 
-  await page.getByRole('button', { name: 'Foto' }).click();
+  await page.getByRole('button', { name: 'Foto', exact: true }).click();
   await expect(page.getByTestId('quota-label')).toContainText('no 3 analīzēm');
   const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByTestId('gallery').click()]);
   await chooser.setFiles(PHOTO);

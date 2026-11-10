@@ -63,15 +63,15 @@ describe('Anthropic provider request shape', () => {
           {
             name: 'Griķi, vārīti',
             grams: 180.4,
-            per100g: { kcal: 92, proteinG: 3.4, carbsG: 20, fatG: 0.6, fibreG: 2.7 },
+            per100g: { kcal: 92, proteinG: 3.4, carbsG: 20, fatG: 0.6, fibreG: 2.7, calciumMg: 7 },
             confidence: 0.9,
-            alternatives: [{ label: 'Rīsi', grams: 180, per100g: { kcal: 130, proteinG: 2.7, carbsG: 28, fatG: 0.3, fibreG: 0.4 } }],
+            alternatives: [{ label: 'Rīsi', grams: 180, per100g: { kcal: 130, proteinG: 2.7, carbsG: 28, fatG: 0.3, fibreG: 0.4, calciumMg: 10 } }],
             portionLabel: '',
           },
           {
             name: 'Mērce',
             grams: 40,
-            per100g: { kcal: 320, proteinG: 1, carbsG: 6, fatG: 33, fibreG: 0 },
+            per100g: { kcal: 320, proteinG: 1, carbsG: 6, fatG: 33, fibreG: 0, calciumMg: 20 },
             confidence: 1.4,
             alternatives: [],
             portionLabel: null,
@@ -82,6 +82,7 @@ describe('Anthropic provider request shape', () => {
     const items = await ai.food.analyzeMeal(JPEG_BASE64, 'image/jpeg', log);
     // Re-validated: grams rounded, confidence clamped, alternatives dropped for confident items.
     expect(items[0]).toMatchObject({ name: 'Griķi, vārīti', grams: 180, confidence: 0.9, alternatives: [], portionLabel: null });
+    expect(items[0]!.per100g.calciumMg).toBe(7);
     expect(items[1]!.confidence).toBe(1);
 
     const params = create.mock.calls[0]![0];

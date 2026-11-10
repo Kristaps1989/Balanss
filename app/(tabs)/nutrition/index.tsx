@@ -16,17 +16,17 @@ import { dayLabel, formatNumber, grams, plural, timeOf } from '@/lib/format';
 import { useToday } from '@/lib/today';
 import { addDays } from '@shared/dates';
 import { MEAL_LABEL, MEAL_ORDER, itemsTotals } from '@shared/nutrition';
-import { colors, fonts, radius, type } from '@/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 
 /** "Kafija ar pienu" → "kafija ar pienu" when it follows another item (keeps acronyms). */
 const lowerFirst = (s: string) => (/^[A-ZĀČĒĢĪĶĻŅŠŪŽ][a-zāčēģīķļņšūž]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
 
-const TILE: Record<MealType, { bg: string; ink: string }> = {
-  breakfast: { bg: '#F6E7CF', ink: '#8A6420' },
-  lunch: { bg: '#E6EFE9', ink: '#3F6E57' },
-  snack: { bg: '#EEE6F0', ink: '#6E4E68' },
-  dinner: { bg: '#EEF0F8', ink: '#3A4B7E' },
-};
+const TILE: Record<MealType, { bg: string; ink: string }> = themed(() => ({
+  breakfast: { bg: colors.noticeSoft, ink: colors.notice },
+  lunch: { bg: colors.moveSoft, ink: colors.moveDeep },
+  snack: { bg: colors.fatTrack, ink: colors.fat },
+  dinner: { bg: colors.sleepSoft, ink: colors.sleepDeep },
+}));
 
 /** Uzturs · dienas žurnāls (prototype: Food-Log.dc.html). */
 export default function FoodLog() {
@@ -71,6 +71,7 @@ export default function FoodLog() {
     { label: 'Tauki', p: nutrition.fatG, color: colors.fat, track: colors.fatTrack },
     { label: 'Šķiedrv.', p: nutrition.fibreG, color: colors.fibre, track: colors.fibreTrack },
   ];
+  const calcium = nutrition.calciumMg;
 
   return (
     <Screen refreshing={day.isRefetching} onRefresh={() => day.refetch()} testID="food-log">
@@ -85,17 +86,26 @@ export default function FoodLog() {
             <Text style={type.link}>Tendences</Text>
           </Pressable>
         </View>
-        <ProgressBar progress={nutrition.kcal.value / nutrition.kcal.target} color={colors.accent} trackColor={colors.kcalTrack} height={10} />
+        <ProgressBar progress={nutrition.kcal.value / nutrition.kcal.target} color={colors.kcal} trackColor={colors.kcalTrack} />
         <View style={styles.macros}>
           {macros.map((m) => (
             <View key={m.label} style={{ flex: 1, gap: 5 }}>
               <Text style={styles.macroLabel}>{m.label}</Text>
-              <ProgressBar progress={m.p.value / m.p.target} color={m.color} trackColor={m.track} height={5} />
+              <ProgressBar progress={m.p.value / m.p.target} color={m.color} trackColor={m.track} />
               <Text style={styles.macroValue}>
                 {grams(Math.round(m.p.value))}/{m.p.target} g
               </Text>
             </View>
           ))}
+        </View>
+        <View style={styles.calcium} accessible accessibilityLabel={`Kalcijs, aptuveni: ${formatNumber(calcium.value)} no ${formatNumber(calcium.target)} miligramiem`} testID="log-calcium">
+          <Text style={styles.macroLabel}>Kalcijs · aptuveni</Text>
+          <View style={{ flex: 1 }}>
+            <ProgressBar progress={calcium.value / calcium.target} color={colors.calcium} trackColor={colors.calciumTrack} />
+          </View>
+          <Text style={styles.macroValue}>
+            {formatNumber(calcium.value)}/{formatNumber(calcium.target)} mg
+          </Text>
         </View>
       </Card>
 
@@ -117,7 +127,7 @@ export default function FoodLog() {
         <Card style={styles.recipes} onPress={() => router.push('/nutrition/recipes')} accessibilityLabel="Receptes tavam mērķim">
           <View style={{ flex: 1, gap: 2 }}>
             <Text style={type.section}>Receptes tavam mērķim</Text>
-            <Text style={type.secondary}>Idejas nākamajai maltītei pēc tā, kā šodien vēl pietrūkst</Text>
+            <Text style={type.secondary}>Idejas nākamajai maltītei pēc tā, kas šodien vēl noderētu</Text>
           </View>
           {me.data?.plan === 'pro' ? <Icon name="chevron" color={colors.caption} size={20} /> : <Text style={styles.pro}>PRO</Text>}
         </Card>
@@ -186,13 +196,14 @@ function EmptyMeal({ type: t, canAdd }: { type: MealType; canAdd: boolean }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
+  calcium: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   dayNav: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   dayLabel: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink, minWidth: 52, textAlign: 'center' },
   summary: { paddingVertical: 16, paddingHorizontal: 18, gap: 12 },
   summaryTop: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  kcal: { fontFamily: fonts.heading, fontSize: 28, color: colors.ink },
+  kcal: { fontFamily: fonts.number, fontSize: 28, color: colors.ink },
   kcalTarget: { fontFamily: fonts.body, fontSize: 15, color: colors.text2 },
   macros: { flexDirection: 'row', gap: 8 },
   macroLabel: { fontFamily: fonts.body, fontSize: 12, color: colors.text2 },
@@ -206,7 +217,7 @@ const styles = StyleSheet.create({
   empty: {
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: '#D8CFC2',
+    borderColor: colors.inputBorder,
     borderRadius: radius.card,
     paddingVertical: 16,
     paddingHorizontal: 18,
@@ -215,6 +226,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   recipes: { paddingVertical: 16, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  pro: { fontFamily: fonts.bodyBold, fontSize: 11, color: colors.white, backgroundColor: colors.ink, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, overflow: 'hidden' },
+  pro: { fontFamily: fonts.bodyBold, fontSize: 11, color: colors.onInk, backgroundColor: colors.ink, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, overflow: 'hidden' },
   emptyAdd: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
-});
+}));

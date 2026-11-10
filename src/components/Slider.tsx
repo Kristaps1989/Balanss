@@ -3,7 +3,7 @@ import { StyleSheet, View, type GestureResponderEvent, type LayoutChangeEvent } 
 
 import { valueAt } from '@/lib/portion';
 
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 
 interface Props {
   value: number;
@@ -72,7 +72,7 @@ export function Slider({ value, min, max, step = 1, onChange, color = colors.acc
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   hit: { height: 44, justifyContent: 'center' },
   track: { height: 6, borderRadius: 3, backgroundColor: colors.track, overflow: 'hidden' },
   fill: { height: 6, borderRadius: 3 },
@@ -81,8 +81,8 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 3,
     top: 10,
   },
-});
+}));

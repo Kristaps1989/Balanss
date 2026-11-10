@@ -1,6 +1,6 @@
 import type { MealType, Nutrients } from './api';
 
-export const ZERO: Nutrients = { kcal: 0, proteinG: 0, carbsG: 0, fatG: 0, fibreG: 0 };
+export const ZERO: Nutrients = { kcal: 0, proteinG: 0, carbsG: 0, fatG: 0, fibreG: 0, calciumMg: 0 };
 
 const round1 = (x: number) => Math.round(x * 10) / 10;
 
@@ -13,6 +13,7 @@ export function scale(per100g: Nutrients, grams: number): Nutrients {
     carbsG: round1(per100g.carbsG * f),
     fatG: round1(per100g.fatG * f),
     fibreG: round1(per100g.fibreG * f),
+    calciumMg: Math.round((per100g.calciumMg ?? 0) * f),
   };
 }
 
@@ -24,10 +25,11 @@ export function sum(list: Nutrients[]): Nutrients {
       carbsG: a.carbsG + n.carbsG,
       fatG: a.fatG + n.fatG,
       fibreG: a.fibreG + n.fibreG,
+      calciumMg: (a.calciumMg ?? 0) + (n.calciumMg ?? 0),
     }),
     ZERO,
   );
-  return { kcal: Math.round(t.kcal), proteinG: round1(t.proteinG), carbsG: round1(t.carbsG), fatG: round1(t.fatG), fibreG: round1(t.fibreG) };
+  return { kcal: Math.round(t.kcal), proteinG: round1(t.proteinG), carbsG: round1(t.carbsG), fatG: round1(t.fatG), fibreG: round1(t.fibreG), calciumMg: Math.round(t.calciumMg ?? 0) };
 }
 
 export function itemsTotals(items: { per100g: Nutrients; grams: number }[]): Nutrients {
