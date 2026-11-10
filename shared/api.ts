@@ -36,6 +36,8 @@ export interface Nutrients {
   carbsG: number;
   fatG: number;
   fibreG: number;
+  /** Estimated from the photo / food tables; missing on items logged before calcium tracking. */
+  calciumMg?: number;
 }
 
 // ---------------------------------------------------------------- auth
@@ -95,6 +97,8 @@ export interface Targets {
   carbsG: number;
   fatG: number;
   fibreG: number;
+  /** EFSA population reference intake; older stored targets may lack it (see withDefaults). */
+  calciumMg: number;
   waterMl: number;
   steps: number;
   sleepMin: number;
@@ -502,9 +506,13 @@ export interface Day {
     carbsG: Progress;
     fatG: Progress;
     fibreG: Progress;
+    /** Estimated (photo analysis); shown as "aptuveni". */
+    calciumMg: Progress;
     waterMl: Progress;
   };
   meals: Meal[];
+  /** Days with at least one logged meal in the 7 days ending today: a neutral fact, never a streak. */
+  week: { loggedDays: number; days: number };
   movement: { steps: Progress; activeKcal: number; restingHr: number | null; hrvMs: number | null; source: HealthSource | null };
   sleep: (SleepNight & { window: SleepWindow | null }) | null;
   tip: Tip | null;

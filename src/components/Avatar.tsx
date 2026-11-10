@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { colors, fonts } from '@/theme';
+import { colors, fonts, themed } from '@/theme';
 
 interface Props {
   name: string;
@@ -20,7 +20,7 @@ export function Avatar({ name, onPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   avatar: {
     width: 46,
     height: 46,
@@ -30,4 +30,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   initial: { fontFamily: fonts.heading, fontSize: 19, color: colors.ink },
-});
+}));

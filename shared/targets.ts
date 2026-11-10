@@ -10,6 +10,7 @@ import { KCAL_FLOOR, weightLossAllowed } from './safety';
  * - Protein: 1,55 g/kg when losing weight (keeps muscle in a deficit), else 1,3 g/kg.
  * - Fat: 30 % of energy. Carbs: the remainder. Fibre: 14 g per 1 000 kcal.
  * - Water: EFSA adequate intake (women 2,0 l, men 2,5 l from all sources) + activity.
+ * - Calcium: EFSA population reference intake — 1 150 mg (under 18), 1 000 mg (18–24), 950 mg (25+).
  * - Steps: 8 000 (benefit plateaus around there for adults). Sleep: 7 h 30 min.
  */
 
@@ -48,7 +49,16 @@ export function computeTargets(p: Profile): Targets {
   const carbsG = Math.max(0, Math.floor((kcal - proteinG * 4 - fatG * 9) / 4 / 5) * 5);
   const fibreG = Math.round((kcal / 1000) * 14);
   const waterMl = WATER_BASE_ML[p.sex] + WATER_ACTIVITY_ML[p.activity];
-  return { kcal, proteinG, carbsG, fatG, fibreG, waterMl, steps: 8000, sleepMin: 450 };
+  return { kcal, proteinG, carbsG, fatG, fibreG, calciumMg: calciumTarget(p.age), waterMl, steps: 8000, sleepMin: 450 };
+}
+
+export function calciumTarget(age: number): number {
+  return age < 18 ? 1150 : age < 25 ? 1000 : 950;
+}
+
+/** Fills targets added after a user's targets were stored (calcium). */
+export function withDefaults(t: Targets, p: Pick<Profile, 'age'>): Targets {
+  return { ...t, calciumMg: t.calciumMg ?? calciumTarget(p.age) };
 }
 
 /** Source lines shown under each target (Latvian). */

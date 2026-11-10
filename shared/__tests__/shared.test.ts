@@ -16,7 +16,7 @@ import {
   validateAnswers,
 } from '../personality';
 import { computeSleepWindow, sleepScore } from '../sleep';
-import { computeTargets, targetSources, weeksToGoal } from '../targets';
+import { calciumTarget, computeTargets, targetSources, weeksToGoal, withDefaults } from '../targets';
 
 const ilze: Profile = {
   firstName: 'Ilze',
@@ -38,10 +38,23 @@ describe('targets', () => {
       carbsG: 190,
       fatG: 60,
       fibreG: 25,
+      calciumMg: 950,
       waterMl: 2300,
       steps: 8000,
       sleepMin: 450,
     });
+  });
+  it('calcium follows the EFSA reference intake by age and fills older stored targets', () => {
+    expect([calciumTarget(16), calciumTarget(20), calciumTarget(34)]).toEqual([1150, 1000, 950]);
+    const { calciumMg: _drop, ...old } = computeTargets(ilze);
+    expect(withDefaults(old as ReturnType<typeof computeTargets>, ilze).calciumMg).toBe(950);
+    expect(withDefaults({ ...computeTargets(ilze), calciumMg: 1200 }, ilze).calciumMg).toBe(1200);
+  });
+  it('scales and sums calcium, treating items without it as 0', () => {
+    const milk = { kcal: 50, proteinG: 3.3, carbsG: 4.8, fatG: 2, fibreG: 0, calciumMg: 120 };
+    const bread = { kcal: 229, proteinG: 6.1, carbsG: 44, fatG: 1.4, fibreG: 7.5 };
+    expect(scale(milk, 250).calciumMg).toBe(300);
+    expect(itemsTotals([{ per100g: milk, grams: 250 }, { per100g: bread, grams: 35 }]).calciumMg).toBe(300);
   });
   it('uses maintenance energy when weight is not a goal', () => {
     const t = computeTargets({ ...ilze, goals: ['health'], weightDirection: null, goalWeightKg: null });
@@ -133,6 +146,7 @@ describe('nutrition', () => {
       carbsG: 0,
       fatG: 5.4,
       fibreG: 0,
+      calciumMg: 0,
     });
   });
   it('sums items', () => {

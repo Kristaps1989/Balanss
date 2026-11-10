@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { colors, fonts, hit, radius } from '@/theme';
+import { colors, fonts, hit, radius, themed } from '@/theme';
 
 import { Icon } from './Icon';
 
@@ -68,8 +68,8 @@ export function PillChoice<T extends string>({
             onPress={() => onChange(o.value)}
             accessibilityRole="radio"
             aria-checked={on}
-            style={[styles.pill, { backgroundColor: on ? colors.ink : colors.white, borderColor: on ? colors.ink : colors.inputBorder }]}>
-            <Text style={[styles.pillText, { color: on ? colors.white : colors.ink }]}>{o.label}</Text>
+            style={[styles.pill, { backgroundColor: on ? colors.ink : colors.card, borderColor: on ? colors.ink : colors.inputBorder }]}>
+            <Text style={[styles.pillText, { color: on ? colors.onInk : colors.ink }]}>{o.label}</Text>
           </Pressable>
         );
       })}
@@ -132,7 +132,7 @@ export function OptionCard({
       accessibilityLabel={accessibilityLabel}
       style={({ pressed }) => [
         styles.option,
-        { backgroundColor: selected ? colors.accentSoft : colors.white, borderColor: selected ? colors.accent : colors.optionBorder },
+        { backgroundColor: selected ? colors.accentSoft : colors.card, borderColor: selected ? colors.accent : colors.optionBorder },
         pressed && { opacity: 0.9 },
         style,
       ]}>
@@ -177,8 +177,8 @@ export function CheckRow({ checked, onChange, title, hint }: { checked: boolean;
       accessibilityRole="checkbox"
       aria-checked={checked}
       style={styles.checkRow}>
-      <View style={[styles.box, { backgroundColor: checked ? colors.accent : colors.white, borderColor: checked ? colors.accent : colors.boxBorder }]}>
-        {checked && <Icon name="check" color={colors.white} size={16} strokeWidth={2.6} />}
+      <View style={[styles.box, { backgroundColor: checked ? colors.accent : colors.card, borderColor: checked ? colors.accent : colors.boxBorder }]}>
+        {checked && <Icon name="check" color={colors.onAccent} size={16} strokeWidth={2.6} />}
       </View>
       <View style={{ flex: 1, gap: 2 }}>
         <Text style={styles.checkTitle}>{title}</Text>
@@ -188,10 +188,10 @@ export function CheckRow({ checked, onChange, title, hint }: { checked: boolean;
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   stepper: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.optionBorder,
     borderRadius: radius.option,
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   stepperLabel: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.caption },
-  stepperValue: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 34, color: colors.ink },
+  stepperValue: { fontFamily: fonts.number, fontSize: 30, lineHeight: 34, color: colors.ink },
   stepperUnit: { fontFamily: fonts.body, fontSize: 12, lineHeight: 16, height: 16, color: colors.caption },
   round: { width: hit, height: hit, borderRadius: hit / 2, alignItems: 'center', justifyContent: 'center' },
   pill: { flex: 1, height: 52, borderRadius: 26, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   seg: { flexDirection: 'row', backgroundColor: colors.chip, borderRadius: 22, padding: 4, gap: 4 },
   segItem: { flex: 1, minHeight: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
   segOn: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     shadowColor: colors.ink,
     shadowOpacity: 0.12,
     shadowRadius: 3,
@@ -224,8 +224,8 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: colors.white,
-    shadowColor: '#000',
+    backgroundColor: colors.card,
+    shadowColor: colors.shadow,
     shadowOpacity: 0.15,
     shadowRadius: 2,
     shadowOffset: { width: 0, height: 1 },
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   box: { width: 24, height: 24, borderRadius: 7, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   checkTitle: { fontFamily: fonts.bodySemi, fontSize: 15, lineHeight: 20, color: colors.ink },
   checkHint: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.text2 },
-});
+}));
 
 /** Wrapping single-choice chips (genres, cities). Each chip ≥ 44 px tall. */
 export function ChipGroup<T extends string>({
@@ -259,8 +259,8 @@ export function ChipGroup<T extends string>({
             onPress={() => onChange(o.value)}
             accessibilityRole="radio"
             aria-checked={on}
-            style={[styles.chip, { backgroundColor: on ? colors.ink : colors.white, borderColor: on ? colors.ink : colors.inputBorder }]}>
-            <Text style={[styles.pillText, { color: on ? colors.white : colors.ink }]}>{o.label}</Text>
+            style={[styles.chip, { backgroundColor: on ? colors.ink : colors.card, borderColor: on ? colors.ink : colors.inputBorder }]}>
+            <Text style={[styles.pillText, { color: on ? colors.onInk : colors.ink }]}>{o.label}</Text>
           </Pressable>
         );
       })}

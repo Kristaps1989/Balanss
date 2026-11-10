@@ -6,7 +6,7 @@ import { api, type TipReportReason } from '@/api';
 import { keys } from '@/api/hooks';
 import { Icon } from '@/components/Icon';
 import { Sheet } from '@/components/Sheet';
-import { colors, fonts, radius, type } from '@/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 
 const REASONS: { value: TipReportReason; label: string; hint: string }[] = [
   { value: 'not_relevant', label: 'Man neder', hint: 'Neatbilst manai dienai vai paradumiem' },
@@ -51,7 +51,7 @@ export default function TipReport() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   row: { minHeight: 60, borderRadius: radius.option, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 10 },
   error: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentDeep },
-});
+}));

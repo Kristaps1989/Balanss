@@ -3,7 +3,7 @@ import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { Fragment } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fonts } from '@/theme';
+import { colors, fonts, themed } from '@/theme';
 
 import { Icon, type IconName } from './Icon';
 
@@ -61,13 +61,13 @@ function AddButton() {
         accessibilityLabel="Pievienot"
         testID="tab-add"
         style={({ pressed }) => [styles.add, pressed && { transform: [{ scale: 0.95 }] }]}>
-        <Icon name="plus" color={colors.white} size={26} strokeWidth={2.4} />
+        <Icon name="plus" color={colors.onAccent} size={26} strokeWidth={2.4} />
       </Pressable>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   bar: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -103,4 +103,4 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     elevation: 6,
   },
-});
+}));

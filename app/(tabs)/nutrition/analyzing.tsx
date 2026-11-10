@@ -10,7 +10,7 @@ import { Button } from '@/components/Button';
 import { IconButton } from '@/components/Header';
 import { Icon } from '@/components/Icon';
 import { useMealDraft } from '@/lib/mealDraft';
-import { colors, fonts, type } from '@/theme';
+import { colors, fonts, type, themed } from '@/theme';
 
 const STEPS = ['Atpazīstu produktus', 'Novērtēju porcijas', 'Rēķinu uzturvērtību'];
 
@@ -132,17 +132,17 @@ export default function Analyzing() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
-  photo: { height: 430, backgroundColor: '#5B4E43', overflow: 'hidden' },
+  photo: { height: 430, backgroundColor: colors.avatar, overflow: 'hidden' },
   scan: {
     position: 'absolute',
     left: 24,
     right: 24,
     height: 3,
     borderRadius: 2,
-    backgroundColor: '#F5B48F',
-    shadowColor: '#F5B48F',
+    backgroundColor: colors.glow,
+    shadowColor: colors.glow,
     shadowOpacity: 0.8,
     shadowRadius: 12,
   },
@@ -153,4 +153,4 @@ const styles = StyleSheet.create({
   pending: { width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
   stepText: { fontFamily: fonts.body, fontSize: 16 },
   wait: { height: 56, alignItems: 'center', justifyContent: 'center' },
-});
+}));

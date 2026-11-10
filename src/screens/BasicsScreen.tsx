@@ -10,7 +10,7 @@ import { OptionCard, PillChoice, StepperCard } from '@/components/Controls';
 import { BackButton, StepHeader } from '@/components/Header';
 import { Screen } from '@/components/Screen';
 import { Loading } from '@/components/States';
-import { colors, fonts, type } from '@/theme';
+import { colors, fonts, type, themed } from '@/theme';
 
 const ACTS: { value: ActivityLevel; label: string; hint: string }[] = [
   { value: 'sit', label: 'Pārsvarā sēžu', hint: 'Birojs, maz kustību' },
@@ -115,7 +115,7 @@ function BasicsForm({ mode, initial }: { mode: 'onboarding' | 'edit'; initial: N
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
   lead: { ...type.body, color: colors.text2 },
   label: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.optionBorder,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     paddingHorizontal: 16,
     fontFamily: fonts.body,
     fontSize: 16,
@@ -135,4 +135,4 @@ const styles = StyleSheet.create({
   actLabel: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.ink },
   actHint: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.text2 },
   error: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentDeep, textAlign: 'center' },
-});
+}));

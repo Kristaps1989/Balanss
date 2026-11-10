@@ -9,8 +9,8 @@ interface Props {
   height?: number;
 }
 
-/** Horizontal bar; clamps at 100% (over target is never shown as red). */
-export function ProgressBar({ progress, color, trackColor = colors.track, height = 8 }: Props) {
+/** Thin (4 px) rounded bar; clamps at 100% (over target is never shown as red). */
+export function ProgressBar({ progress, color, trackColor = colors.track, height = 4 }: Props) {
   const pct = Math.max(0, Math.min(1, progress)) * 100;
   return (
     <View style={[styles.track, { backgroundColor: trackColor, height, borderRadius: height / 2 }]}>

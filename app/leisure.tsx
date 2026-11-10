@@ -13,7 +13,7 @@ import { Screen } from '@/components/Screen';
 import { Loading } from '@/components/States';
 import { startsWhen } from '@/lib/format';
 import { useToday } from '@/lib/today';
-import { colors, fonts, radius, type } from '@/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 import { EVENT_WHEN, LEISURE_CITIES, LEISURE_GENRES, LEISURE_KINDS, MOVIE_WHERE } from '@shared/leisure';
 
 const PROVIDER_LABEL: Record<LeisureItem['provider'], string> = {
@@ -173,10 +173,10 @@ function Results({ data, today }: { data: LeisureResponse; today: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   cityRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 44 },
   item: { gap: 6, borderRadius: radius.card },
   kicker: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.accentText },
   open: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44 },
   error: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentDeep },
-});
+}));

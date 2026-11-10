@@ -43,6 +43,8 @@ export function offToDraft(product: Record<string, unknown>): FoodItemDraft | nu
       carbsG: r1(num(nutr.carbohydrates_100g)),
       fatG: r1(num(nutr.fat_100g)),
       fibreG: r1(num(nutr.fiber_100g)),
+      // Open Food Facts gives grams per 100 g.
+      ...(num(nutr.calcium_100g) > 0 ? { calciumMg: Math.round(num(nutr.calcium_100g) * 1000) } : {}),
     },
     confidence: 0.95,
     alternatives: [],

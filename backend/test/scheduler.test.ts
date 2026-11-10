@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { eq } from 'drizzle-orm';
 
-import { pushLog, tips } from '../src/db/schema';
+import { pushLog, tips, users } from '../src/db/schema';
 import { zonedTime } from '../src/lib/time';
 import { runSchedulerTick, waterShareBy } from '../src/scheduler';
 import { ILZE_EMAIL, seedIlze } from '../src/seed-data';
@@ -86,6 +86,21 @@ describe('push scheduler', () => {
     await call({ method: 'PUT', url: '/v1/me/reminders', payload: { sleepLeadMin: 60 } });
     expect((await at('21:55')).pushes).toEqual([]);
     expect((await at('22:00')).pushes.map((p) => p.kind)).toEqual(['sleep']);
+  });
+
+  it('goes quiet after three days without opening the app, and resumes on the next visit', async () => {
+    // Any authenticated request marks the user active.
+    const [me] = await db.select({ at: users.lastActiveAt }).from(users).where(eq(users.email, ILZE_EMAIL));
+    expect(me!.at).toBeInstanceOf(Date);
+
+    const now = zonedTime(TODAY, '19:00', RIGA);
+    const daysAgo = (d: number) => new Date(now.getTime() - d * 24 * 60 * 60 * 1000);
+    await db.update(users).set({ lastActiveAt: daysAgo(4) }).where(eq(users.email, ILZE_EMAIL));
+    expect((await at('19:00')).pushes).toEqual([]);
+    expect((await at('22:30')).pushes).toEqual([]); // not even the sleep window
+
+    await db.update(users).set({ lastActiveAt: daysAgo(2) }).where(eq(users.email, ILZE_EMAIL));
+    expect((await at('19:05')).pushes.map((p) => p.kind)).toEqual(['water']);
   });
 
   it('uses the gentle tone copy when the user prefers it', async () => {

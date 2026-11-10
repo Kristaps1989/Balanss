@@ -1,9 +1,10 @@
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
-import { sql } from 'drizzle-orm';
+import { and, eq, isNull, lt, or, sql } from 'drizzle-orm';
 import Fastify, { type FastifyError, type FastifyInstance, type FastifyRequest } from 'fastify';
 
+import { users } from './db/schema';
 import type { AppDeps } from './deps';
 import { AppError, unauthorized } from './errors';
 import { authRoutes } from './routes/auth';
@@ -133,6 +134,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
           const header = req.headers.authorization;
           if (!header?.startsWith('Bearer ')) throw unauthorized();
           req.userId = await verifyAccessToken(config, header.slice(7).trim());
+          await touchActive(deps.db, req.userId);
         });
         await secured.register(meRoutes);
         await secured.register(dayRoutes);
@@ -148,4 +150,12 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   );
 
   return app;
+}
+
+/** Marks the user active (at most once an hour) so the scheduler can tell ignored reminders apart. */
+async function touchActive(db: AppDeps['db'], userId: string) {
+  await db
+    .update(users)
+    .set({ lastActiveAt: sql`now()` })
+    .where(and(eq(users.id, userId), or(isNull(users.lastActiveAt), lt(users.lastActiveAt, sql`now() - interval '1 hour'`))));
 }

@@ -19,6 +19,8 @@ export default defineConfig({
     locale: 'lv-LV',
     timezoneId: 'Europe/Riga',
     trace: 'retain-on-failure',
+    // Optional: a preinstalled Chromium (e.g. cloud dev boxes) instead of Playwright's own download.
+    ...(process.env.PW_CHROMIUM_PATH ? { launchOptions: { executablePath: process.env.PW_CHROMIUM_PATH } } : {}),
     screenshot: 'only-on-failure',
   },
 });

@@ -33,8 +33,13 @@ describe('GET /days/:date', () => {
       carbsG: { value: 160, target: 190 },
       fatG: { value: 52, target: 60 },
       fibreG: { value: 18, target: 25 },
+      calciumMg: { value: day.nutrition.calciumMg.value, target: 950 },
       waterMl: { value: 1200, target: 2300 },
     });
+    // Calcium is estimated from the foods (dairy, cheese, greens): a plausible, non-zero day.
+    expect(day.nutrition.calciumMg.value).toBeGreaterThan(300);
+    expect(day.nutrition.calciumMg.value).toBeLessThan(1500);
+    expect(day.week).toEqual({ loggedDays: 7, days: 7 });
     expect(day.meals.map((m) => [m.type, m.totals.kcal])).toEqual([
       ['breakfast', 420],
       ['lunch', 514],

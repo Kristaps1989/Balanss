@@ -55,7 +55,8 @@ jobs:
 
   e2e:
     name: End-to-end (web build + backend)
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to 26.04, which Playwright 1.56 cannot install browsers on.
+    runs-on: ubuntu-24.04
     needs: [app, backend]
     services:
       postgres:

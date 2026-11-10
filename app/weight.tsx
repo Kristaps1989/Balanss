@@ -8,9 +8,10 @@ import { keys, useDay } from '@/api/hooks';
 import { Button } from '@/components/Button';
 import { RoundButton } from '@/components/Controls';
 import { Sheet } from '@/components/Sheet';
+import { confirmLogged } from '@/components/Toast';
 import { formatNumber } from '@/lib/format';
 import { useToday } from '@/lib/today';
-import { colors, fonts, type } from '@/theme';
+import { colors, fonts, type, themed } from '@/theme';
 
 /** Weight entry (from Add-Sheet "Svars"). */
 export default function WeightSheet() {
@@ -22,6 +23,7 @@ export default function WeightSheet() {
   const save = useMutation({
     mutationFn: () => api.addWeight(date, value),
     onSuccess: () => {
+      confirmLogged();
       qc.invalidateQueries({ queryKey: keys.day(date) });
       qc.invalidateQueries({ queryKey: keys.me });
       router.back();
@@ -51,8 +53,8 @@ export default function WeightSheet() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 20 },
-  value: { fontFamily: fonts.heading, fontSize: 48, lineHeight: 54, color: colors.ink },
+  value: { fontFamily: fonts.number, fontSize: 48, lineHeight: 54, color: colors.ink },
   error: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentDeep },
-});
+}));

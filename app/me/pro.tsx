@@ -9,7 +9,7 @@ import { IconButton } from '@/components/Header';
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { billingAvailable, loadOffers, purchase, restore, type PlanId } from '@/lib/billing';
-import { colors, fonts, radius, type } from '@/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 
 /** Balanss Pro (prototype: Pro.dc.html). */
 export default function Pro() {
@@ -50,7 +50,7 @@ export default function Pro() {
   return (
     <Screen gap={16} testID="pro">
       <View style={{ alignItems: 'flex-end' }}>
-        <IconButton icon="close" label="Aizvērt" bg="#EDE6DB" size={20} onPress={() => router.back()} />
+        <IconButton icon="close" label="Aizvērt" bg={colors.chip} size={20} onPress={() => router.back()} />
       </View>
       <View style={{ gap: 8 }}>
         <Text style={styles.h1} accessibilityRole="header">
@@ -61,7 +61,7 @@ export default function Pro() {
         </Text>
       </View>
       <View style={{ flexDirection: 'row', gap: 10 }}>
-        <View style={[styles.col, { backgroundColor: colors.white, borderColor: colors.border, borderWidth: 1 }]}>
+        <View style={[styles.col, { backgroundColor: colors.card }]}>
           <Text style={[styles.colTitle, { color: colors.text2 }]}>Bezmaksas</Text>
           {['3 foto analīzes dienā', 'Ierīču sinhronizācija', 'Ieteikumi tavā stilā'].map((t) => (
             <Feature key={t} text={t} color={colors.moveDeep} />
@@ -90,7 +90,7 @@ export default function Pro() {
                 accessibilityRole="radio"
                 aria-checked={on}
                 style={[styles.plan, { borderColor: on ? colors.accent : colors.inputBorder }]}>
-                <View style={[styles.radio, { borderColor: on ? colors.accent : colors.inputBorder, backgroundColor: on ? colors.accent : colors.white }]} />
+                <View style={[styles.radio, { borderColor: on ? colors.accent : colors.inputBorder, backgroundColor: on ? colors.accent : colors.card }]} />
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={styles.planName}>{p.name}</Text>
                   <Text style={type.secondary}>{p.sub}</Text>
@@ -129,16 +129,16 @@ function Feature({ text, color }: { text: string; color: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   h1: { fontFamily: fonts.heading, fontSize: 32, lineHeight: 36, color: colors.ink },
   col: { flex: 1, borderRadius: radius.option, padding: 14, gap: 10 },
   colTitle: { fontFamily: fonts.bodyBold, fontSize: 14 },
   feature: { flex: 1, fontFamily: fonts.body, fontSize: 14, lineHeight: 19, color: colors.ink },
-  plan: { minHeight: 68, borderRadius: radius.option, paddingVertical: 12, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: colors.white, borderWidth: 1.5 },
+  plan: { minHeight: 68, borderRadius: radius.option, paddingVertical: 12, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: colors.card, borderWidth: 1.5 },
   radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2 },
   planName: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.ink },
-  price: { fontFamily: fonts.heading, fontSize: 18, color: colors.ink },
+  price: { fontFamily: fonts.number, fontSize: 18, color: colors.ink },
   msg: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.text2, textAlign: 'center' },
-  active: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 16, backgroundColor: '#EAF3EE', padding: 14 },
+  active: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 16, backgroundColor: colors.moveSoft, padding: 14 },
   activeText: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.moveDeep },
-});
+}));

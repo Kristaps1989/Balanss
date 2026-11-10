@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { api, type Day } from '@/api';
 import { invalidateDay, keys } from '@/api/hooks';
+import { confirmLogged } from '@/components/Toast';
 
 export const GLASS_ML = 250;
 
@@ -24,7 +25,8 @@ export function useAddWater(date: string) {
     onError: (_e, _ml, ctx) => {
       if (ctx?.prev) qc.setQueryData(keys.day(date), ctx.prev);
     },
-    onSuccess: (res) => {
+    onSuccess: (res, ml) => {
+      if (ml > 0) confirmLogged();
       const cur = qc.getQueryData<Day>(keys.day(date));
       if (cur) {
         qc.setQueryData<Day>(keys.day(date), {

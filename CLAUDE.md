@@ -7,11 +7,11 @@ Target user: an ordinary adult who finds classic calorie apps too complex. Princ
 
 ## Source of truth for UI
 `prototype/` holds the clickable hi-fi prototype, one screen per `.dc.html` file (390×844, Latvian copy).
-Treat these files as **design reference only**: copy their layout, spacing, colours, copy and flows. Do not port their HTML or runtime code. `prototype/canvas.json` lists every screen and its order.
+Treat these files as **reference for flows and copy only**; the visual design (colours, fonts, dark mode) follows the Design section below. Do not port their HTML or runtime code. `prototype/canvas.json` lists every screen and its order.
 
 | Prototype file | App route (expo-router) |
 |---|---|
-| Main, Onb-Welcome2, Onb-Welcome3 | `(onboarding)/welcome` (3-slide carousel) |
+| Main | `(onboarding)/welcome` (one screen) |
 | Onb-Login | `(onboarding)/login` |
 | Onb-Basics | `(onboarding)/basics` |
 | Onb-Device | `(onboarding)/devices` |
@@ -39,14 +39,14 @@ Bottom tab bar: Šodiena · Uzturs · (+) · Kustība · Miegs — five equal sl
 - **AI:** food-photo recognition and tone-adapted tips are generated server-side. Never call AI providers or put API keys in the app.
 - **Push:** expo-notifications (FCM/APNs), scheduled by the backend (e.g. the sleep window reminder).
 
-## Design tokens (from the prototype)
-- Background `#F7F3EE`, card `#FFFFFF` with 1px border `#EFE8DE`, radius 24 (cards), 28 (pill buttons), 20 (option cards)
-- Ink `#26231F`, secondary text `#5E5850`, caption `#6F685E`
-- Accent `#D9693C`; text-safe accent `#A9502A`; commit button `#B9532A`; accent soft `#FBEBE1`
-- Macros: protein `#56679A`, carbs `#C08A2E`, fat `#9A6F8F`, fibre/steps `#5E8C74`, water `#4F8DB8` / soft `#E3F0F8`
-- Sleep: deep `#3A4B7E`, REM `#8494C6`, light `#C3CCE7`, sleep-window card `#26304F`
-- Fonts: **Bricolage Grotesque** (headings, big numbers), **Figtree** (body). Both are Google Fonts via `@expo-google-fonts/*`.
-- Never use red for "over target". Touch targets ≥ 44 px. No emoji in UI.
+## Design (2026-11 redesign: "premium wellness", not medical)
+- Colours live only in `src/theme/palettes.ts` (dark + light, same keys); screens use `colors.*`, never hex (lint rule). Module-level styles use `themed(() => StyleSheet.create(...))` so a theme switch picks up the new palette. Contrast and "no red" are tested in `palettes.test.ts`.
+- **Dark is the default** (warm near-black `#121513`, cards `#1C201D`); light is cream `#F6F2EA` with white cards. Es → Izskats: Tumšs / Gaišs / Kā tālrunī.
+- Brand forest green (dark: mint `#6CCB94`, light `#2F6B4F`); lime `#CFE884` for the daily focus card; coral accent. One colour per nutrient: kcal green, protein coral, carbs amber, fat plum, fibre leaf green, calcium blue, water blue, steps teal.
+- Fonts: **Fraunces** (headings), **Manrope** (everything else, numbers included). `@expo-google-fonts/*`.
+- One main number per screen, few frames (cards have no border), lots of air. Charts thin and rounded: one kcal ring, 4 px bars, 10 px columns.
+- Never red or "bad" for over target; copy is progress first ("68 g jau ir, vēl 42 g") — enforced by `src/lib/copy-rules.test.ts`. Touch targets ≥ 44 px. No emoji in UI.
+- Calcium is estimated from the photo/food tables and always labelled "aptuveni".
 
 ## Product rules
 - All user-facing copy in **Latvian**. Numbers use Latvian format: `1 480 kcal`, `1,2 l`.

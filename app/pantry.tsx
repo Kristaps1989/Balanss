@@ -11,7 +11,7 @@ import { Icon } from '@/components/Icon';
 import { Sheet } from '@/components/Sheet';
 import { preparePhoto } from '@/lib/photo';
 import { useToday } from '@/lib/today';
-import { colors, fonts, radius, type } from '@/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 
 const split = (text: string) =>
   text
@@ -135,7 +135,7 @@ export default function PantrySheet() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   item: {
     minHeight: 44,
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body,
     fontSize: 16,
     color: colors.ink,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
   },
   message: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentText },
-});
+}));

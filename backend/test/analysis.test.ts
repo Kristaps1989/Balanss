@@ -9,7 +9,7 @@ import { weekdayOf } from '../src/lib/time';
 
 const END = '2026-09-26'; // Saturday
 const DATES = lastNDates(END, 28);
-const T: Targets = { kcal: 1750, proteinG: 110, carbsG: 190, fatG: 60, fibreG: 25, waterMl: 2300, steps: 8000, sleepMin: 450 };
+const T: Targets = { kcal: 1750, proteinG: 110, carbsG: 190, fatG: 60, fibreG: 25, calciumMg: 950, waterMl: 2300, steps: 8000, sleepMin: 450 };
 
 /** A well-balanced default day: nothing to report except what a test changes. */
 function day(date: string, over: Partial<AnalysisDay> = {}): AnalysisDay {

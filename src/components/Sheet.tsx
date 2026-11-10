@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, radius, space, type } from '@/theme';
+import { colors, radius, space, type, themed } from '@/theme';
 
 import { IconButton } from './Header';
 
@@ -35,7 +35,7 @@ export function Sheet({ title, children, onClose, scroll }: { title: string; chi
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { flex: 1, justifyContent: 'flex-end', backgroundColor: colors.scrim },
   sheet: {
     backgroundColor: colors.card,
@@ -48,4 +48,4 @@ const styles = StyleSheet.create({
   },
   handle: { alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: colors.handle },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-});
+}));

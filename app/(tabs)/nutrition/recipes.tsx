@@ -15,7 +15,7 @@ import { ErrorState, Loading } from '@/components/States';
 import { formatNumber } from '@/lib/format';
 import { useToday } from '@/lib/today';
 import { MEAL_LABEL } from '@shared/nutrition';
-import { colors, fonts, type } from '@/theme';
+import { colors, fonts, type, themed } from '@/theme';
 
 const DIET_LABEL = { any: 'bez ierobežojumiem', vegetarian: 'veģetārs', vegan: 'vegāns', pescatarian: 'peskatārs' } as const;
 
@@ -39,7 +39,7 @@ export default function Recipes() {
     return (
       <Screen>
         {header}
-        <Text style={type.secondary}>Idejas nākamajai maltītei, kas papildina to, kā šodien vēl pietrūkst. Pieejamas ar Balanss Pro.</Text>
+        <Text style={type.secondary}>Idejas nākamajai maltītei, kas papildina to, kas šodien vēl noderētu. Pieejamas ar Balanss Pro.</Text>
         <Button label="Uzzināt par Pro" onPress={() => router.push('/me/pro')} />
       </Screen>
     );
@@ -115,12 +115,12 @@ function RecipeCard({ recipe, date }: { recipe: Recipe; date: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
   card: { padding: 18, gap: 12 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   why: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.moveDeep },
   sub: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.ink, marginTop: 4 },
-  ing: { flexDirection: 'row', gap: 8, borderBottomWidth: 1, borderBottomColor: '#F0EAE1', paddingVertical: 6 },
+  ing: { flexDirection: 'row', gap: 8, borderBottomWidth: 1, borderBottomColor: colors.divider, paddingVertical: 6 },
   body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 21, color: colors.ink },
-});
+}));

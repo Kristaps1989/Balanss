@@ -1,12 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router, type Href } from 'expo-router';
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { api, type Day, type Progress, type Tip, type WeeklyQuestion } from '@/api';
+import { api, type Day, type Meal, type Me, type Progress, type Tip, type TipFocus, type ToneStyle, type WeeklyQuestion } from '@/api';
 import { keys, useDay, useMe, useTip, useWeeklyQuestion, useWeeklySummary } from '@/api/hooks';
 import { AiLabel } from '@/components/AiLabel';
 import { Avatar } from '@/components/Avatar';
+import { Button } from '@/components/Button';
 import { CareCard } from '@/components/CareCard';
 import { Card } from '@/components/Card';
 import { IconButton } from '@/components/Header';
@@ -14,16 +15,29 @@ import { Icon, type IconName } from '@/components/Icon';
 import { ProgressBar } from '@/components/ProgressBar';
 import { ProgressRing } from '@/components/ProgressRing';
 import { Screen } from '@/components/Screen';
-import { SourceNote } from '@/components/SourceNote';
 import { ErrorState, Loading } from '@/components/States';
-import { WaterGlass } from '@/components/WaterGlass';
-import { duration, formatNumber, greeting, kcal, litres, longDate } from '@/lib/format';
+import { duration, formatNumber, greeting, itemList, litres, longDate, syncedAgo, timeOf } from '@/lib/format';
 import { GLASS_ML, useAddWater } from '@/lib/mutations';
 import { useHealthRefresh } from '@/lib/services';
 import { useToday } from '@/lib/today';
-import { colors, fonts, hit, radius, space, type } from '@/theme';
+import { MEAL_LABEL } from '@shared/nutrition';
+import { colors, fonts, hit, radius, space, themed, type } from '@/theme';
 
-/** Šodiena (prototype: Home.dc.html). */
+/** The tone the tips are written in, as the user knows it from "Es → Tonis". */
+const TONE_TITLE: Record<ToneStyle, string> = {
+  plan: 'plāns un skaitļi',
+  novelty: 'dažādība un jaunais',
+  gentle: 'maigi, bez spiediena',
+  neutral: 'neitrāls',
+};
+
+const SOURCE_LABEL = { apple_health: 'Apple Health', health_connect: 'Health Connect', manual: 'ievadīts manuāli' } as const;
+
+/**
+ * Šodiena: one question answered at a glance — how is today going?
+ * One hero number (kcal left), thin bars, one focus for the day, then the
+ * meals and three one-line rows. Everything else is one tap down.
+ */
 export default function HomeScreen() {
   const date = useToday();
   const me = useMe();
@@ -31,25 +45,18 @@ export default function HomeScreen() {
   const hr = useHealthRefresh(day.refetch);
   if (day.isPending || me.isPending) return <Loading />;
   if (day.isError || !me.data) return <ErrorState onRetry={() => day.refetch()} />;
-  return (
-    <HomeContent
-      date={date}
-      pro={me.data.plan === 'pro'}
-      firstName={me.data.profile.firstName}
-      day={day.data}
-      refreshing={hr.refreshing}
-      onRefresh={hr.refresh}
-    />
-  );
+  return <HomeContent date={date} me={me.data} day={day.data} refreshing={hr.refreshing} onRefresh={hr.refresh} />;
 }
 
-function HomeContent({ date, pro, firstName, day, refreshing, onRefresh }: { date: string; pro: boolean; firstName: string; day: Day; refreshing: boolean; onRefresh: () => void }) {
+function HomeContent({ date, me, day, refreshing, onRefresh }: { date: string; me: Me; day: Day; refreshing: boolean; onRefresh: () => void }) {
   const now = new Date();
-  const { nutrition, movement, sleep } = day;
-  const water = useAddWater(date);
+  const firstName = me.profile.firstName;
+  const pro = me.plan === 'pro';
+  const tip = useTip(date);
+  const focus = tip.data?.angle ?? null;
 
   return (
-    <Screen refreshing={refreshing} onRefresh={onRefresh} testID="home">
+    <Screen refreshing={refreshing} onRefresh={onRefresh} testID="home" gap={18}>
       <View style={styles.header}>
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={styles.date}>{longDate(now)}</Text>
@@ -63,155 +70,86 @@ function HomeContent({ date, pro, firstName, day, refreshing, onRefresh }: { dat
 
       {day.care.active && <CareCard />}
 
-      <TipCard date={date} />
+      <TodayCard day={day} focus={focus} />
 
-      <Card style={styles.card}>
-        <CardHeader title="Uzturs" link="Maltītes" href="/nutrition" />
-        <View style={styles.energy}>
-          <ProgressRing
-            size={128}
-            stroke={12}
-            progress={nutrition.kcal.value / nutrition.kcal.target}
-            color={colors.accent}
-            trackColor={colors.kcalTrack}>
-            <Text style={styles.ringValue}>{formatNumber(nutrition.kcal.value)}</Text>
-            <Text style={styles.ringCaption}>no {kcal(nutrition.kcal.target)}</Text>
-          </ProgressRing>
-          <View style={{ flex: 1, gap: 4 }}>
-            {day.care.active ? (
-              <>
-                <Text style={styles.left}>Šodien apēsts</Text>
-                <Text style={type.secondary}>Galvenais — regulāras maltītes un pietiekami daudz atpūtas.</Text>
-              </>
-            ) : (
-              <>
-                <Text style={styles.left}>{remainingLabel(nutrition.kcal)}</Text>
-                <Text style={type.secondary}>{remainingHint(nutrition.kcal)}</Text>
-              </>
-            )}
-          </View>
-        </View>
-        <View style={styles.macros}>
-          <Macro label="Olbaltumvielas" p={nutrition.proteinG} color={colors.protein} track={colors.proteinTrack} />
-          <Macro label="Ogļhidrāti" p={nutrition.carbsG} color={colors.carbs} track={colors.carbsTrack} />
-          <Macro label="Tauki" p={nutrition.fatG} color={colors.fat} track={colors.fatTrack} />
-          <Macro label="Šķiedrvielas" p={nutrition.fibreG} color={colors.fibre} track={colors.fibreTrack} />
-        </View>
-      </Card>
+      <TipCard date={date} tip={tip.data} pending={tip.isPending} tone={me.tone} />
 
-      <Card style={[styles.card, styles.water]}>
-        <WaterGlass progress={nutrition.waterMl.value / nutrition.waterMl.target} />
-        <View style={{ flex: 1, gap: 4 }}>
-          <Text style={type.section}>Ūdens</Text>
-          <Text testID="water-total">
-            <Text style={styles.big}>{litres(nutrition.waterMl.value)}</Text>
-            <Text style={styles.unitLg}> no {litres(nutrition.waterMl.target)}</Text>
-          </Text>
-          <Pressable
-            onPress={() => water.mutate(GLASS_ML)}
-            accessibilityRole="button"
-            accessibilityLabel={`Pievienot ${GLASS_ML} ml ūdens`}
-            testID="water-add"
-            style={({ pressed }) => [styles.waterAdd, pressed && { opacity: 0.8 }]}>
-            <Icon name="plus" color={colors.waterDeep} size={18} strokeWidth={2.2} />
-            <Text style={styles.waterAddText}>{GLASS_ML} ml</Text>
-          </Pressable>
-        </View>
-      </Card>
+      <MealsSection meals={day.meals} />
 
-      <Card style={[styles.card, { gap: 12 }]}>
-        <CardHeader title="Kustība" link="Vairāk" href="/movement" />
-        <View style={styles.moveRow}>
-          <View style={{ flex: 1, gap: 8 }}>
-            <Text>
-              <Text style={type.number}>{formatNumber(movement.steps.value)}</Text>
-              <Text style={styles.unit}> / {formatNumber(movement.steps.target)} soļi</Text>
-            </Text>
-            <ProgressBar progress={movement.steps.value / movement.steps.target} color={colors.steps} trackColor={colors.stepsTrack} />
-          </View>
-          <View style={styles.divider} />
-          <View style={{ width: 92, gap: 2 }}>
-            <Text style={type.number}>{formatNumber(movement.activeKcal)}</Text>
-            <Text style={styles.smallSecondary}>aktīvās kcal</Text>
-          </View>
-        </View>
-        {movement.source && <SourceNote source={movement.source} />}
-      </Card>
-
-      <Card style={[styles.card, { gap: 12 }]}>
-        <CardHeader title="Pagājušā nakts" link="Vairāk" href="/sleep" />
-        {sleep ? (
-          <>
-            <View style={styles.sleepRow}>
-              <View>
-                <Text style={type.number}>{duration(sleep.totalMin)}</Text>
-                <Text style={type.secondary}>
-                  {sleep.bedtime} → {sleep.wakeTime}
-                </Text>
-              </View>
-              <View style={styles.score}>
-                <Text style={styles.scoreValue}>{sleep.score}</Text>
-                <Text style={styles.scoreLabel}>miega vērtējums</Text>
-              </View>
-            </View>
-            <View style={styles.stages}>
-              <View style={{ flex: sleep.deepMin, backgroundColor: colors.sleepDeep }} />
-              <View style={{ flex: sleep.remMin, backgroundColor: colors.sleepRem }} />
-              <View style={{ flex: sleep.lightMin, backgroundColor: colors.sleepLight }} />
-            </View>
-            <SourceNote source={sleep.source} />
-          </>
-        ) : (
-          <Text style={type.secondary}>Miega dati vēl nav. Pievieno pulksteni sadaļā “Es”, un nakts parādīsies šeit.</Text>
-        )}
-      </Card>
+      <RowsCard date={date} day={day} focus={focus} />
 
       <WeeklyQuestionCard date={date} />
 
-      <SummaryCard date={date} pro={pro} />
-
-      <LeisureCard />
-
-      <View style={{ gap: 10, paddingTop: 4 }}>
-        <Text style={[type.section, { paddingHorizontal: 2 }]}>Pievieno</Text>
-        <View style={styles.quickRow}>
-          <QuickAdd icon="camera" label="Foto" onPress={() => router.push('/nutrition/camera')} />
-          <QuickAdd icon="drop" label="Ūdens" onPress={() => water.mutate(GLASS_ML)} />
-          <QuickAdd icon="movement" label="Aktivitāte" onPress={() => router.push('/activity')} />
-          <QuickAdd icon="scale" label="Svars" onPress={() => router.push('/weight')} />
-        </View>
+      <View style={styles.more}>
+        <SummaryRow date={date} pro={pro} />
+        <View style={styles.rowDivider} />
+        <LeisureRow />
       </View>
+
+      <Text style={styles.week} testID="week-logged">
+        Šonedēļ maltītes pierakstītas {day.week.loggedDays} no {day.week.days} dienām
+      </Text>
+
+      <SyncLine me={me} source={day.movement.source} />
     </Screen>
   );
 }
 
-function remainingLabel(p: Progress) {
-  const left = Math.round(p.target - p.value);
-  return left >= 0 ? `Vēl ${kcal(left)}` : `${kcal(-left)} virs mērķa`;
-}
+// ---------------------------------------------------------------- hero
 
-function remainingHint(p: Progress) {
-  const left = p.target - p.value;
-  if (left > 700) return 'Vēl pietiek pilnvērtīgai maltītei.';
-  if (left > 150) return 'Pietiek vieglām vakariņām ar olbaltumvielām.';
-  if (left >= 0) return 'Diena gandrīz pilna — ja gribas, kaut kas viegls.';
-  return 'Tas nekas — viena diena neko neizšķir.';
-}
-
-function CardHeader({ title, link, href }: { title: string; link: string; href: Href }) {
+function TodayCard({ day, focus }: { day: Day; focus: TipFocus | null }) {
+  const n = day.nutrition;
+  const left = Math.round(n.kcal.target - n.kcal.value);
+  const care = day.care.active;
+  const hero = care || left < 0 ? formatNumber(n.kcal.value) : formatNumber(left);
+  const heroCaption = care ? 'Šodien apēsts' : left < 0 ? 'kcal šodien' : 'kcal vēl šodien';
   return (
-    <View style={styles.cardHeader}>
-      <Text style={type.section}>{title}</Text>
-      <Pressable onPress={() => router.navigate(href)} accessibilityRole="link" hitSlop={8} style={styles.link}>
-        <Text style={type.link}>{link}</Text>
-      </Pressable>
+    <Card style={styles.today}>
+      <View style={styles.ringRow}>
+        <ProgressRing size={164} stroke={10} progress={n.kcal.value / n.kcal.target} color={colors.kcal} trackColor={colors.kcalTrack} animate>
+          <Text style={type.hero} testID="kcal-hero">
+            {hero}
+          </Text>
+          <Text style={styles.heroCaption}>{heroCaption}</Text>
+        </ProgressRing>
+      </View>
+      <Text style={styles.eaten} testID="kcal-line">
+        {care ? 'Galvenais — regulāras maltītes un pietiekami daudz atpūtas.' : `${formatNumber(n.kcal.value)} no ${formatNumber(n.kcal.target)} kcal`}
+      </Text>
+      <View style={styles.bars}>
+        <Bar label="Olbaltumvielas" p={n.proteinG} unit="g" color={colors.protein} track={colors.proteinTrack} focused={focus === 'protein'} />
+        <Bar label="Ogļhidrāti" p={n.carbsG} unit="g" color={colors.carbs} track={colors.carbsTrack} />
+        <Bar label="Tauki" p={n.fatG} unit="g" color={colors.fat} track={colors.fatTrack} />
+        <Bar label="Šķiedrvielas" p={n.fibreG} unit="g" color={colors.fibre} track={colors.fibreTrack} focused={focus === 'fibre'} />
+        <Bar label="Kalcijs" hint="aptuveni" p={n.calciumMg} unit="mg" color={colors.calcium} track={colors.calciumTrack} />
+      </View>
+    </Card>
+  );
+}
+
+function Bar({ label, hint, p, unit, color, track, focused }: { label: string; hint?: string; p: Progress; unit: string; color: string; track: string; focused?: boolean }) {
+  const value = `${formatNumber(Math.round(p.value))} / ${formatNumber(p.target)} ${unit}`;
+  return (
+    <View style={styles.bar} accessible accessibilityLabel={`${label}${hint ? `, ${hint}` : ''}: ${value}${focused ? ', šodienas fokuss' : ''}`}>
+      <View style={styles.barHead}>
+        <View style={styles.barLabelRow}>
+          <View style={[styles.dot, { backgroundColor: color }]} />
+          <Text style={[styles.barLabel, focused && styles.barLabelFocus]}>{label}</Text>
+          {hint ? <Text style={styles.barHint}>{hint}</Text> : null}
+          {focused ? <Text style={styles.focusTag}>fokuss</Text> : null}
+        </View>
+        <Text style={[styles.barValue, focused && { color: colors.ink }]}>{value}</Text>
+      </View>
+      <ProgressBar progress={p.value / p.target} color={color} trackColor={track} />
     </View>
   );
 }
 
-function TipCard({ date }: { date: string }) {
+// ---------------------------------------------------------------- focus tip
+
+function TipCard({ date, tip, pending, tone }: { date: string; tip: Tip | null | undefined; pending: boolean; tone: ToneStyle }) {
   const qc = useQueryClient();
-  const tip = useTip(date);
+  const water = useAddWater(date);
   const setTip = (t: Tip) => {
     qc.setQueryData(keys.tip(date), t);
     qc.invalidateQueries({ queryKey: keys.day(date) });
@@ -219,21 +157,32 @@ function TipCard({ date }: { date: string }) {
   const next = useMutation({ mutationFn: () => api.tipNext(date), onSuccess: setTip });
   const accept = useMutation({ mutationFn: (id: string) => api.acceptTip(id), onSuccess: setTip });
 
-  if (tip.isPending) {
+  if (pending) {
     return (
       <View style={[styles.tip, { minHeight: 120, justifyContent: 'center' }]}>
-        <TipTitle />
-        <Text style={styles.tipBody}>Gatavoju šodienas ieteikumu…</Text>
+        <TipTitle tone={tone} />
+        <Text style={styles.tipBody}>Gatavoju šodienas fokusu…</Text>
       </View>
     );
   }
-  if (!tip.data) return null;
-  const t = tip.data;
+  if (!tip) return null;
+  const t = tip;
   const [before, after] = t.highlight && t.body.includes(t.highlight) ? t.body.split(t.highlight, 2) : [t.body, undefined];
+  // One action per tip: the water tip logs the glass it suggests; the rest are a "yes, I'll try".
+  const action =
+    t.angle === 'water'
+      ? {
+          label: `Pievienot ${GLASS_ML} ml`,
+          run: () => {
+            water.mutate(GLASS_ML);
+            accept.mutate(t.id);
+          },
+        }
+      : { label: 'Labi, pamēģināšu', run: () => accept.mutate(t.id) };
   return (
     <View style={styles.tip} testID="tip-card">
-      <TipTitle />
-      <Text style={styles.tipBody}>
+      <TipTitle tone={tone} />
+      <Text style={styles.tipBody} testID="tip-body">
         {before}
         {after !== undefined && (
           <>
@@ -242,14 +191,14 @@ function TipCard({ date }: { date: string }) {
           </>
         )}
       </Text>
-      <View style={{ flexDirection: 'row', gap: 8, paddingTop: 2, flexWrap: 'wrap' }}>
+      <View style={styles.tipActions}>
         {t.accepted ? (
           <View style={styles.accepted}>
-            <Icon name="check" color={colors.moveDeep} size={18} strokeWidth={2.4} />
-            <Text style={[styles.chipText, { color: colors.moveDeep }]}>Pieņemts</Text>
+            <Icon name="check" color={colors.onLime} size={18} strokeWidth={2.4} />
+            <Text style={styles.acceptedText}>Pieņemts</Text>
           </View>
         ) : (
-          <Chip dark label="Labi, pamēģināšu" onPress={() => accept.mutate(t.id)} disabled={accept.isPending} />
+          <Chip primary label={action.label} onPress={action.run} disabled={accept.isPending} />
         )}
         <Chip label={next.isPending ? 'Meklēju…' : 'Cits ieteikums'} onPress={() => next.mutate()} disabled={next.isPending} />
         {(t.angle === 'protein' || t.angle === 'fibre' || t.angle === 'meals') && (
@@ -258,12 +207,12 @@ function TipCard({ date }: { date: string }) {
       </View>
       <View style={styles.tipFoot}>
         <View style={{ flex: 1 }}>
-          <AiLabel ai={t.aiGenerated} color={colors.accentDeep} />
+          <AiLabel ai={t.aiGenerated} color={colors.limeDeep} />
         </View>
         <IconButton
           icon="dots"
           label="Ziņot par ieteikumu"
-          color={colors.accentDeep}
+          color={colors.limeDeep}
           size={20}
           onPress={() => router.push({ pathname: '/tip-report', params: { id: t.id, date } })}
           testID="tip-report"
@@ -273,57 +222,21 @@ function TipCard({ date }: { date: string }) {
   );
 }
 
-/** Brīvais laiks: films, books and events in the user's city. */
-function LeisureCard() {
+function TipTitle({ tone }: { tone: ToneStyle }) {
   return (
-    <Card style={[styles.card, { gap: 8 }]} onPress={() => router.push('/leisure')} accessibilityLabel="Brīvais laiks: filma, grāmata vai pasākums" testID="leisure-card">
-      <View style={styles.cardHeader}>
-        <View style={styles.tipTitle}>
-          <Icon name="star" color={colors.accentDeep} size={18} />
-          <Text style={styles.tipTitleText}>Brīvais laiks</Text>
-        </View>
-        <Icon name="chevron" color={colors.caption} size={20} />
+    <View style={styles.tipHead}>
+      <View style={styles.tipTitle}>
+        <Icon name="bulb" color={colors.onLime} size={18} />
+        <Text style={styles.tipTitleText}>Šodienas fokuss</Text>
       </View>
-      <Text style={type.secondary}>Filma kinoteātrī vai Go3, grāmata vai pasākums tavā pilsētā — tikai tas, kam vēl vari paspēt.</Text>
-    </Card>
-  );
-}
-
-function SummaryCard({ date, pro }: { date: string; pro: boolean }) {
-  const summary = useWeeklySummary(date, pro);
-  return (
-    <Card
-      style={[styles.card, { gap: 8 }]}
-      onPress={() => router.push(pro ? '/summary' : '/me/pro')}
-      accessibilityLabel={pro ? 'Nedēļas kopsavilkums' : 'Nedēļas AI kopsavilkums, Pro'}>
-      <View style={styles.cardHeader}>
-        <View style={styles.tipTitle}>
-          <Icon name="trend" color={colors.accentDeep} size={18} />
-          <Text style={styles.tipTitleText}>Nedēļas kopsavilkums</Text>
-        </View>
-        {pro ? <Icon name="chevron" color={colors.caption} size={20} /> : <Text style={styles.proBadge}>PRO</Text>}
-      </View>
-      {pro ? (
-        <Text style={styles.question} testID="summary-headline">
-          {summary.data?.headline ?? (summary.isError ? 'Kopsavilkums vēl gatavojas' : 'Analizēju tavu nedēļu…')}
-        </Text>
-      ) : (
-        <Text style={type.secondary}>AI izanalizē tavu nedēļu — kas strādā, kur ir iespējas un viens mazs nākamais solis.</Text>
-      )}
-    </Card>
-  );
-}
-
-function TipTitle() {
-  return (
-    <View style={styles.tipTitle}>
-      <Icon name="bulb" color={colors.accentDeep} size={18} />
-      <Text style={styles.tipTitleText}>Šodienas ieteikums · tavā stilā</Text>
+      <Pressable onPress={() => router.push('/me/tone')} accessibilityRole="link" hitSlop={10} testID="tip-tone">
+        <Text style={styles.toneLabel}>Tavā stilā: {TONE_TITLE[tone]}</Text>
+      </Pressable>
     </View>
   );
 }
 
-function Chip({ label, dark, onPress, disabled, testID }: { label: string; dark?: boolean; onPress?: () => void; disabled?: boolean; testID?: string }) {
+function Chip({ label, primary, onPress, disabled, testID }: { label: string; primary?: boolean; onPress?: () => void; disabled?: boolean; testID?: string }) {
   return (
     <Pressable
       testID={testID}
@@ -331,27 +244,180 @@ function Chip({ label, dark, onPress, disabled, testID }: { label: string; dark?
       disabled={disabled}
       accessibilityRole="button"
       hitSlop={{ top: 2, bottom: 2 }}
-      style={({ pressed }) => [
-        styles.chip,
-        { backgroundColor: dark ? colors.ink : colors.white },
-        (pressed || disabled) && { opacity: 0.7 },
-      ]}>
-      <Text style={[styles.chipText, dark && { color: colors.white }]}>{label}</Text>
+      style={({ pressed }) => [styles.chip, primary ? styles.chipPrimary : styles.chipSecondary, (pressed || disabled) && { opacity: 0.7 }]}>
+      <Text style={[styles.chipText, primary && { color: colors.lime }]}>{label}</Text>
     </Pressable>
   );
 }
 
-function Macro({ label, p, color, track }: { label: string; p: Progress; color: string; track: string }) {
+// ---------------------------------------------------------------- meals
+
+function MealsSection({ meals }: { meals: Meal[] }) {
   return (
-    <View style={styles.macro} accessible accessibilityLabel={`${label}: ${Math.round(p.value)} no ${p.target} gramiem`}>
-      <ProgressRing size={46} stroke={6} progress={p.value / p.target} color={color} trackColor={track} />
-      <View style={{ flexShrink: 1 }}>
-        <Text style={styles.smallSecondary}>{label}</Text>
-        <Text style={styles.macroValue}>
-          {formatNumber(p.value)} / {formatNumber(p.target)} g
+    <View style={{ gap: 10 }}>
+      <SectionHeader title="Šodienas maltītes" link="Visas" href="/nutrition" />
+      {meals.length === 0 ? (
+        <Card style={styles.emptyMeals}>
+          <Text style={type.secondary}>Vēl nav nevienas maltītes. Nofotografē pirmo — tas aizņem dažas sekundes.</Text>
+          <Button label="Foto" icon="camera" size="md" variant="accent" onPress={() => router.push('/nutrition/camera')} style={{ alignSelf: 'flex-start', paddingHorizontal: 24 }} />
+        </Card>
+      ) : (
+        <Card style={styles.list}>
+          {meals.map((m, i) => (
+            <View key={m.id}>
+              {i > 0 && <View style={styles.rowDivider} />}
+              <MealRow meal={m} />
+            </View>
+          ))}
+        </Card>
+      )}
+    </View>
+  );
+}
+
+function MealRow({ meal }: { meal: Meal }) {
+  const photo = meal.photoUrl && !meal.photoUrl.startsWith('data:') ? meal.photoUrl : null;
+  return (
+    <Pressable
+      onPress={() => router.push({ pathname: '/meal/[id]', params: { id: meal.id, date: meal.date } })}
+      accessibilityRole="button"
+      accessibilityLabel={`${MEAL_LABEL[meal.type]}, ${meal.totals.kcal} kcal`}
+      style={({ pressed }) => [styles.row, pressed && { opacity: 0.8 }]}>
+      {photo ? (
+        <Image source={{ uri: photo }} style={styles.thumb} accessibilityLabel="Maltītes foto" />
+      ) : (
+        <View style={[styles.thumb, styles.thumbEmpty]}>
+          <Icon name="nutrition" color={colors.accentDeep} size={22} />
+        </View>
+      )}
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text style={styles.rowTitle} numberOfLines={1}>
+          {itemList(meal.items.map((i) => i.name))}
+        </Text>
+        <Text style={styles.rowMeta}>
+          {MEAL_LABEL[meal.type]} · {timeOf(meal.eatenAt)}
         </Text>
       </View>
+      <Text style={styles.rowValue}>{formatNumber(meal.totals.kcal)} kcal</Text>
+    </Pressable>
+  );
+}
+
+// ---------------------------------------------------------------- one-line rows
+
+function RowsCard({ date, day, focus }: { date: string; day: Day; focus: TipFocus | null }) {
+  const water = useAddWater(date);
+  const w = day.nutrition.waterMl;
+  const steps = day.movement.steps;
+  return (
+    <Card style={styles.list}>
+      <View style={[styles.row, focus === 'water' && styles.rowFocus]}>
+        <RowIcon icon="drop" color={colors.water} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.rowTitle}>Ūdens</Text>
+          <Text style={styles.rowMeta} testID="water-total">
+            {litres(w.value)} no {litres(w.target)}
+          </Text>
+        </View>
+        <Pressable
+          onPress={() => water.mutate(GLASS_ML)}
+          accessibilityRole="button"
+          accessibilityLabel={`Pievienot ${GLASS_ML} ml ūdens`}
+          testID="water-add"
+          style={({ pressed }) => [styles.waterAdd, pressed && { opacity: 0.8 }]}>
+          <Icon name="plus" color={colors.waterDeep} size={16} strokeWidth={2.4} />
+          <Text style={styles.waterAddText}>{GLASS_ML} ml</Text>
+        </Pressable>
+      </View>
+      <View style={styles.rowDivider} />
+      <LinkRow icon="movement" color={colors.steps} title="Soļi" href="/movement" focused={focus === 'steps'}>
+        {formatNumber(steps.value)} no {formatNumber(steps.target)}
+      </LinkRow>
+      <View style={styles.rowDivider} />
+      <LinkRow icon="sleep" color={colors.sleepRem} title="Miegs" href="/sleep" focused={focus === 'sleep'}>
+        {day.sleep ? duration(day.sleep.totalMin) : 'Vēl nav datu'}
+      </LinkRow>
+    </Card>
+  );
+}
+
+function RowIcon({ icon, color }: { icon: IconName; color: string }) {
+  return (
+    <View style={styles.rowIcon}>
+      <Icon name={icon} color={color} size={20} />
     </View>
+  );
+}
+
+function LinkRow({ icon, color, title, href, focused, children }: { icon: IconName; color: string; title: string; href: Href; focused?: boolean; children: ReactNode }) {
+  return (
+    <Pressable
+      onPress={() => router.navigate(href)}
+      accessibilityRole="link"
+      style={({ pressed }) => [styles.row, focused && styles.rowFocus, pressed && { opacity: 0.8 }]}>
+      <RowIcon icon={icon} color={color} />
+      <View style={{ flex: 1 }}>
+        <Text style={styles.rowTitle}>{title}</Text>
+        <Text style={styles.rowMeta}>{children}</Text>
+      </View>
+      <Icon name="chevron" color={colors.caption} size={20} />
+    </Pressable>
+  );
+}
+
+function SectionHeader({ title, link, href }: { title: string; link: string; href: Href }) {
+  return (
+    <View style={styles.sectionHead}>
+      <Text style={type.section}>{title}</Text>
+      <Pressable onPress={() => router.navigate(href)} accessibilityRole="link" hitSlop={8} style={styles.link}>
+        <Text style={type.link}>{link}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------- below the fold
+
+function SummaryRow({ date, pro }: { date: string; pro: boolean }) {
+  const summary = useWeeklySummary(date, pro);
+  return (
+    <Pressable
+      onPress={() => router.push(pro ? '/summary' : '/me/pro')}
+      accessibilityRole="button"
+      accessibilityLabel={pro ? 'Nedēļas kopsavilkums' : 'Nedēļas AI kopsavilkums, Pro'}
+      style={({ pressed }) => [styles.row, pressed && { opacity: 0.8 }]}>
+      <RowIcon icon="trend" color={colors.accentDeep} />
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text style={styles.rowTitle}>Nedēļas kopsavilkums</Text>
+        {pro ? (
+          <Text style={styles.rowMeta} testID="summary-headline" numberOfLines={2}>
+            {summary.data?.headline ?? (summary.isError ? 'Kopsavilkums vēl gatavojas' : 'Analizēju tavu nedēļu…')}
+          </Text>
+        ) : (
+          <Text style={styles.rowMeta}>Kas strādā un viens mazs nākamais solis</Text>
+        )}
+      </View>
+      {pro ? <Icon name="chevron" color={colors.caption} size={20} /> : <Text style={styles.proBadge}>PRO</Text>}
+    </Pressable>
+  );
+}
+
+/** Brīvais laiks: films, books and events in the user's city. */
+function LeisureRow() {
+  return (
+    <Pressable
+      onPress={() => router.push('/leisure')}
+      accessibilityRole="button"
+      accessibilityLabel="Brīvais laiks: filma, grāmata vai pasākums"
+      testID="leisure-card"
+      style={({ pressed }) => [styles.row, pressed && { opacity: 0.8 }]}>
+      <RowIcon icon="star" color={colors.accentDeep} />
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text style={styles.rowTitle}>Brīvais laiks</Text>
+        <Text style={styles.rowMeta}>Filma, grāmata vai pasākums tavā pilsētā</Text>
+      </View>
+      <Icon name="chevron" color={colors.caption} size={20} />
+    </Pressable>
   );
 }
 
@@ -366,11 +432,11 @@ function WeeklyQuestionCard({ date }: { date: string }) {
   if (!q) return null;
   const picked = q.answerIndex !== null ? q.options[q.answerIndex] : null;
   return (
-    <Card style={[styles.card, { gap: 12 }]}>
-      <View style={styles.cardHeader}>
+    <Card style={{ gap: 12 }}>
+      <View style={styles.sectionHead}>
         <View style={styles.tipTitle}>
           <Icon name="chat" color={colors.accentDeep} size={18} />
-          <Text style={styles.tipTitleText}>Nedēļas jautājums</Text>
+          <Text style={styles.cardKicker}>Nedēļas jautājums</Text>
         </View>
         <Text style={type.caption}>1 reizi nedēļā</Text>
       </View>
@@ -393,8 +459,8 @@ function WeeklyQuestionCard({ date }: { date: string }) {
                 disabled={answer.isPending}
                 accessibilityRole="button"
                 hitSlop={{ top: 2, bottom: 2 }}
-                style={({ pressed }) => [styles.chip, { backgroundColor: colors.chip }, pressed && { opacity: 0.8 }]}>
-                <Text style={styles.chipText}>{o.label}</Text>
+                style={({ pressed }) => [styles.option, pressed && { opacity: 0.8 }]}>
+                <Text style={styles.optionText}>{o.label}</Text>
               </Pressable>
             ))}
           </View>
@@ -405,88 +471,109 @@ function WeeklyQuestionCard({ date }: { date: string }) {
   );
 }
 
-function QuickAdd({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }): ReactNode {
+function SyncLine({ me, source }: { me: Me; source: Day['movement']['source'] }) {
+  if (!source || source === 'manual') return null;
+  const ago = me.devices.lastSyncAt ? ` · sinhronizēts ${syncedAgo(me.devices.lastSyncAt)}` : '';
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`Pievienot: ${label}`}
-      style={({ pressed }) => [styles.quick, pressed && { backgroundColor: colors.neutralSoft }]}>
-      <Icon name={icon} color={colors.ink} />
-      <Text style={styles.quickLabel}>{label}</Text>
-    </Pressable>
+    <View style={styles.sync} testID="sync-line">
+      <View style={[styles.dot, { backgroundColor: colors.accent }]} />
+      <Text style={type.caption}>
+        Dati no {SOURCE_LABEL[source]}
+        {me.devices.devices.length ? ` · ${me.devices.devices.join(', ')}` : ''}
+        {ago}
+      </Text>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 2, paddingBottom: 4 },
-  date: { fontFamily: fonts.bodySemi, fontSize: 14, lineHeight: 18, color: colors.caption },
+const styles = themed(() =>
+  StyleSheet.create({
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 2, paddingTop: 4 },
+    date: { fontFamily: fonts.bodySemi, fontSize: 14, lineHeight: 18, color: colors.caption },
 
-  card: { padding: space.card, gap: 16 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  link: { minHeight: hit - 6, justifyContent: 'center', paddingLeft: 12 },
-  unit: { fontFamily: fonts.body, fontSize: 14, color: colors.text2 },
-  unitLg: { fontFamily: fonts.body, fontSize: 15, color: colors.text2 },
-  smallSecondary: { fontFamily: fonts.body, fontSize: 13, lineHeight: 17, color: colors.text2 },
-  big: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 36, color: colors.ink, letterSpacing: -0.6 },
+    today: { padding: space.xxl, gap: 18 },
+    ringRow: { alignItems: 'center', paddingTop: 4 },
+    heroCaption: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.text2, marginTop: -2 },
+    eaten: { fontFamily: fonts.body, fontSize: 15, lineHeight: 21, color: colors.text2, textAlign: 'center', marginTop: -6 },
+    bars: { gap: 14 },
+    bar: { gap: 7 },
+    barHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 },
+    barLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 7, flexShrink: 1 },
+    dot: { width: 8, height: 8, borderRadius: 4 },
+    barLabel: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.text2 },
+    barLabelFocus: { fontFamily: fonts.bodyBold, color: colors.ink },
+    barHint: { fontFamily: fonts.body, fontSize: 12, color: colors.caption },
+    focusTag: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 11,
+      color: colors.onLime,
+      backgroundColor: colors.lime,
+      paddingHorizontal: 7,
+      paddingVertical: 1,
+      borderRadius: 8,
+      overflow: 'hidden',
+    },
+    barValue: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.text2 },
 
-  tip: { backgroundColor: colors.accentSoft, borderRadius: radius.card, padding: space.card, gap: 10 },
-  tipTitle: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  tipTitleText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.accentDeep },
-  tipBody: { fontFamily: fonts.body, fontSize: 16, lineHeight: 24, color: colors.tipText },
-  chip: { height: 40, paddingHorizontal: 16, borderRadius: radius.chip, justifyContent: 'center' },
-  chipText: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.ink },
-  tipFoot: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: -4, marginBottom: -8, marginRight: -10 },
-  proBadge: { fontFamily: fonts.bodyBold, fontSize: 11, color: colors.white, backgroundColor: colors.ink, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, overflow: 'hidden' },
-  basedOn: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.text2 },
-  accepted: { height: 40, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 6 },
+    tip: { backgroundColor: colors.lime, borderRadius: radius.card, padding: space.card, gap: 10 },
+    tipHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
+    tipTitle: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    tipTitleText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.onLime },
+    toneLabel: { fontFamily: fonts.bodySemi, fontSize: 12, color: colors.limeDeep, textDecorationLine: 'underline' },
+    tipBody: { fontFamily: fonts.body, fontSize: 16, lineHeight: 24, color: colors.onLime },
+    tipActions: { flexDirection: 'row', gap: 8, paddingTop: 2, flexWrap: 'wrap' },
+    chip: { height: 40, paddingHorizontal: 16, borderRadius: radius.chip, justifyContent: 'center' },
+    chipPrimary: { backgroundColor: colors.onLime },
+    chipSecondary: { borderWidth: 1.5, borderColor: colors.onLime },
+    chipText: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.onLime },
+    accepted: { height: 40, paddingHorizontal: 8, flexDirection: 'row', alignItems: 'center', gap: 6 },
+    acceptedText: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.onLime },
+    tipFoot: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: -4, marginBottom: -8, marginRight: -10 },
 
-  energy: { flexDirection: 'row', alignItems: 'center', gap: 18 },
-  ringValue: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 32, color: colors.ink, letterSpacing: -0.6 },
-  ringCaption: { fontFamily: fonts.body, fontSize: 13, color: colors.text2, paddingTop: 4 },
-  left: { fontFamily: fonts.heading, fontSize: 22, lineHeight: 28, color: colors.ink, letterSpacing: -0.4 },
-  macros: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 14, columnGap: 12 },
-  macro: { flexDirection: 'row', alignItems: 'center', gap: 10, width: '47%' },
-  macroValue: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
+    sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 2 },
+    link: { minHeight: hit - 6, justifyContent: 'center', paddingLeft: 12 },
+    list: { paddingVertical: 4, paddingHorizontal: space.lg },
+    emptyMeals: { gap: 12 },
+    row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingVertical: 8 },
+    rowFocus: { marginHorizontal: -8, paddingHorizontal: 8, borderRadius: 14, backgroundColor: colors.accentSoft },
+    rowDivider: { height: 1, backgroundColor: colors.divider },
+    rowIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: colors.chip, alignItems: 'center', justifyContent: 'center' },
+    rowTitle: { fontFamily: fonts.bodySemi, fontSize: 15, lineHeight: 20, color: colors.ink },
+    rowMeta: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.text2 },
+    rowValue: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.ink },
+    thumb: { width: 48, height: 48, borderRadius: 14 },
+    thumbEmpty: { backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
+    waterAdd: {
+      height: hit,
+      paddingHorizontal: 14,
+      borderRadius: 22,
+      backgroundColor: colors.waterSoft,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    waterAddText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.waterDeep },
 
-  water: { flexDirection: 'row', alignItems: 'center', gap: 18 },
-  waterAdd: {
-    marginTop: 6,
-    height: hit,
-    paddingHorizontal: 16,
-    alignSelf: 'flex-start',
-    borderRadius: 22,
-    backgroundColor: colors.waterSoft,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  waterAddText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.waterDeep },
+    more: { backgroundColor: colors.card, borderRadius: radius.card, paddingHorizontal: space.lg, paddingVertical: 4 },
+    cardKicker: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.accentDeep },
+    proBadge: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 11,
+      color: colors.onInk,
+      backgroundColor: colors.ink,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 8,
+      overflow: 'hidden',
+    },
+    basedOn: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.text2 },
+    question: { fontFamily: fonts.bodySemi, fontSize: 17, lineHeight: 24, color: colors.ink },
+    reply: { fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: colors.ink },
+    options: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    option: { height: 40, paddingHorizontal: 16, borderRadius: radius.chip, justifyContent: 'center', backgroundColor: colors.chip },
+    optionText: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.ink },
 
-  moveRow: { flexDirection: 'row', gap: 16 },
-  divider: { width: 1, backgroundColor: colors.border },
-
-  sleepRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  score: { alignItems: 'center', gap: 2, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 16, backgroundColor: colors.sleepSoft },
-  scoreValue: { fontFamily: fonts.heading, fontSize: 24, lineHeight: 28, color: colors.sleepDeep },
-  scoreLabel: { fontFamily: fonts.bodySemi, fontSize: 12, color: colors.sleepDeep },
-  stages: { flexDirection: 'row', height: 10, borderRadius: 5, overflow: 'hidden', gap: 2 },
-
-  question: { fontFamily: fonts.bodySemi, fontSize: 17, lineHeight: 24, color: colors.ink },
-  reply: { fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: colors.ink },
-  options: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-
-  quickRow: { flexDirection: 'row', gap: 10 },
-  quick: {
-    flex: 1,
-    height: 76,
-    borderRadius: radius.option,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  quickLabel: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.ink },
-});
+    week: { fontFamily: fonts.body, fontSize: 13, color: colors.text2, textAlign: 'center' },
+    sync: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingBottom: 8 },
+  }),
+);

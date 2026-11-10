@@ -11,7 +11,7 @@ import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { health } from '@/lib/health';
 import { syncHealth, syncProfile } from '@/lib/services';
-import { colors, fonts, radius, type } from '@/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 
 /** Pievieno savu pulksteni (prototype: Onb-Device.dc.html). */
 export function DevicesScreen({ mode }: { mode: 'onboarding' | 'edit' }) {
@@ -52,8 +52,8 @@ export function DevicesScreen({ mode }: { mode: 'onboarding' | 'edit' }) {
     const mine = (kind === 'hc') === isAndroid && Platform.OS !== 'web';
     const title = kind === 'apple' ? 'Apple Health' : 'Health Connect';
     const sub = kind === 'apple' ? 'iPhone un Apple Watch' : 'Android tālruņiem';
-    const iconBg = kind === 'apple' ? '#FCE7EA' : colors.moveSoft;
-    const iconFg = kind === 'apple' ? '#C2475E' : '#3F6E57';
+    const iconBg = kind === 'apple' ? colors.healthSoft : colors.moveSoft;
+    const iconFg = kind === 'apple' ? colors.health : colors.moveDeep;
     return (
       <View style={[styles.card, !mine && { flexDirection: 'row', alignItems: 'center' }]} key={kind}>
         <View style={styles.cardTop}>
@@ -130,17 +130,17 @@ export function DevicesScreen({ mode }: { mode: 'onboarding' | 'edit' }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
   lead: { ...type.body, color: colors.text2 },
-  card: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.optionBorder, borderRadius: radius.card, padding: 18, gap: 14 },
+  card: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.optionBorder, borderRadius: radius.card, padding: 18, gap: 14 },
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },
   icon: { width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   cardTitle: { fontFamily: fonts.bodyBold, fontSize: 18, color: colors.ink },
   na: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.caption },
-  ok: { borderRadius: 16, backgroundColor: '#EAF3EE', paddingVertical: 12, paddingHorizontal: 14, gap: 6 },
+  ok: { borderRadius: 16, backgroundColor: colors.moveSoft, paddingVertical: 12, paddingHorizontal: 14, gap: 6 },
   okTitle: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.moveDeep },
-  okBody: { fontFamily: fonts.body, fontSize: 14, color: '#3D4B43' },
+  okBody: { fontFamily: fonts.body, fontSize: 14, color: colors.text2 },
   warn: { fontFamily: fonts.body, fontSize: 14, color: colors.accentDeep },
   note: { flexDirection: 'row', gap: 12, paddingTop: 4, paddingHorizontal: 4 },
-});
+}));

@@ -8,8 +8,9 @@ import { keys } from '@/api/hooks';
 import { Button } from '@/components/Button';
 import { StepperCard } from '@/components/Controls';
 import { Sheet } from '@/components/Sheet';
+import { confirmLogged } from '@/components/Toast';
 import { useToday } from '@/lib/today';
-import { colors, fonts } from '@/theme';
+import { colors, fonts, themed } from '@/theme';
 
 export const WORKOUT_LABEL: Record<WorkoutType, string> = {
   walk: 'Pastaiga',
@@ -37,6 +38,7 @@ export default function ActivitySheet() {
       return api.createActivity({ type: kind, startedAt: start.toISOString(), durationMin: minutes });
     },
     onSuccess: () => {
+      confirmLogged();
       qc.invalidateQueries({ queryKey: keys.movement(date) });
       qc.invalidateQueries({ queryKey: keys.day(date) });
       router.back();
@@ -54,7 +56,7 @@ export default function ActivitySheet() {
               accessibilityRole="radio"
               aria-checked={on}
               style={[styles.chip, { backgroundColor: on ? colors.ink : colors.chip }]}>
-              <Text style={[styles.chipText, { color: on ? colors.white : colors.ink }]}>{WORKOUT_LABEL[t]}</Text>
+              <Text style={[styles.chipText, { color: on ? colors.onInk : colors.ink }]}>{WORKOUT_LABEL[t]}</Text>
             </Pressable>
           );
         })}
@@ -81,9 +83,9 @@ export default function ActivitySheet() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { height: 44, paddingHorizontal: 16, borderRadius: 22, justifyContent: 'center' },
   chipText: { fontFamily: fonts.bodySemi, fontSize: 14 },
   error: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentDeep },
-});
+}));

@@ -8,7 +8,7 @@ import { BackButton } from '@/components/Header';
 import { Icon, type IconName } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { Loading } from '@/components/States';
-import { colors, fonts, type } from '@/theme';
+import { colors, fonts, type, themed } from '@/theme';
 
 const SECTIONS: { icon: IconName; title: string; body: string }[] = [
   {
@@ -24,7 +24,7 @@ const SECTIONS: { icon: IconName; title: string; body: string }[] = [
   {
     icon: 'heart',
     title: 'Drošības noteikumi',
-    body: 'Nekādu diagnožu, zāļu vai uztura bagātinātāju, svara solījumu, vainas vai kauna, maltīšu izlaišanas vai "atstrādāšanas" ar sportu. Katru tekstu pirms parādīšanas pārbaudām; ja tas neatbilst, rādām pārbaudītu tekstu. Ja dati liecina, ka ēdiens vai atpūta pietrūkst, ieteikumi par mazāk ēšanu tiek izslēgti.',
+    body: 'Nekādu diagnožu, zāļu vai uztura bagātinātāju, svara solījumu, vainas vai kauna, maltīšu izlaišanas vai "atstrādāšanas" ar sportu. Katru tekstu pirms parādīšanas pārbaudām; ja tas neatbilst, rādām pārbaudītu tekstu. Ja dati liecina, ka ēdiena vai atpūtas ir par maz, ieteikumi par mazāk ēšanu tiek izslēgti.',
   },
   {
     icon: 'check',
@@ -72,9 +72,9 @@ export default function AiInfo() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
   toggleCard: { padding: 18, flexDirection: 'row', alignItems: 'center', gap: 12 },
   section: { flexDirection: 'row', gap: 14, paddingHorizontal: 4 },
   body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: colors.ink },
-});
+}));

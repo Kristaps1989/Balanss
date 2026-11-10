@@ -36,7 +36,7 @@ describe('profile and targets', () => {
     expect(res.statusCode).toBe(200);
     const me = res.json() as Me;
     expect(me.profile).toEqual(ilzeBasics);
-    expect(me.targets).toEqual({ kcal: 1750, proteinG: 110, carbsG: 190, fatG: 60, fibreG: 25, waterMl: 2300, steps: 8000, sleepMin: 450 });
+    expect(me.targets).toEqual({ kcal: 1750, proteinG: 110, carbsG: 190, fatG: 60, fibreG: 25, calciumMg: 950, waterMl: 2300, steps: 8000, sleepMin: 450 });
   });
 
   it('stops recomputing once targets were edited manually', async () => {

@@ -7,7 +7,7 @@ import { Sheet } from '@/components/Sheet';
 import { formatNumber } from '@/lib/format';
 import { GLASS_ML, useAddWater } from '@/lib/mutations';
 import { useToday } from '@/lib/today';
-import { colors, fonts } from '@/theme';
+import { colors, fonts, themed } from '@/theme';
 
 interface Action {
   label: string;
@@ -51,16 +51,31 @@ export default function AddSheet() {
     },
   ];
 
+  const [photo, ...rest] = actions;
   return (
     <Sheet title="Ko pievienosim?">
+      {/* Photo is the main way to log, so it gets the big, brand-coloured tile. */}
+      <Pressable
+        onPress={photo.run}
+        accessibilityRole="button"
+        testID="add-photo"
+        style={({ pressed }) => [styles.hero, pressed && { opacity: 0.85 }]}>
+        <View style={styles.heroIcon}>
+          <Icon name="camera" color={colors.commit} size={30} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.heroLabel}>Foto</Text>
+          <Text style={styles.heroHint}>Nofotografē maltīti — pārējo izdarīsim mēs</Text>
+        </View>
+      </Pressable>
       <View style={styles.grid}>
-        {actions.map((a) => (
+        {rest.map((a) => (
           <Pressable
             key={a.label}
             onPress={a.run}
             accessibilityRole="button"
             style={({ pressed }) => [styles.tile, { backgroundColor: a.bg }, pressed && { opacity: 0.85 }]}>
-            <Icon name={a.icon} color={a.tint} size={30} />
+            <Icon name={a.icon} color={a.tint} size={26} />
             <View>
               <Text style={styles.tileLabel}>{a.label}</Text>
               <Text style={styles.tileHint}>{a.hint}</Text>
@@ -72,9 +87,13 @@ export default function AddSheet() {
   );
 }
 
-const styles = StyleSheet.create({
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  tile: { width: '47%', flexGrow: 1, height: 120, borderRadius: 22, padding: 16, justifyContent: 'space-between' },
-  tileLabel: { fontFamily: fonts.bodyBold, fontSize: 17, color: colors.ink },
+const styles = themed(() => StyleSheet.create({
+  hero: { flexDirection: 'row', alignItems: 'center', gap: 16, minHeight: 104, borderRadius: 24, padding: 18, marginBottom: 12, backgroundColor: colors.commit },
+  heroIcon: { width: 56, height: 56, borderRadius: 18, backgroundColor: colors.onAccent, alignItems: 'center', justifyContent: 'center' },
+  heroLabel: { fontFamily: fonts.bodyBold, fontSize: 20, color: colors.onAccent },
+  heroHint: { fontFamily: fonts.body, fontSize: 14, lineHeight: 19, color: colors.onAccent, opacity: 0.85 },
+  grid: { flexDirection: 'row', gap: 10 },
+  tile: { flex: 1, height: 112, borderRadius: 20, padding: 14, justifyContent: 'space-between' },
+  tileLabel: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
   tileHint: { fontFamily: fonts.body, fontSize: 13, color: colors.text2 },
-});
+}));

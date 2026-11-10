@@ -6,14 +6,14 @@
     "scheme": "balanss",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "backgroundColor": "#F7F3EE",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#121513",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "lv.balanss.app",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "NSHealthShareUsageDescription": "Balanss nolasa so\u013cus, pulsu un miegu, lai par\u0101d\u012btu tavu dienu vien\u0101 skat\u0101."
+        "NSHealthShareUsageDescription": "Balanss nolasa soļus, pulsu un miegu, lai parādītu tavu dienu vienā skatā."
       }
     },
     "android": {
@@ -32,7 +32,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#F7F3EE",
+          "backgroundColor": "#121513",
           "image": "./assets/splash-icon.png",
           "imageWidth": 160
         }
@@ -43,7 +43,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Balanss izmanto kameru, lai nofotograf\u0113tu malt\u012bti un atpaz\u012btu produktus.",
+          "cameraPermission": "Balanss izmanto kameru, lai nofotografētu maltīti un atpazītu produktus.",
           "recordAudioAndroid": false,
           "barcodeScannerEnabled": true
         }
@@ -51,8 +51,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Balanss piek\u013c\u016bst foto, lai tu var\u0113tu pievienot malt\u012bti no galerijas.",
-          "cameraPermission": "Balanss izmanto kameru, lai nofotograf\u0113tu malt\u012bti."
+          "photosPermission": "Balanss piekļūst foto, lai tu varētu pievienot maltīti no galerijas.",
+          "cameraPermission": "Balanss izmanto kameru, lai nofotografētu maltīti."
         }
       ],
       [

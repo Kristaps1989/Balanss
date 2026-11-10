@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors, space } from '@/theme';
+import { colors, space, themed } from '@/theme';
 
 /** Scrollable screen body with the prototype's paddings (56 top incl. status bar, 20 sides, gap 14). */
 export function Screen({
@@ -36,7 +36,7 @@ export function Screen({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   content: { paddingHorizontal: space.screen, paddingTop: space.lg, paddingBottom: 28 },
-});
+}));

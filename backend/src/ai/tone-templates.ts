@@ -139,7 +139,7 @@ function pantryTip(input: ToneInput, angle: 'protein' | 'fibre', picks: string[]
     case 'plan':
       return t(
         angle === 'protein'
-          ? `No tā, kas ir mājās: ${both(picks)} vakariņās — līdz olbaltumvielu mērķim trūkst ${gap} g.`
+          ? `No tā, kas ir mājās: ${both(picks)} vakariņās — olbaltumvielas ${fmtInt(n.proteinG.value)} g jau ir, vēl ${gap} g.`
           : `No tā, kas ir mājās: ${both(picks)} — šķiedrvielas ${fmtDec(n.fibreG.value)} no ${n.fibreG.target} g.`,
         picks[0],
       );
@@ -162,11 +162,11 @@ function likedTip(input: ToneInput, angle: 'protein' | 'fibre', liked: string[],
   const n = input.nutrition;
   const picks = liked.map((p) => p[0]!.toLowerCase() + p.slice(1)); // the user's names, mid-sentence
   const gap = Math.max(0, Math.round(n.proteinG.target - n.proteinG.value));
-  const what = angle === 'protein' ? `līdz olbaltumvielu mērķim trūkst ${gap} g` : `šķiedrvielas ${fmtDec(n.fibreG.value)} no ${n.fibreG.target} g`;
+  const what = angle === 'protein' ? `olbaltumvielas ${fmtInt(n.proteinG.value)} g jau ir, vēl ${gap} g` : `šķiedrvielas ${fmtDec(n.fibreG.value)} no ${n.fibreG.target} g`;
   const soft = input.modifiers.softer && sleepShort(input) ? ' Miegs bija nedaudz īsāks — tāpēc šodien bez spiediena.' : '';
   switch (input.tone) {
     case 'plan':
-      return t(`${angle === 'protein' ? 'Olbaltumvielas' : 'Šķiedrvielas'}: ${what}. Plāns no tā, ko ēd bieži: ${both(picks)} vakariņās.${soft}`, picks[0]);
+      return t(`${what[0].toUpperCase()}${what.slice(1)}. Plāns no tā, ko ēd bieži: ${both(picks)} vakariņās.${soft}`, picks[0]);
     case 'novelty':
       return t(`Tu bieži ēd ${picks[0]} — šodien pamēģini to citā veidā nekā parasti. ${what[0].toUpperCase()}${what.slice(1)}.`, picks[0]);
     case 'gentle':
@@ -215,17 +215,17 @@ export function templateTip(input: ToneInput, angle: TipAngle): TipResult {
         case 'protein':
           return soft
             ? t(
-                `Līdz olbaltumvielu mērķim trūkst ${proteinGap} g. Viens viegls solis: ${food.proteinEvening} vakariņās (+${food.proteinEveningGrams} g).${soft}`,
+                `Olbaltumvielas: ${fmtInt(n.proteinG.value)} g jau ir, vēl ${proteinGap} g. Viens viegls solis: ${food.proteinEvening} vakariņās (+${food.proteinEveningGrams} g).${soft}`,
                 `${proteinGap} g`,
               )
             : t(
-                `Šodien trūkst ${proteinGap} g olbaltumvielu. Plāns: ${food.proteinEvening} vakariņās (+${food.proteinEveningGrams} g) un ${food.proteinSnack} uzkodām (+6 g).`,
+                `Olbaltumvielas: ${fmtInt(n.proteinG.value)} g jau ir, vēl ${proteinGap} g. Plāns: ${food.proteinEvening} vakariņās (+${food.proteinEveningGrams} g) un ${food.proteinSnack} uzkodām (+6 g).`,
                 `${proteinGap} g`,
               );
         case 'water':
-          return t(`Ūdens: ${litresOf(n.waterMl)}. Plāns: glāze tagad un pa glāzei pēc katras maltītes — tā pietrūkstošie ${fmtLitres(waterGap)} sanāks līdz vakaram.`, fmtLitres(waterGap));
+          return t(`Ūdens: ${litresOf(n.waterMl)}. Plāns: glāze tagad un pa glāzei pēc katras maltītes — tā atlikušie ${fmtLitres(waterGap)} sanāks līdz vakaram.`, fmtLitres(waterGap));
         case 'steps':
-          return t(`Līdz ${fmtInt(input.steps.target)} soļiem trūkst ${fmtInt(stepsGap)}. Plāns: 20 minūšu pastaiga pēc pusdienām — tas ir ap 2 000 soļu.${soft}`, `${fmtInt(stepsGap)}`);
+          return t(`Soļi: ${fmtInt(input.steps.value)} jau ir, līdz ${fmtInt(input.steps.target)} vēl ${fmtInt(stepsGap)}. Plāns: 20 minūšu pastaiga pēc pusdienām — tas ir ap 2 000 soļu.${soft}`, `${fmtInt(stepsGap)}`);
         case 'fibre':
           return t(`Šķiedrvielas: ${fmtDec(n.fibreG.value)} no ${n.fibreG.target} g. Plāns: ābols uzkodām (+4 g) un ${food.fibreStep}.`, `${fmtDec(n.fibreG.value)} no ${n.fibreG.target} g`);
         case 'sleep':
@@ -450,12 +450,12 @@ export function fakeTrendsInsight(input: TrendsInput): string {
       return `${kcalOk ? `Vidēji ${fmtInt(input.avgKcal)} kcal pret mērķi ${fmtInt(input.targetKcal)}. ` : ''}Olbaltumvielas vidēji ${fmtInt(input.avgProteinG)} g no ${fmtInt(input.targetProteinG)} g${proteinLow ? ' — plāns: vakariņās viens olbaltumvielu avots (+18 g).' : ' — plāns strādā, turpinām.'}`;
     case 'novelty':
       return proteinLow
-        ? `Olbaltumvielas visbiežāk pietrūkst vakaros. Ideja: šonedēļ pamēģini vienu jaunu vakariņu recepti ar ${food.dinnerNovelty}.`
+        ? `Vakariņas ir labākā vieta olbaltumvielām. Ideja: šonedēļ pamēģini vienu jaunu vakariņu recepti ar ${food.dinnerNovelty}.`
         : 'Nedēļa bija līdzsvarota. Ideja: pamēģini vienu jaunu ēdienu, ko vēl neesi gatavojis vai gatavojusi.';
     case 'gentle':
       return `${kcalClose ? 'Enerģija turas tuvu mērķim.' : 'Nedēļa bija sava ritma.'} ${proteinLow ? 'Ja gribi, vakariņām pievieno vienu olbaltumvielu avotu — bez spiediena.' : 'Nekas nav jāmaina.'}`;
     default:
-      return `${kcalClose ? 'Enerģija turas tuvu mērķim.' : kcalOk ? `Vidēji ${fmtInt(input.avgKcal)} kcal dienā.` : 'Ne visas dienas ir pilnībā ierakstītas.'} ${proteinLow ? 'Olbaltumvielas visbiežāk pietrūkst vakaros — ja gribi, vakariņām pievieno vienu olbaltumvielu avotu.' : 'Olbaltumvielas ir tuvu mērķim.'}`;
+      return `${kcalClose ? 'Enerģija turas tuvu mērķim.' : kcalOk ? `Vidēji ${fmtInt(input.avgKcal)} kcal dienā.` : 'Ne visas dienas ir pilnībā ierakstītas.'} ${proteinLow ? 'Vakariņas ir labākā vieta olbaltumvielām — ja gribi, pievieno tām vienu olbaltumvielu avotu.' : 'Olbaltumvielas ir tuvu mērķim.'}`;
   }
 }
 

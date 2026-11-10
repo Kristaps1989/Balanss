@@ -5,8 +5,6 @@ import { uniqueEmail } from './helpers';
 test('new user completes onboarding with the personality test', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('Visa tava diena — vienā skatā')).toBeVisible();
-  await page.getByTestId('welcome-next').click();
-  await page.getByTestId('welcome-next').click();
   await page.getByTestId('welcome-start').click();
 
   await page.getByTestId('email-open').click();

@@ -34,9 +34,12 @@ function page(token: string | null, config: Config): string {
 <p>Pieprasi jaunu pieslēgšanās saiti lietotnē.</p>`;
   return `<!doctype html><html lang="lv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex"><title>Balanss</title>
-<style>body{margin:0;font-family:Figtree,Arial,sans-serif;background:#F7F3EE;color:#26231F;padding:24px 16px}
-main{max-width:480px;margin:0 auto;background:#FFFFFF;border:1px solid #EFE8DE;border-radius:24px;padding:28px}
-h1{font-size:22px;margin:0 0 12px}p{font-size:16px;line-height:1.5;margin:0 0 20px}.small{font-size:14px;color:#5E5850;margin:0 0 8px}
-a{color:#A9502A}.btn{display:inline-block;min-height:44px;box-sizing:border-box;background:#B9532A;color:#FFFFFF;text-decoration:none;font-weight:600;padding:14px 24px;border-radius:28px}</style>
+<meta name="color-scheme" content="light dark">
+<style>:root{--bg:#F6F2EA;--card:#FFFFFF;--ink:#1F2420;--text2:#525852;--link:#2A6148;--btn:#2F6B4F;--on-btn:#FFFFFF}
+@media (prefers-color-scheme:dark){:root{--bg:#121513;--card:#1C201D;--ink:#F2F1EC;--text2:#B8BCB6;--link:#7FD3A2;--btn:#6CCB94;--on-btn:#0E1A13}}
+body{margin:0;font-family:Manrope,Arial,sans-serif;background:var(--bg);color:var(--ink);padding:24px 16px}
+main{max-width:480px;margin:0 auto;background:var(--card);border-radius:24px;padding:28px}
+h1{font-family:Fraunces,Georgia,serif;font-size:24px;margin:0 0 12px}p{font-size:16px;line-height:1.5;margin:0 0 20px}.small{font-size:14px;color:var(--text2);margin:0 0 8px}
+a{color:var(--link)}.btn{display:inline-block;min-height:44px;box-sizing:border-box;background:var(--btn);color:var(--on-btn);text-decoration:none;font-weight:600;padding:14px 24px;border-radius:28px}</style>
 </head><body><main>${body}</main></body></html>`;
 }

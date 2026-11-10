@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, space, type } from '@/theme';
+import { colors, radius, space, type, themed } from '@/theme';
 
 import { Button } from './Button';
 
@@ -48,7 +48,7 @@ export function ConfirmHost() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.scrim, alignItems: 'center', justifyContent: 'center', padding: space.screen },
   card: { width: '100%', maxWidth: 420, backgroundColor: colors.card, borderRadius: radius.card, padding: space.xxl, gap: space.md },
-});
+}));

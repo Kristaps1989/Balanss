@@ -93,10 +93,10 @@ test('reporting a tip hides it and shows a different one', async ({ page }) => {
   await signIn(page, 'ilze@piemers.lv');
   const card = page.getByTestId('tip-card');
   await expect(card).toBeVisible();
-  const before = await card.innerText();
+  const before = await page.getByTestId('tip-body').innerText();
   await page.getByTestId('tip-report').click();
   await page.getByRole('button', { name: /Man neder/ }).click();
-  await expect.poll(async () => (await card.innerText()).split('\n').slice(0, 2).join(' ')).not.toBe(before.split('\n').slice(0, 2).join(' '));
+  await expect.poll(async () => page.getByTestId('tip-body').innerText()).not.toBe(before);
 });
 
 test('AI personalization can be switched off and on', async ({ page }) => {

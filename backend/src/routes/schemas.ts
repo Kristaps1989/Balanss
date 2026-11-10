@@ -19,6 +19,7 @@ export const NutrientsSchema = z.object({
   carbsG: z.number().min(0).max(100),
   fatG: z.number().min(0).max(100),
   fibreG: z.number().min(0).max(100),
+  calciumMg: z.number().min(0).max(2500).optional(),
 });
 
 export const ItemSchema = z.object({

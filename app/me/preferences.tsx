@@ -8,7 +8,7 @@ import { BackButton } from '@/components/Header';
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { Loading } from '@/components/States';
-import { colors, fonts, type } from '@/theme';
+import { colors, fonts, type, themed } from '@/theme';
 
 const DIETS: { value: Diet; label: string; hint: string }[] = [
   { value: 'any', label: 'Ēdu visu', hint: 'Bez ierobežojumiem' },
@@ -68,8 +68,8 @@ export default function Preferences() {
               accessibilityRole="checkbox"
               aria-checked={on}
               style={[styles.chip, { backgroundColor: on ? colors.ink : colors.chip }]}>
-              {on && <Icon name="check" color={colors.white} size={16} strokeWidth={2.6} />}
-              <Text style={[styles.chipText, { color: on ? colors.white : colors.ink }]}>{a.label}</Text>
+              {on && <Icon name="check" color={colors.onInk} size={16} strokeWidth={2.6} />}
+              <Text style={[styles.chipText, { color: on ? colors.onInk : colors.ink }]}>{a.label}</Text>
             </Pressable>
           );
         })}
@@ -107,7 +107,7 @@ export default function Preferences() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
   label: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
@@ -126,9 +126,9 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body,
     fontSize: 16,
     color: colors.ink,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     textAlignVertical: 'top',
   },
   saveBtn: { minHeight: 44, paddingHorizontal: 18, borderRadius: 22, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
-  saveText: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.white },
-});
+  saveText: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.onInk },
+}));

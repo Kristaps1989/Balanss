@@ -9,7 +9,7 @@ import { Screen } from '@/components/Screen';
 import { ErrorState, Loading } from '@/components/States';
 import { formatNumber } from '@/lib/format';
 import { useToday } from '@/lib/today';
-import { colors, fonts, radius } from '@/theme';
+import { colors, fonts, radius, themed } from '@/theme';
 
 /** Pēdējās 7 dienas (prototype: Food-Trends.dc.html). */
 export default function Trends() {
@@ -78,7 +78,7 @@ export default function Trends() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 44, marginLeft: -10 },
   title: { fontFamily: fonts.heading, fontSize: 24, color: colors.ink },
   card: { padding: 18, gap: 14 },
@@ -87,6 +87,6 @@ const styles = StyleSheet.create({
   avg: { fontFamily: fonts.body, fontSize: 14, color: colors.text2 },
   avgValue: { fontFamily: fonts.bodyBold, color: colors.ink },
   insight: { backgroundColor: colors.accentSoft, borderRadius: radius.card, paddingVertical: 16, paddingHorizontal: 18, flexDirection: 'row', gap: 12 },
-  insightText: { flex: 1, fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: colors.tipText },
+  insightText: { flex: 1, fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: colors.ink },
   note: { fontFamily: fonts.body, fontSize: 13, color: colors.caption, paddingHorizontal: 4 },
-});
+}));

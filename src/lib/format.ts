@@ -130,3 +130,19 @@ export function monthYear(iso: string): string {
   const d = new Date(iso);
   return `${d.getFullYear()}. gada ${MONTHS_GEN[d.getMonth()]}`;
 }
+
+/** "tikko", "pirms 5 min", "pirms 3 h", else the date: when device data last synced. */
+export function syncedAgo(iso: string, now: Date = new Date()): string {
+  const min = Math.max(0, Math.round((now.getTime() - new Date(iso).getTime()) / 60000));
+  if (min < 1) return 'tikko';
+  if (min < 60) return `pirms ${min} min`;
+  if (min < 24 * 60) return `pirms ${Math.round(min / 60)} h`;
+  const d = new Date(iso);
+  return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.`;
+}
+
+/** Same item names as a sentence: "Auzu putra, ogas un kafija ar pienu" (keeps acronyms). */
+export function itemList(names: string[]): string {
+  const lower = (s: string) => (/^[A-ZĀČĒĢĪĶĻŅŠŪŽ][a-zāčēģīķļņšūž]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
+  return names.map((n, i) => (i === 0 ? n : lower(n))).join(', ');
+}

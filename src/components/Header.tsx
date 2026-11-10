@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fonts, hit } from '@/theme';
+import { colors, fonts, hit, themed } from '@/theme';
 
 import { Icon, type IconName } from './Icon';
 
@@ -82,12 +82,12 @@ export function TitleRow({ title, right }: { title: string; right?: ReactNode })
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   iconBtn: { width: hit, height: hit, borderRadius: hit / 2, alignItems: 'center', justifyContent: 'center' },
   step: { flexDirection: 'row', alignItems: 'center', gap: 12, height: 44 },
-  track: { flex: 1, height: 6, borderRadius: 3, backgroundColor: '#E6DED3', overflow: 'hidden' },
+  track: { flex: 1, height: 6, borderRadius: 3, backgroundColor: colors.track, overflow: 'hidden' },
   fill: { height: 6, backgroundColor: colors.ink },
   count: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.caption },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 36, color: colors.ink, letterSpacing: -0.6 },
-});
+}));

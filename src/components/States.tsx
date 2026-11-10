@@ -1,6 +1,6 @@
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-import { colors, space, type } from '@/theme';
+import { colors, space, type, themed } from '@/theme';
 
 import { Button } from './Button';
 
@@ -23,6 +23,6 @@ export function ErrorState({ onRetry, message }: { onRetry?: () => void; message
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.md, padding: space.xxl, backgroundColor: colors.bg },
-});
+}));

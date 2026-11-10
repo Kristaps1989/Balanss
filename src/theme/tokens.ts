@@ -1,65 +1,57 @@
 /**
- * Design tokens copied from the hi-fi prototype (see CLAUDE.md).
+ * Design tokens: palettes (palettes.ts), radii, spacing and type. Dark is the default theme.
  * Never use red for "over target".
  */
-export const colors = {
-  bg: '#F7F3EE',
-  card: '#FFFFFF',
-  border: '#EFE8DE',
+import { palettes, type Palette, type ThemeName } from './palettes';
 
-  ink: '#26231F',
-  text2: '#5E5850',
-  caption: '#6F685E',
+let current: ThemeName = 'dark';
+let version = 0;
 
-  accent: '#D9693C',
-  accentText: '#A9502A',
-  commit: '#B9532A',
-  accentSoft: '#FBEBE1',
+/** The active theme. Set once before the first render and again on a switch (the app tree then remounts). */
+export function themeName(): ThemeName {
+  return current;
+}
+export function setThemeName(name: ThemeName) {
+  if (name === current) return;
+  current = name;
+  version++;
+}
 
-  protein: '#56679A',
-  carbs: '#C08A2E',
-  fat: '#9A6F8F',
-  fibre: '#5E8C74',
-  steps: '#5E8C74',
-  water: '#4F8DB8',
-  waterSoft: '#E3F0F8',
+/**
+ * Live colour tokens: every read returns the active palette's value, so a
+ * screen rendered after a theme switch gets the new colours.
+ */
+export const colors = Object.defineProperties(
+  {},
+  Object.fromEntries(Object.keys(palettes.dark).map((k) => [k, { enumerable: true, get: () => palettes[current][k as keyof Palette] }])),
+) as Palette;
 
-  sleepDeep: '#3A4B7E',
-  sleepRem: '#8494C6',
-  sleepLight: '#C3CCE7',
-  sleepWindow: '#26304F',
+/**
+ * Theme-aware module-level styles: `const styles = themed(() => StyleSheet.create({...}))`.
+ * The factory runs once per theme; property reads go to the active theme's copy.
+ */
+export function themed<T extends object>(factory: () => T): T {
+  const cache: Partial<Record<ThemeName, T>> = {};
+  const get = () => (cache[current] ??= factory());
+  return new Proxy({} as T, {
+    get: (_, key) => {
+      const target = get();
+      const v = Reflect.get(target, key);
+      return typeof v === 'function' ? v.bind(target) : v;
+    },
+    has: (_, key) => Reflect.has(get(), key),
+    ownKeys: () => Reflect.ownKeys(get()),
+    getOwnPropertyDescriptor: (_, key) => {
+      const d = Reflect.getOwnPropertyDescriptor(get(), key);
+      return d ? { ...d, configurable: true } : undefined;
+    },
+  });
+}
 
-  white: '#FFFFFF',
-
-  // Secondary tints used in the prototype.
-  accentDeep: '#8A3F1F',
-  tipText: '#2E2A25',
-  kcalTrack: '#F4E2D5',
-  proteinTrack: '#DDE2F0',
-  carbsTrack: '#F2E4C8',
-  fatTrack: '#EADDE6',
-  fibreTrack: '#DCEAE1',
-  stepsTrack: '#E3EEE7',
-  moveSoft: '#E6EFE9',
-  moveDeep: '#2F6049',
-  waterDeep: '#1F5579',
-  waterFill: '#9CC8E6',
-  sleepSoft: '#EEF0F8',
-  avatar: '#E9E1D5',
-  chip: '#F2ECE3',
-  neutralSoft: '#F1ECE4',
-  handle: '#DDD5C9',
-  navBorder: '#ECE5DA',
-  scrim: 'rgba(38,35,31,0.42)',
-  inputBorder: '#E3DBCF',
-  optionBorder: '#EDE6DB',
-  toggleOff: '#D8D0C4',
-  boxBorder: '#B8AFA3',
-  muted: '#8C857B',
-  barMuted: '#D8CBBB',
-  /** Neutral track behind progress bars and rings. */
-  track: '#F1EBE3',
-} as const;
+/** Changes on every theme switch (used as a React key to remount the tree). */
+export function themeVersion() {
+  return version;
+}
 
 export const radius = {
   card: 24,
@@ -87,26 +79,30 @@ export const space = {
 /** Minimum touch target (px). */
 export const hit = 44;
 
+/** Fraunces for headings, Manrope for everything else (numbers included). */
 export const fonts = {
-  heading: 'BricolageGrotesque_700Bold',
-  headingSemi: 'BricolageGrotesque_600SemiBold',
-  body: 'Figtree_400Regular',
-  bodyMedium: 'Figtree_500Medium',
-  bodySemi: 'Figtree_600SemiBold',
-  bodyBold: 'Figtree_700Bold',
+  heading: 'Fraunces_600SemiBold',
+  headingSemi: 'Fraunces_500Medium',
+  number: 'Manrope_700Bold',
+  body: 'Manrope_400Regular',
+  bodyMedium: 'Manrope_500Medium',
+  bodySemi: 'Manrope_600SemiBold',
+  bodyBold: 'Manrope_700Bold',
 } as const;
 
-export const type = {
-  display: { fontFamily: fonts.heading, fontSize: 40, lineHeight: 44, color: colors.ink },
+export const type = themed(() => ({
+  display: { fontFamily: fonts.heading, fontSize: 38, lineHeight: 44, color: colors.ink, letterSpacing: -0.6 },
   h1: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 36, color: colors.ink, letterSpacing: -0.6 },
   h2: { fontFamily: fonts.heading, fontSize: 22, lineHeight: 28, color: colors.ink },
-  /** Card section title (Figtree 17 bold in the prototype). */
+  /** Card section title. */
   section: { fontFamily: fonts.bodyBold, fontSize: 17, lineHeight: 22, color: colors.ink },
-  number: { fontFamily: fonts.heading, fontSize: 26, lineHeight: 32, color: colors.ink, letterSpacing: -0.5 },
+  number: { fontFamily: fonts.number, fontSize: 26, lineHeight: 32, color: colors.ink, letterSpacing: -0.5 },
+  /** The one main number on a screen. */
+  hero: { fontFamily: fonts.number, fontSize: 44, lineHeight: 50, color: colors.ink, letterSpacing: -1 },
   body: { fontFamily: fonts.body, fontSize: 16, lineHeight: 22, color: colors.ink },
   bodySemi: { fontFamily: fonts.bodySemi, fontSize: 16, lineHeight: 22, color: colors.ink },
   label: { fontFamily: fonts.bodySemi, fontSize: 14, lineHeight: 18, color: colors.ink },
   secondary: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.text2 },
   caption: { fontFamily: fonts.body, fontSize: 12, lineHeight: 16, color: colors.caption },
   link: { fontFamily: fonts.bodySemi, fontSize: 14, lineHeight: 18, color: colors.accentText },
-} as const;
+} as const));

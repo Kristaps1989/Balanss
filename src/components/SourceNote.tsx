@@ -1,7 +1,7 @@
 import { StyleSheet, Text } from 'react-native';
 
 import type { HealthSource } from '@/api';
-import { type } from '@/theme';
+import { type, themed } from '@/theme';
 
 const LABEL: Record<HealthSource, string> = {
   apple_health: 'Dati no Apple Health',
@@ -14,6 +14,6 @@ export function SourceNote({ source, devices }: { source: HealthSource; devices?
   return <Text style={styles.note}>{LABEL[source] + extra}</Text>;
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   note: type.caption,
-});
+}));

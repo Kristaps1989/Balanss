@@ -12,13 +12,13 @@ import { Screen } from '@/components/Screen';
 import { Loading } from '@/components/States';
 import { TraitBars } from '@/components/TraitBars';
 import { LIKERT_LABELS, PERSONALITY_ITEMS } from '@shared/personality';
-import { colors, fonts, radius, type } from '@/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 
-const EXAMPLES = [
-  { trait: 'Ja tev patīk jaunais', bg: '#F6E7CF', fg: '#5E420F', say: 'Ko jaunu šonedēļ izmēģināji? Ideja: lēcu zupa ar ciedru riekstiem.' },
-  { trait: 'Ja tev patīk plāns', bg: colors.sleepSoft, fg: '#2E3B66', say: 'Šodien trūkst 42 g olbaltumvielu. Plāns: biezpiens brokastīs (+18 g).' },
-  { trait: 'Ja viegli satraucies', bg: colors.moveSoft, fg: '#24503B', say: 'Miegs bija īsāks, tas ir normāli. Šodien — bez spiediena.' },
-];
+const EXAMPLES = themed(() => [
+  { trait: 'Ja tev patīk jaunais', bg: colors.noticeSoft, fg: colors.notice, say: 'Ko jaunu šonedēļ izmēģināji? Ideja: lēcu zupa ar ciedru riekstiem.' },
+  { trait: 'Ja tev patīk plāns', bg: colors.sleepSoft, fg: colors.sleepInk, say: 'Olbaltumvielas: 68 g jau ir, vēl 42 g. Plāns: biezpiens brokastīs (+18 g).' },
+  { trait: 'Ja viegli satraucies', bg: colors.moveSoft, fg: colors.moveDeep, say: 'Miegs bija īsāks, tas ir normāli. Šodien — bez spiediena.' },
+]);
 
 /** Hook: finish onboarding and land on Šodiena. */
 function useFinishOnboarding() {
@@ -116,7 +116,7 @@ export function PersonalityTest({ mode }: { mode: 'onboarding' | 'retest' }) {
               onPress={() => pick(v)}
               accessibilityRole="radio"
               aria-checked={on}
-              style={[styles.opt, { backgroundColor: on ? colors.accentSoft : colors.white, borderColor: on ? colors.accent : colors.optionBorder }]}>
+              style={[styles.opt, { backgroundColor: on ? colors.accentSoft : colors.card, borderColor: on ? colors.accent : colors.optionBorder }]}>
               <View style={styles.dotBox}>
                 <View
                   style={{
@@ -125,7 +125,7 @@ export function PersonalityTest({ mode }: { mode: 'onboarding' | 'retest' }) {
                     borderRadius: size / 2,
                     borderWidth: 2,
                     borderColor: on ? colors.accent : colors.boxBorder,
-                    backgroundColor: on ? colors.accent : colors.white,
+                    backgroundColor: on ? colors.accent : colors.card,
                   }}
                 />
               </View>
@@ -208,18 +208,18 @@ export function PersonalityResult({ mode }: { mode: 'onboarding' | 'view' }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
   h1Big: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 34, color: colors.ink },
   lead: { fontFamily: fonts.body, fontSize: 16, lineHeight: 23, color: colors.text2 },
   overline: { fontFamily: fonts.bodyBold, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', color: colors.caption },
-  example: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.optionBorder, borderRadius: radius.option, paddingVertical: 12, paddingHorizontal: 14, gap: 6 },
+  example: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.optionBorder, borderRadius: radius.option, paddingVertical: 12, paddingHorizontal: 14, gap: 6 },
   chip: { alignSelf: 'flex-start', height: 26, paddingHorizontal: 10, borderRadius: 13, justifyContent: 'center' },
   chipText: { fontFamily: fonts.bodyBold, fontSize: 12 },
   say: { fontFamily: fonts.body, fontSize: 15, lineHeight: 21, color: colors.ink },
   test: { flex: 1, backgroundColor: colors.bg, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 24, gap: 20 },
   testTop: { flexDirection: 'row', alignItems: 'center', gap: 12, height: 44 },
-  track: { flex: 1, height: 6, borderRadius: 3, backgroundColor: '#E6DED3', overflow: 'hidden' },
+  track: { flex: 1, height: 6, borderRadius: 3, backgroundColor: colors.track, overflow: 'hidden' },
   fill: { height: 6, backgroundColor: colors.accent },
   fillInk: { height: 6, backgroundColor: colors.ink },
   count: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.caption },
@@ -232,9 +232,9 @@ const styles = StyleSheet.create({
   error: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentDeep, textAlign: 'center' },
   resultTop: { flexDirection: 'row', alignItems: 'center', gap: 12, height: 44 },
   styleLabel: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentText },
-  traits: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.optionBorder, borderRadius: radius.card, padding: 18 },
+  traits: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.optionBorder, borderRadius: radius.card, padding: 18 },
   help: { backgroundColor: colors.accentSoft, borderRadius: radius.card, padding: 18, gap: 8 },
   helpTitle: { fontFamily: fonts.heading, fontSize: 18, color: colors.ink },
-  helpBody: { fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: '#3B3833' },
+  helpBody: { fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: colors.ink },
   disclaimer: { fontFamily: fonts.body, fontSize: 13, lineHeight: 19, color: colors.caption, paddingHorizontal: 4 },
-});
+}));

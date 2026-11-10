@@ -64,6 +64,8 @@ export const users = pgTable('users', {
   timezone: text('timezone').notNull().default('Europe/Riga'),
   /** City for free-time suggestions, chosen by the user (no location tracking). */
   leisureCity: text('leisure_city'),
+  /** Last authenticated request (updated at most hourly); reminders go quiet after 3 days without one. */
+  lastActiveAt: ts('last_active_at'),
   createdAt: ts('created_at').notNull().defaultNow(),
   updatedAt: ts('updated_at').notNull().defaultNow(),
 });

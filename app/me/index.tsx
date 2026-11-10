@@ -16,7 +16,8 @@ import { TraitBars } from '@/components/TraitBars';
 import { signOutProviders } from '@/lib/auth';
 import { openDownload } from '@/lib/download';
 import { duration, formatNumber, litres, monthYear } from '@/lib/format';
-import { colors, fonts, radius, type } from '@/theme';
+import { THEME_PREFS, useThemeStore } from '@/lib/theme';
+import { colors, fonts, radius, type, themed } from '@/theme';
 
 const REMINDERS: { key: keyof Pick<Reminders, 'water' | 'food' | 'move' | 'sleepWindow'>; label: string }[] = [
   { key: 'water', label: 'Ūdens' },
@@ -44,6 +45,8 @@ export default function MeScreen() {
     onSuccess: () => qc.clear(),
   });
   const del = useMutation({ mutationFn: api.deleteAccount, onSuccess: () => qc.clear() });
+  const themePref = useThemeStore((s) => s.pref);
+  const setThemePref = useThemeStore((s) => s.setPref);
 
   if (me.isPending) return <Loading />;
   if (!me.data) return <ErrorState onRetry={() => me.refetch()} />;
@@ -86,7 +89,7 @@ export default function MeScreen() {
             </Pressable>
             <Pressable onPress={() => router.push('/me/tone')} accessibilityRole="button" style={styles.toneLink}>
               <Text style={styles.toneLinkText}>Tie paši dati, cits tonis</Text>
-              <Icon name="chevron" color="#6E3A1F" size={20} />
+              <Icon name="chevron" color={colors.accentDeep} size={20} />
             </Pressable>
             <View style={styles.rowToggle}>
               <View style={{ flex: 1 }}>
@@ -127,7 +130,7 @@ export default function MeScreen() {
               accessibilityRole="button"
               style={styles.toneLink}>
               <Text style={styles.toneLinkText}>Uzzināt savu stilu</Text>
-              <Icon name="chevron" color="#6E3A1F" size={20} />
+              <Icon name="chevron" color={colors.accentDeep} size={20} />
             </Pressable>
           </>
         )}
@@ -164,8 +167,8 @@ export default function MeScreen() {
 
       <Section title="Ierīces">
         <Pressable onPress={() => router.push('/me/devices')} accessibilityRole="button" style={styles.device}>
-          <View style={[styles.devIcon, { backgroundColor: m.devices.source === 'apple_health' ? '#FCE7EA' : colors.moveSoft }]}>
-            <Icon name={m.devices.source === 'apple_health' ? 'heart' : 'movement'} color={m.devices.source === 'apple_health' ? '#C2475E' : colors.moveDeep} size={22} />
+          <View style={[styles.devIcon, { backgroundColor: m.devices.source === 'apple_health' ? colors.healthSoft : colors.moveSoft }]}>
+            <Icon name={m.devices.source === 'apple_health' ? 'heart' : 'movement'} color={m.devices.source === 'apple_health' ? colors.health : colors.moveDeep} size={22} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.rowTitleBold}>{sourceName ?? 'Nav savienots'}</Text>
@@ -175,6 +178,13 @@ export default function MeScreen() {
             {m.devices.connected ? 'Sinhronizēts' : 'Savienot'}
           </Text>
         </Pressable>
+      </Section>
+
+      <Section title="Izskats">
+        <View style={{ paddingTop: 2, paddingBottom: 12, gap: 8 }} testID="theme-picker">
+          <Segmented options={THEME_PREFS} value={themePref} onChange={(v) => setThemePref(v, '/me')} />
+          <Text style={type.caption}>Tumšais režīms ir noklusējums. “Kā tālrunī” seko tālruņa iestatījumam.</Text>
+        </View>
       </Section>
 
       <Section title="Atgādinājumi">
@@ -247,7 +257,7 @@ export default function MeScreen() {
             <Text style={styles.proTitle}>Balanss Pro</Text>
             <Text style={styles.proText}>Neierobežotas foto analīzes, nedēļas kopsavilkums un receptes</Text>
           </View>
-          <Icon name="chevron" color={colors.white} size={22} />
+          <Icon name="chevron" color={colors.onInk} size={22} />
         </Pressable>
       )}
     </Screen>
@@ -291,7 +301,7 @@ function Row({ label, icon, onPress, danger, href }: { label: string; icon: 'dow
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   head: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   avatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.avatar, alignItems: 'center', justifyContent: 'center' },
   avatarText: { fontFamily: fonts.heading, fontSize: 24, color: colors.ink },
@@ -307,21 +317,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  toneLinkText: { fontFamily: fonts.bodyBold, fontSize: 15, color: '#6E3A1F' },
+  toneLinkText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.accentDeep },
   rowToggle: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   rowTitle: { fontFamily: fonts.body, fontSize: 15, color: colors.ink, flexShrink: 1 },
   rowTitleBold: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
   inline: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 32 },
   section: { paddingVertical: 6, paddingHorizontal: 18, borderRadius: radius.card },
   sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, paddingBottom: 4 },
-  line: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 48, borderTopWidth: 1, borderTopColor: '#F0EAE1', gap: 12 },
-  lineTop: { borderTopWidth: 1, borderTopColor: '#F0EAE1' },
+  line: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 48, borderTopWidth: 1, borderTopColor: colors.divider, gap: 12 },
+  lineTop: { borderTopWidth: 1, borderTopColor: colors.divider },
   k: { fontFamily: fonts.body, fontSize: 15, color: colors.text2 },
   v: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink, flexShrink: 1, textAlign: 'right' },
-  device: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 60, borderTopWidth: 1, borderTopColor: '#F0EAE1' },
+  device: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 60, borderTopWidth: 1, borderTopColor: colors.divider },
   devIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   status: { fontFamily: fonts.bodySemi, fontSize: 13 },
   pro: { borderRadius: radius.card, backgroundColor: colors.ink, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14 },
-  proTitle: { fontFamily: fonts.heading, fontSize: 19, color: colors.white },
-  proText: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: '#E4DDD3' },
-});
+  proTitle: { fontFamily: fonts.heading, fontSize: 19, color: colors.onInk },
+  proText: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.onInk2 },
+}));

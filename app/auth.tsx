@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { api } from '@/api';
 import { Button } from '@/components/Button';
 import { Loading } from '@/components/States';
-import { colors, space, type } from '@/theme';
+import { colors, space, type, themed } from '@/theme';
 
 /** Magic-link landing: balanss://auth?token=… (or /auth?token=… on web). */
 export default function AuthLink() {
@@ -32,6 +32,6 @@ export default function AuthLink() {
   return <Loading label="Pieslēdzos…" />;
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg, justifyContent: 'center', padding: space.xxl, gap: space.md },
-});
+}));
