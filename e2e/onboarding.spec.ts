@@ -33,6 +33,9 @@ test('new user completes onboarding with the personality test', async ({ page })
 
   // 5/7 intro → 6/7 test (20 statements) → 7/7 result
   await expect(page.getByText('Mērķi ir vieglāk sasniegt, ja zini, kāds esi')).toBeVisible();
+  // Consent starts unticked (explicit consent for special-category data); the test can't start without it.
+  await expect(page.getByTestId('start-test')).toBeDisabled();
+  await page.getByRole('checkbox', { name: /Atļauju izmantot rezultātu/ }).click();
   await page.getByTestId('start-test').click();
   const answers = ['Pilnīgi piekrītu', 'Drīzāk piekrītu', 'Neitrāli', 'Drīzāk nepiekrītu'];
   for (let i = 0; i < 20; i++) {

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Balanss",
+    "name": "ZestWell",
     "slug": "balanss",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "scheme": "balanss",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,13 +13,13 @@
       "bundleIdentifier": "lv.balanss.app",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "NSHealthShareUsageDescription": "Balanss nolasa soļus, pulsu un miegu, lai parādītu tavu dienu vienā skatā."
+        "NSHealthShareUsageDescription": "ZestWell nolasa soļus, pulsu un miegu, lai parādītu tavu dienu vienā skatā."
       }
     },
     "android": {
       "package": "lv.balanss.app",
       "adaptiveIcon": {
-        "backgroundColor": "#D9693C",
+        "backgroundColor": "#2F6B4F",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -43,7 +43,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Balanss izmanto kameru, lai nofotografētu maltīti un atpazītu produktus.",
+          "cameraPermission": "ZestWell izmanto kameru, lai nofotografētu maltīti un atpazītu produktus.",
           "recordAudioAndroid": false,
           "barcodeScannerEnabled": true
         }
@@ -51,14 +51,14 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Balanss piekļūst foto, lai tu varētu pievienot maltīti no galerijas.",
-          "cameraPermission": "Balanss izmanto kameru, lai nofotografētu maltīti."
+          "photosPermission": "ZestWell piekļūst foto, lai tu varētu pievienot maltīti no galerijas.",
+          "cameraPermission": "ZestWell izmanto kameru, lai nofotografētu maltīti."
         }
       ],
       [
         "expo-notifications",
         {
-          "color": "#D9693C"
+          "color": "#2F6B4F"
         }
       ],
       "expo-apple-authentication",

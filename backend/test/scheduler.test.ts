@@ -106,7 +106,7 @@ describe('push scheduler', () => {
   it('uses the gentle tone copy when the user prefers it', async () => {
     await call({ method: 'PUT', url: '/v1/me/tone', payload: { preference: 'gentle' } });
     const r = await at('19:00');
-    expect(r.pushes[0]).toMatchObject({ kind: 'water', title: 'Balanss', body: 'Ja ērti, iedzer malku ūdens. Nekas nav nokavēts.' });
+    expect(r.pushes[0]).toMatchObject({ kind: 'water', title: 'ZestWell', body: 'Ja ērti, iedzer malku ūdens. Nekas nav nokavēts.' });
   });
 
   it('works in the token’s time zone', async () => {

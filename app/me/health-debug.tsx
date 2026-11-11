@@ -14,7 +14,7 @@ import { colors, fonts, radius, type, themed } from '@/theme';
 
 /**
  * Health Connect diagnostics: syncs now, then shows what the store holds per app and device
- * next to what Balanss saved. For support when steps don't match the watch app.
+ * next to what ZestWell saved. For support when steps don't match the watch app.
  */
 export default function HealthDebug() {
   const date = useToday();
@@ -31,7 +31,7 @@ export default function HealthDebug() {
     gcTime: 0,
   });
   const text = [
-    `Balanss ${date}`,
+    `ZestWell ${date}`,
     `Saglabāts serverī šodien: ${mv.data ? formatNumber(mv.data.today.steps.value) : '…'} soļi`,
     `Pēdējā sinhronizācija: ${me.data?.devices.lastSyncAt ? new Date(me.data.devices.lastSyncAt).toLocaleString('lv-LV') : '—'}`,
     '',

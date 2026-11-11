@@ -39,7 +39,7 @@ export default function Recipes() {
     return (
       <Screen>
         {header}
-        <Text style={type.secondary}>Idejas nākamajai maltītei, kas papildina to, kas šodien vēl noderētu. Pieejamas ar Balanss Pro.</Text>
+        <Text style={type.secondary}>Idejas nākamajai maltītei, kas papildina to, kas šodien vēl noderētu. Pieejamas ar ZestWell Pro.</Text>
         <Button label="Uzzināt par Pro" onPress={() => router.push('/me/pro')} />
       </Screen>
     );

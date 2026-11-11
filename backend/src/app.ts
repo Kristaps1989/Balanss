@@ -19,6 +19,7 @@ import { meRoutes } from './routes/me';
 import { publicRoutes } from './routes/public';
 import { pushRoutes } from './routes/push';
 import { verifyAccessToken } from './services/auth';
+import { renderNotFound, siteHosts, siteRoutes } from './site/routes';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -105,7 +106,12 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     req.log.error({ err: { name: err.name, message: err.message, stack: err.stack } }, 'unhandled error');
     return reply.status(500).send({ error: { code: 'internal_error', message: 'Something went wrong' } });
   });
-  app.setNotFoundHandler((_req, reply) => reply.status(404).send({ error: { code: 'not_found', message: 'Route not found' } }));
+  const site = siteHosts(config.publicWebUrl);
+  const notFoundPage = renderNotFound(config.publicWebUrl);
+  app.setNotFoundHandler((req, reply) => {
+    if (req.hostname === site.host) return reply.status(404).header('Content-Type', 'text/html; charset=utf-8').send(notFoundPage);
+    return reply.status(404).send({ error: { code: 'not_found', message: 'Route not found' } });
+  });
 
   // Liveness + readiness. Reports which providers are configured (never their keys) so a deploy can be checked from a browser.
   app.get('/health', { config: { rateLimit: false } }, async (_req, reply) => {
@@ -124,6 +130,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     });
   });
   await app.register(magicLinkPage);
+  await app.register(siteRoutes);
 
   await app.register(
     async (v1) => {

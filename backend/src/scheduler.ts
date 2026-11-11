@@ -9,6 +9,7 @@ import type { AppDeps } from './deps';
 import { meals, pushLog, pushTokens, users, type UserRow } from './db/schema';
 import { getOrCreateTip } from './services/copy';
 import { buildToneInput, nightsUpTo, waterFor, windowFor } from './services/day';
+import { cleanupExpired } from './services/cleanup';
 import { cleanupOldPhotos } from './services/photos';
 import { getPersonality } from './services/users';
 import { localNow, type LocalNow } from './lib/time';
@@ -65,6 +66,8 @@ export interface TickResult {
   pushes: SentPush[];
   tipsGenerated: string[];
   photosDeleted: number;
+  /** Expired tokens and old bookkeeping rows removed this tick (once an hour). */
+  rowsCleaned: number;
 }
 
 async function claim(deps: AppDeps, userId: string, kind: string, localDate: string, slot: string): Promise<boolean> {
@@ -151,7 +154,7 @@ async function tickUser(deps: AppDeps, log: FastifyBaseLogger, user: UserRow, to
 }
 
 export async function runSchedulerTick(deps: AppDeps, log: FastifyBaseLogger, now: Date = deps.now()): Promise<TickResult> {
-  const result: TickResult = { pushes: [], tipsGenerated: [], photosDeleted: 0 };
+  const result: TickResult = { pushes: [], tipsGenerated: [], photosDeleted: 0, rowsCleaned: 0 };
   const rows = await deps.db
     .select({ user: users, token: pushTokens.token, timezone: pushTokens.timezone, updatedAt: pushTokens.updatedAt })
     .from(pushTokens)
@@ -175,6 +178,15 @@ export async function runSchedulerTick(deps: AppDeps, log: FastifyBaseLogger, no
   } catch (err) {
     log.error({ scheduler: { reason: err instanceof Error ? err.message : 'unknown' } }, 'photo cleanup failed');
   }
+  // Ticks run every 5 minutes; the row cleanup only needs to run in the first tick of each hour.
+  if (now.getUTCMinutes() < TICK_MS / 60_000) {
+    try {
+      const c = await cleanupExpired(deps.db, now);
+      result.rowsCleaned = c.magicLinks + c.refreshTokens + c.exportTokens + c.pushLog + c.usage;
+    } catch (err) {
+      log.error({ scheduler: { reason: err instanceof Error ? err.message : 'unknown' } }, 'row cleanup failed');
+    }
+  }
   return result;
 }
 
@@ -186,8 +198,8 @@ export function startScheduler(deps: AppDeps, log: FastifyBaseLogger): () => voi
     running = true;
     try {
       const r = await runSchedulerTick(deps, log);
-      if (r.pushes.length || r.tipsGenerated.length || r.photosDeleted)
-        log.info({ scheduler: { pushes: r.pushes.length, tips: r.tipsGenerated.length, photosDeleted: r.photosDeleted } }, 'scheduler tick');
+      if (r.pushes.length || r.tipsGenerated.length || r.photosDeleted || r.rowsCleaned)
+        log.info({ scheduler: { pushes: r.pushes.length, tips: r.tipsGenerated.length, photosDeleted: r.photosDeleted, rowsCleaned: r.rowsCleaned } }, 'scheduler tick');
     } catch (err) {
       log.error({ scheduler: { reason: err instanceof Error ? err.message : 'unknown' } }, 'scheduler tick failed');
     } finally {

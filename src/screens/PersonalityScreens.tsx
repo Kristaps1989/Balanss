@@ -27,7 +27,8 @@ function useFinishOnboarding() {
 
 /** Onb-TestIntro (5/7). */
 export function PersonalityIntro() {
-  const [consent, setConsent] = useState(true);
+  // Explicit consent for special-category data: the box starts unticked (GDPR art. 9(2)(a), art. 4(11)).
+  const [consent, setConsent] = useState(false);
   const finish = useFinishOnboarding();
   return (
     <Screen

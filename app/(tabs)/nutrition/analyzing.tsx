@@ -90,7 +90,7 @@ export default function Analyzing() {
             </Text>
             <View style={{ flex: 1 }} />
             {quotaExceeded ? (
-              <Button label="Balanss Pro — foto bez limita" variant="accent" onPress={() => router.push('/me/pro')} />
+              <Button label="ZestWell Pro — foto bez limita" variant="accent" onPress={() => router.push('/me/pro')} />
             ) : (
               <Button label="Mēģināt vēlreiz" onPress={() => setAttempt((a) => a + 1)} />
             )}

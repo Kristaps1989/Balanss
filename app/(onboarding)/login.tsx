@@ -10,8 +10,8 @@ import { Screen } from '@/components/Screen';
 import { appleAvailable, googleAvailable, SignInCancelled, signInWithApple, signInWithGoogle } from '@/lib/auth';
 import { colors, fonts, type, themed } from '@/theme';
 
-const TERMS_URL = process.env.EXPO_PUBLIC_TERMS_URL ?? 'https://balanss.app/noteikumi';
-const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL ?? 'https://balanss.app/privatums';
+const TERMS_URL = process.env.EXPO_PUBLIC_TERMS_URL ?? 'https://zestwell.app/noteikumi';
+const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL ?? 'https://zestwell.app/privatums';
 
 type Step = 'closed' | 'edit' | 'sent';
 

@@ -152,9 +152,9 @@ const ListingSchema = z.object({
 export type RawListing = z.infer<typeof ListingSchema>;
 const ListingsSchema = z.object({ items: z.array(ListingSchema) });
 
-const SEARCH_SYSTEM = `You find real things to do for a user of Balanss, a Latvian wellbeing app. You search the web and report only what you actually found, with links. Never invent titles, venues, times or links. Prefer official sources (cinema and venue websites, go3.lv, biļešu tirgotāji, city event calendars). Suggestions must suit a calm, healthy free-time plan: no gambling, no alcohol-focused events, nothing adult-only. Write your findings as a plain list: title, venue or author, exact local start time (date + HH:MM, Europe/Riga) when it has one, one-sentence description, and the URL of the page for that specific film, book or event (its own page with showtimes/tickets/details — never a homepage, category list or search results page).`;
+const SEARCH_SYSTEM = `You find real things to do for a user of ZestWell, a Latvian wellbeing app. You search the web and report only what you actually found, with links. Never invent titles, venues, times or links. Prefer official sources (cinema and venue websites, go3.lv, biļešu tirgotāji, city event calendars). Suggestions must suit a calm, healthy free-time plan: no gambling, no alcohol-focused events, nothing adult-only. Write your findings as a plain list: title, venue or author, exact local start time (date + HH:MM, Europe/Riga) when it has one, one-sentence description, and the URL of the page for that specific film, book or event (its own page with showtimes/tickets/details — never a homepage, category list or search results page).`;
 
-const EXTRACT_SYSTEM = `You turn search notes into structured listings for Balanss, a Latvian wellbeing app.
+const EXTRACT_SYSTEM = `You turn search notes into structured listings for ZestWell, a Latvian wellbeing app.
 
 Rules:
 - Use only items that appear in the notes. Do not add anything.

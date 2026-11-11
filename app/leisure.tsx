@@ -166,7 +166,7 @@ function Results({ data, today }: { data: LeisureResponse; today: string }) {
       ))}
       {data.items.length > 0 && (
         <Text style={type.caption}>
-          {data.live ? 'Atrasts tīmeklī pirms brīža. Saite ved tieši uz filmu, grāmatu vai pasākumu; laikus un biļetes pārbaudi tur.' : 'Balanss idejas bez konkrēta laika.'}
+          {data.live ? 'Atrasts tīmeklī pirms brīža. Saite ved tieši uz filmu, grāmatu vai pasākumu; laikus un biļetes pārbaudi tur.' : 'ZestWell idejas bez konkrēta laika.'}
         </Text>
       )}
     </View>

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Checks that a deployed Balanss API is reachable and configured the way the app needs it.
+# Checks that a deployed ZestWell API is reachable and configured the way the app needs it.
 #   scripts/check-api.sh                                   # production (Railway)
-#   scripts/check-api.sh https://balanss-production.up.railway.app you@example.com
+#   scripts/check-api.sh https://api.zestwell.app you@example.com
 # With an e-mail address it also requests a real sign-in e-mail to that address.
 set -uo pipefail
 
-URL=${1:-https://balanss-production.up.railway.app}
+URL=${1:-https://api.zestwell.app}
 URL=${URL%/}
 URL=${URL%/v1}
 EMAIL=${2:-}

@@ -254,7 +254,7 @@ export default function MeScreen() {
       {m.plan !== 'pro' && (
         <Pressable onPress={() => router.push('/me/pro')} accessibilityRole="button" style={styles.pro} testID="pro-banner">
           <View style={{ flex: 1, gap: 4 }}>
-            <Text style={styles.proTitle}>Balanss Pro</Text>
+            <Text style={styles.proTitle}>ZestWell Pro</Text>
             <Text style={styles.proText}>Neierobežotas foto analīzes, nedēļas kopsavilkums un receptes</Text>
           </View>
           <Icon name="chevron" color={colors.onInk} size={22} />

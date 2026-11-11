@@ -130,6 +130,7 @@ export const meRoutes: FastifyPluginAsync = async (app) => {
       styleDescription: styleDescription(levels),
       testedAt: now,
       retestFrom: toISODate(retestFrom(now)),
+      consentAt: now,
     };
     await db
       .insert(personalities)

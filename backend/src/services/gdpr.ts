@@ -102,6 +102,7 @@ export async function collectExport(db: Db, userId: string, now: Date) {
     personality: p
       ? {
           consent: true,
+          consentAt: (p.consentAt ?? p.testedAt).toISOString(),
           answers: p.answers,
           scores: p.scores,
           levels: p.levels,
