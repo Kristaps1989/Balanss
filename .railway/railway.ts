@@ -24,7 +24,8 @@ const PORT = 8081;
 
 export default defineRailway(() => {
   const db = postgres('Postgres', { region: REGION });
-  const data = volume('balanss-data', { region: REGION }); // meal photos
+  // Meal photos. Size pinned to the live 5 GB so an apply never resets it (volumes can only grow).
+  const data = volume('balanss-data', { region: REGION, sizeMB: 5000 });
 
   const api = service('Balanss', {
     // "Wait for CI": deploy a commit only after GitHub Actions is green on it.
