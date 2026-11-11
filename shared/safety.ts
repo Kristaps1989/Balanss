@@ -1,7 +1,7 @@
 /**
  * Wellbeing safeguards shared by the app and the backend.
  *
- * Balanss gives habit-level suggestions only. These rules keep targets and AI
+ * ZestWell gives habit-level suggestions only. These rules keep targets and AI
  * copy away from anything that could encourage under-eating, rapid weight loss,
  * guilt or medical claims, and switch the app into "care mode" when the data
  * suggests someone may be at risk. Thresholds are conservative on purpose.

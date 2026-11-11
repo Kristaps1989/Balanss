@@ -25,15 +25,15 @@ export const magicLinkPage: FastifyPluginAsync = async (app) => {
 
 function page(token: string | null, config: Config): string {
   const body = token
-    ? `<h1>Pieslēgšanās Balanss</h1>
+    ? `<h1>Pieslēgšanās ZestWell</h1>
 <p>Pieskaries pogai, lai atvērtu lietotni un pieslēgtos.</p>
-<p><a class="btn" href="intent://auth?token=${token}#Intent;scheme=${config.appScheme};package=lv.balanss.app;end">Atvērt Balanss</a></p>
+<p><a class="btn" href="intent://auth?token=${token}#Intent;scheme=${config.appScheme};package=lv.balanss.app;end">Atvērt ZestWell</a></p>
 <p class="small">Ja poga nestrādā (piemēram, iPhone), <a href="${config.appScheme}://auth?token=${token}">atver šo saiti</a>. Atver to tajā pašā telefonā, kurā ir instalēta lietotne.</p>
 <p class="small">Saite ir derīga 15 minūtes un izmantojama vienu reizi.</p>`
     : `<h1>Saite nav derīga</h1>
 <p>Pieprasi jaunu pieslēgšanās saiti lietotnē.</p>`;
   return `<!doctype html><html lang="lv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex"><title>Balanss</title>
+<meta name="robots" content="noindex"><title>ZestWell</title>
 <meta name="color-scheme" content="light dark">
 <style>:root{--bg:#F6F2EA;--card:#FFFFFF;--ink:#1F2420;--text2:#525852;--link:#2A6148;--btn:#2F6B4F;--on-btn:#FFFFFF}
 @media (prefers-color-scheme:dark){:root{--bg:#121513;--card:#1C201D;--ink:#F2F1EC;--text2:#B8BCB6;--link:#7FD3A2;--btn:#6CCB94;--on-btn:#0E1A13}}

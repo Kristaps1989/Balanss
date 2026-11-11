@@ -1,5 +1,5 @@
 /**
- * Balanss API contract, shared by the app (src/api) and the backend (backend/).
+ * ZestWell API contract, shared by the app (src/api) and the backend (backend/).
  * All routes are prefixed with /v1 and, except /auth/* and the billing webhook,
  * require `Authorization: Bearer <accessToken>`.
  *

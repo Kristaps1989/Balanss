@@ -1,7 +1,7 @@
-# Balanss — project guide for Claude Code
+# ZestWell — project guide for Claude Code
 
 ## What we are building
-A daily health companion app (working title **Balanss**). It combines nutrition (photo-based food logging: kcal, protein, carbs, fat, fibre, water), movement, heart rate and sleep (read from Health Connect on Android and Apple Health on iOS) in one daily view.
+A daily health companion app called **ZestWell** (formerly the working title Balanss). Technical IDs keep the old name on purpose: Android package `lv.balanss.app`, URL scheme `balanss`, the Railway service/project, and the `balanss.app` domain. Changing them would make a new app on devices and break magic links. It combines nutrition (photo-based food logging: kcal, protein, carbs, fat, fibre, water), movement, heart rate and sleep (read from Health Connect on Android and Apple Health on iOS) in one daily view.
 **Differentiator:** a short Big Five personality test at onboarding. Every tip, reminder and weekly question is delivered in a tone that fits the user's personality. Same data, different delivery.
 Target user: an ordinary adult who finds classic calorie apps too complex. Principle: simple, visual, every action in max 2 taps.
 
@@ -37,12 +37,14 @@ Bottom tab bar: Šodiena · Uzturs · (+) · Kustība · Miegs — five equal sl
 - **Health data:** `react-native-health-connect` (Android). `minSdkVersion` ≥ 26; declare Health Connect read permissions and the permissions-rationale activity in `AndroidManifest.xml`. Later `react-native-health` (iOS HealthKit).
 - **Auth:** Sign in with Google + Sign in with Apple, plus e-mail magic link.
 - **AI:** food-photo recognition and tone-adapted tips are generated server-side. Never call AI providers or put API keys in the app.
+- **Website:** `zestwell.app` (home, privacy, terms, account deletion, support) is server-rendered by the API service from `backend/src/site/`. When data handling changes (new provider, data type or retention), update `/privatums` in the same PR.
 - **Push:** expo-notifications (FCM/APNs), scheduled by the backend (e.g. the sleep window reminder).
 
 ## Design (2026-11 redesign: "premium wellness", not medical)
 - Colours live only in `src/theme/palettes.ts` (dark + light, same keys); screens use `colors.*`, never hex (lint rule). Module-level styles use `themed(() => StyleSheet.create(...))` so a theme switch picks up the new palette. Contrast and "no red" are tested in `palettes.test.ts`.
 - **Dark is the default** (warm near-black `#121513`, cards `#1C201D`); light is cream `#F6F2EA` with white cards. Es → Izskats: Tumšs / Gaišs / Kā tālrunī.
 - Brand forest green (dark: mint `#6CCB94`, light `#2F6B4F`); lime `#CFE884` for the daily focus card; coral accent. One colour per nutrient: kcal green, protein coral, carbs amber, fat plum, fibre leaf green, calcium blue, water blue, steps teal.
+- Logo: lime citrus slice with a leaf on forest green. Colours in `src/theme/brand.ts`; `python scripts/make_logo.py <out>` renders every icon/splash size (copy `out/assets/*` to `assets/` and `out/res/*` to `android/app/src/main/res/`).
 - Fonts: **Fraunces** (headings), **Manrope** (everything else, numbers included). `@expo-google-fonts/*`.
 - One main number per screen, few frames (cards have no border), lots of air. Charts thin and rounded: one kcal ring, 4 px bars, 10 px columns.
 - Never red or "bad" for over target; copy is progress first ("68 g jau ir, vēl 42 g") — enforced by `src/lib/copy-rules.test.ts`. Touch targets ≥ 44 px. No emoji in UI.

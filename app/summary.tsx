@@ -30,7 +30,7 @@ export default function Summary() {
       <Screen>
         {header}
         <Text style={styles.h1}>Nedēļas kopsavilkums</Text>
-        <Text style={type.secondary}>Pieejams ar Balanss Pro.</Text>
+        <Text style={type.secondary}>Pieejams ar ZestWell Pro.</Text>
         <Button label="Uzzināt par Pro" onPress={() => router.replace('/me/pro')} />
       </Screen>
     );

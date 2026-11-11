@@ -11,7 +11,7 @@ import { Screen } from '@/components/Screen';
 import { billingAvailable, loadOffers, purchase, restore, type PlanId } from '@/lib/billing';
 import { colors, fonts, radius, type, themed } from '@/theme';
 
-/** Balanss Pro (prototype: Pro.dc.html). */
+/** ZestWell Pro (prototype: Pro.dc.html). */
 export default function Pro() {
   const me = useMe();
   const userId = me.data?.id ?? '';
@@ -54,7 +54,7 @@ export default function Pro() {
       </View>
       <View style={{ gap: 8 }}>
         <Text style={styles.h1} accessibilityRole="header">
-          Balanss Pro
+          ZestWell Pro
         </Text>
         <Text style={[type.secondary, { fontSize: 16, lineHeight: 23 }]}>
           Bezmaksas versija ir pilnvērtīga. Pro — ja gribi fotografēt katru maltīti un saņemt vairāk ideju.
@@ -77,7 +77,7 @@ export default function Pro() {
       {isPro ? (
         <View style={styles.active}>
           <Icon name="check" color={colors.moveDeep} />
-          <Text style={styles.activeText}>Tev ir Balanss Pro. Paldies!</Text>
+          <Text style={styles.activeText}>Tev ir ZestWell Pro. Paldies!</Text>
         </View>
       ) : (
         <View style={{ gap: 10 }} accessibilityRole="radiogroup" accessibilityLabel="Plāns">

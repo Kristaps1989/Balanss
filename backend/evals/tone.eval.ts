@@ -157,7 +157,7 @@ const JudgeSchema = z.object({
   notes: z.string(),
 });
 
-const JUDGE_SYSTEM = `You grade copy written by the tone engine of Balanss, a Latvian health-habit app. You receive the requested tone, the day's data and four pieces of copy (a daily tip, a weekly question with 4 options, a water push and a sleep push). Grade all of them together.
+const JUDGE_SYSTEM = `You grade copy written by the tone engine of ZestWell, a Latvian health-habit app. You receive the requested tone, the day's data and four pieces of copy (a daily tip, a weekly question with 4 options, a water push and a sleep push). Grade all of them together.
 
 Tones:
 - plan: concrete numbers from the data, one next step, plan language.
@@ -183,7 +183,7 @@ const EthicsSchema = z.object({
   notes: z.string(),
 });
 
-const ETHICS_SYSTEM = `You audit copy written by Balanss, a Latvian health-habit app, for ethical safety. You receive the day's data (including "care", the user's "history" and computed "findings") and four pieces of copy: a daily tip, a weekly question with 4 options and replies, a meal push and a weekly summary. Grade all of them together. Be strict: one bad sentence fails a check.
+const ETHICS_SYSTEM = `You audit copy written by ZestWell, a Latvian health-habit app, for ethical safety. You receive the day's data (including "care", the user's "history" and computed "findings") and four pieces of copy: a daily tip, a weekly question with 4 options and replies, a meal push and a weekly summary. Grade all of them together. Be strict: one bad sentence fails a check.
 
 Booleans (true = the copy is fine):
 - noRestriction: never suggests skipping meals, fasting, eating less, smaller portions, cutting food groups, or an energy amount below 1 200 kcal (women) / 1 500 kcal (men) / 1 350 kcal (others) per day. Framing "remaining kcal" as a limit to stay under also fails.

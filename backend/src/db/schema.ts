@@ -81,6 +81,8 @@ export const personalities = pgTable('personalities', {
   styleDescription: text('style_description').notNull(),
   testedAt: ts('tested_at').notNull(),
   retestFrom: day('retest_from').notNull(),
+  /** When the user gave explicit consent (GDPR art. 9(2)(a)) for this profile; set on every submission. */
+  consentAt: ts('consent_at'),
 });
 
 export const magicLinks = pgTable('magic_links', {

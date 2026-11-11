@@ -69,7 +69,7 @@ export function toPersonality(row: PersonalityRow | null | undefined): Personali
 
 /** 402 `pro_required` unless the user has an active Pro entitlement. */
 export function requirePro(user: Pick<UserRow, 'plan' | 'planExpiresAt'>, now: Date): void {
-  if (effectivePlan(user, now) !== 'pro') throw new AppError(402, 'pro_required', 'This feature is part of Balanss Pro');
+  if (effectivePlan(user, now) !== 'pro') throw new AppError(402, 'pro_required', 'This feature is part of ZestWell Pro');
 }
 
 export function toMe(user: UserRow, personality: PersonalityRow | null | undefined, care: CareStatus): Me {

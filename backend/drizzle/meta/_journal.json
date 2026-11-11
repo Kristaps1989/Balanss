@@ -29,6 +29,13 @@
       "when": 1794335820351,
       "tag": "0003_last_active",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794420653730,
+      "tag": "0004_personality_consent",
+      "breakpoints": true
     }
   ]
 }

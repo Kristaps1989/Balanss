@@ -105,7 +105,7 @@ export const mealRoutes: FastifyPluginAsync = async (app) => {
     let item: FoodItemDraft | null = null;
     try {
       const res = await app.deps.fetch(`https://world.openfoodfacts.org/api/v2/product/${ean}.json`, {
-        headers: { 'User-Agent': 'Balanss/0.1 (https://balanss.app)' },
+        headers: { 'User-Agent': 'ZestWell/0.1 (https://zestwell.app)' },
         signal: AbortSignal.timeout(8000),
       });
       if (res.ok) {

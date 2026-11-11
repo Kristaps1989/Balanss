@@ -67,7 +67,7 @@ export default function AiInfo() {
           </View>
         </View>
       ))}
-      <Text style={type.caption}>Balanss nav medicīniska ierīce. Ja tev ir veselības stāvoklis, mērķus un uzturu pārrunā ar ārstu.</Text>
+      <Text style={type.caption}>ZestWell nav medicīniska ierīce. Ja tev ir veselības stāvoklis, mērķus un uzturu pārrunā ar ārstu.</Text>
     </Screen>
   );
 }

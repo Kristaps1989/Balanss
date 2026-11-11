@@ -74,7 +74,7 @@ test('free plan sees Pro teasers, not the AI summary', async ({ page }) => {
   await signIn(page, 'ilze@piemers.lv');
   await expect(page.getByRole('button', { name: 'Nedēļas AI kopsavilkums, Pro' })).toBeVisible();
   await page.goto('/summary');
-  await expect(page.getByText('Pieejams ar Balanss Pro.')).toBeVisible();
+  await expect(page.getByText('Pieejams ar ZestWell Pro.')).toBeVisible();
 });
 
 test('care mode: no deficit framing, gentle tip and support information', async ({ page }) => {

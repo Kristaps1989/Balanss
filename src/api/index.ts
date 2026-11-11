@@ -12,7 +12,7 @@ export { ApiError, type Api } from './api';
 export { tokenStore } from './http';
 
 /** Production API. Not a secret: every build talks to it unless EXPO_PUBLIC_API_URL says otherwise. */
-export const DEFAULT_API_URL = 'https://balanss-production.up.railway.app';
+export const DEFAULT_API_URL = 'https://api.zestwell.app';
 
 export const API_URL = (process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL).trim().replace(/\/+$/, '').replace(/\/v1$/, '');
 export const USE_MOCK = process.env.EXPO_PUBLIC_USE_MOCK === '1' || !API_URL;

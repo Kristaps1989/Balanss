@@ -393,7 +393,7 @@ export function fakePushCopy(kind: PushKind, input: ToneInput, meal: 'lunch' | '
       case 'novelty':
         return { title: `Miega logs sākas ${start}`, body: 'Šovakar kaut kas jauns: liepziedu tēja un 10 minūtes papīra grāmatas telefona vietā. Rīt pastāsti, kā gulējās.' };
       case 'gentle':
-        return { title: 'Balanss', body: `Diena bija gana. Tavs miega logs ir ap ${start} — ${readyWord(input)}, noliec telefonu un uztaisi tēju.` };
+        return { title: 'ZestWell', body: `Diena bija gana. Tavs miega logs ir ap ${start} — ${readyWord(input)}, noliec telefonu un uztaisi tēju.` };
       default:
         return { title: `Miega logs ${start}–${end}`, body: `Drīz sākas tavs miega logs. Laiks nolikt ierīces malā.` };
     }
@@ -410,14 +410,14 @@ export function fakePushCopy(kind: PushKind, input: ToneInput, meal: 'lunch' | '
       case 'novelty':
         return { title: 'Ūdens ar garšu', body: 'Pamēģini ūdeni ar gurķi un piparmētru — tā pati glāze, cita garša.' };
       case 'gentle':
-        return { title: 'Balanss', body: 'Ja ērti, iedzer malku ūdens. Nekas nav nokavēts.' };
+        return { title: 'ZestWell', body: 'Ja ērti, iedzer malku ūdens. Nekas nav nokavēts.' };
       default:
         return { title: 'Ūdens', body: `Šodien ${litresOf(water)}. Laiks glāzei ūdens.` };
     }
   }
   // Care mode: a meal reminder is about eating regularly, never about tracking.
   if (input.care) {
-    return { title: 'Balanss', body: `Vai ${meal === 'lunch' ? 'pusdienām' : 'vakariņām'} jau ir atrasts brīdis? Regulāra maltīte palīdz justies labāk.` };
+    return { title: 'ZestWell', body: `Vai ${meal === 'lunch' ? 'pusdienām' : 'vakariņām'} jau ir atrasts brīdis? Regulāra maltīte palīdz justies labāk.` };
   }
   // Name a concrete option (pantry → liked foods → default) so the reminder is usable, not just a nudge to log.
   const food = namedFood(input);
@@ -427,7 +427,7 @@ export function fakePushCopy(kind: PushKind, input: ToneInput, meal: 'lunch' | '
     case 'novelty':
       return { title: `Kas šodien uz šķīvja?`, body: `${mealWord} vēl nav. Ja gribi ko ātru — ${food}; ja ko jaunu, nofotografē, kas sanāk.` };
     case 'gentle':
-      return { title: 'Balanss', body: `Ja sanāk, paēd ${meal === 'lunch' ? 'pusdienas' : 'vakariņas'} — kaut vai ${food}. Arī aptuveni ir labi.` };
+      return { title: 'ZestWell', body: `Ja sanāk, paēd ${meal === 'lunch' ? 'pusdienas' : 'vakariņas'} — kaut vai ${food}. Arī aptuveni ir labi.` };
     default:
       return { title: mealWord, body: `${mealWord} vēl nav pievienotas. Der ${food}.` };
   }

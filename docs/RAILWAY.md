@@ -1,6 +1,6 @@
 # Railway: connect the backend and the app
 
-Target: `https://balanss-production.up.railway.app` serves the Balanss API. The app (debug or release, no `.env` needed) talks to it.
+Target: `https://api.zestwell.app` serves the ZestWell API (Railway's own `https://balanss-production.up.railway.app` stays as a fallback for older app builds). The app (debug or release, no `.env` needed) talks to it.
 
 Check progress at any step with:
 
@@ -9,7 +9,7 @@ scripts/check-api.sh                       # health, database, AI key, e-mail, a
 scripts/check-api.sh "" you@example.com    # same, plus sends a real sign-in e-mail
 ```
 
-Or open `https://balanss-production.up.railway.app/health` in a browser. When everything is set, it shows:
+Or open `https://api.zestwell.app/health` in a browser. When everything is set, it shows:
 
 ```json
 {"ok":true,"db":true,"ai":"anthropic","email":"resend","env":"production"}
@@ -48,7 +48,7 @@ Secrets are never in git. `preserve()` keeps the values you set once in the dash
 3. **Railway token.** Railway → project **Balanss** → **Settings → Tokens** → create a token for the **production** environment and copy it.
 4. **GitHub secret.** GitHub → repo **Balanss** → **Settings → Secrets and variables → Actions → New repository secret**. Name: `RAILWAY_TOKEN`, value: the token.
 5. **First apply.** GitHub → **Actions** → **Railway infrastructure** → **Run workflow** (branch `main`). The log shows the plan, then the apply. Railway redeploys.
-6. **Check.** Open `https://balanss-production.up.railway.app/health` or run `scripts/check-api.sh`.
+6. **Check.** Open `https://api.zestwell.app/health` or run `scripts/check-api.sh`.
 
 If step 5 stops with *destructive changes*, the plan wants to delete or replace something. For example, you attached a volume with another name, or the Postgres image or region differs. Send me the log, or run the step yourself on your PC and read the plan before confirming:
 
@@ -98,7 +98,7 @@ JWT_SECRET=<48+ random characters, e.g. from a password manager>
 ANTHROPIC_API_KEY=<sk-ant-… from console.anthropic.com → API keys>
 EMAIL_PROVIDER=resend
 RESEND_API_KEY=<re_… from resend.com → API keys>
-EMAIL_FROM=Balanss <onboarding@resend.dev>
+EMAIL_FROM=ZestWell <noreply@zestwell.app>
 STORAGE_DIR=/data/storage
 RAILWAY_RUN_UID=0
 ```
@@ -136,9 +136,40 @@ Optional: turn on **Wait for CI** (Settings → Deploy), so Railway deploys only
 ## App
 
 1. Pull `main` in Android Studio (Git → Pull), run `npm install`, then start Metro (`npx expo start`) and press **Run ▶**.
-2. No `.env` is needed: the app uses `https://balanss-production.up.railway.app` by default. Overrides:
+2. No `.env` is needed: the app uses `https://api.zestwell.app` by default. Overrides:
    - `EXPO_PUBLIC_API_URL=http://10.0.2.2:3000`: a local backend on the emulator.
    - `EXPO_PUBLIC_USE_MOCK=1`: offline mock data.
 3. Sign in: **Turpināt ar e-pastu** → your Resend account address → open the e-mail **on the phone** → **Pieslēgties** → **Atvērt Balanss**. The app opens signed in and starts onboarding.
 
 If the login screen says *"Nevar sasniegt serveri"*, the phone has no internet or the API is down: run `scripts/check-api.sh`.
+
+## Custom domain (api.zestwell.app)
+
+`.railway/railway.ts` declares `api.zestwell.app` as a custom domain on port 8081 and sets
+`PUBLIC_API_URL=https://api.zestwell.app`, so magic links, photo URLs and exports use it.
+
+1. In Railway → service → Settings → Networking, find `api.zestwell.app` (created by the apply,
+   or add it there yourself first with port 8081). Railway shows a **CNAME** target and a **TXT**
+   (`_railway-verify...`) record.
+2. Add both at the zestwell.app DNS provider. If the DNS is on Cloudflare, set the CNAME to
+   "DNS only" (grey cloud) until Railway shows the certificate as issued.
+3. Wait until Railway shows the domain as verified with a certificate, then check
+   `https://api.zestwell.app/health`.
+
+Do the DNS **before** merging a change that sets `PUBLIC_API_URL`; otherwise new magic-link
+e-mails point at a domain that does not answer yet.
+
+E-mail: `noreply@zestwell.app` works only once the domain shows **Verified** in Resend
+(Domains). Until then Resend rejects the send and the magic link returns 500.
+
+## Website (zestwell.app)
+
+The same service serves the public website from `backend/src/site/` on `zestwell.app`
+(no `www`): home, `/privatums`, `/noteikumi`, `/dzest-kontu`
+(Google Play's data-deletion URL), `/atbalsts`, plus `robots.txt`, `sitemap.xml`, `favicon.svg`.
+The pages answer only on the web host, so `api.zestwell.app` keeps its JSON 404s.
+
+DNS on Cloudflare: `zestwell.app` is a custom domain in Railway (port 8081) with the CNAME Railway
+shows (Cloudflare flattens the apex CNAME) and its `_railway-verify` TXT record. Company details for
+the legal pages live in `backend/src/site/owner.ts`: fill in `regNo` and `address` once the company
+is registered.

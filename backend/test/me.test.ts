@@ -102,6 +102,8 @@ describe('personality', () => {
     expect(me.personality!.retestFrom).toBe(expected.toISOString().slice(0, 10));
     const [stored] = await db.select().from(personalities);
     expect(stored!.answers).toEqual(SAMPLE_ANSWERS);
+    // The moment of explicit consent is recorded with the profile (GDPR art. 7(1): able to demonstrate consent).
+    expect(stored!.consentAt?.toISOString()).toBe(me.personality!.testedAt);
 
     const again = await call({ method: 'POST', url: '/v1/me/personality', payload: { consent: true, answers: SAMPLE_ANSWERS } });
     expect(again.statusCode).toBe(409);

@@ -6,7 +6,7 @@ import { colors, fonts } from '@/theme';
 export function AiLabel({ ai, color = colors.caption }: { ai: boolean; color?: string }) {
   return (
     <Text style={[styles.label, { color }]}>
-      {ai ? 'Sagatavojis AI pēc taviem datiem · ieteikums, nevis medicīnisks padoms' : 'Balanss ieteikums · nevis medicīnisks padoms'}
+      {ai ? 'Sagatavojis AI pēc taviem datiem · ieteikums, nevis medicīnisks padoms' : 'ZestWell ieteikums · nevis medicīnisks padoms'}
     </Text>
   );
 }

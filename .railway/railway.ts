@@ -14,7 +14,12 @@ import { defineRailway, github, postgres, preserve, project, service, volume } f
 
 /** EU West (Amsterdam): health data stays in the EU (GDPR). */
 const REGION = 'europe-west4-drams3a';
+/** Railway's own domain: kept so app builds from before the custom domain still work. */
 const DOMAIN = 'balanss-production.up.railway.app';
+/** Custom domain (CNAME at the zestwell.app DNS provider → the target Railway shows under Networking). */
+const API_DOMAIN = 'api.zestwell.app';
+/** Public website (backend/src/site), served by the same service. */
+const WEB_DOMAIN = 'zestwell.app';
 const PORT = 8081;
 
 export default defineRailway(() => {
@@ -34,7 +39,10 @@ export default defineRailway(() => {
     healthcheckTimeout: 60,
     deploy: { restartPolicyType: 'ON_FAILURE', restartPolicyMaxRetries: 5 },
     regions: { [REGION]: 1 },
-    networking: { serviceDomains: { [DOMAIN]: { port: PORT } } },
+    networking: {
+      serviceDomains: { [DOMAIN]: { port: PORT } },
+      customDomains: { [API_DOMAIN]: { port: PORT }, [WEB_DOMAIN]: { port: PORT } },
+    },
     volumeMounts: { '/data': data },
     env: {
       NODE_ENV: 'production',
@@ -43,8 +51,12 @@ export default defineRailway(() => {
       STORAGE_DIR: '/data/storage',
       // Railway mounts volumes as root; the container runs as the `node` user.
       RAILWAY_RUN_UID: '0',
+      // Links in e-mails, photo URLs and data exports use the custom domain.
+      PUBLIC_API_URL: `https://${API_DOMAIN}`,
+      PUBLIC_WEB_URL: `https://${WEB_DOMAIN}`,
       EMAIL_PROVIDER: 'resend',
-      EMAIL_FROM: 'Balanss <onboarding@resend.dev>',
+      // zestwell.app is verified in Resend, so mail can go to any address.
+      EMAIL_FROM: 'ZestWell <noreply@zestwell.app>',
       // Set once in the dashboard, kept on every apply:
       JWT_SECRET: preserve(),
       ANTHROPIC_API_KEY: preserve(),

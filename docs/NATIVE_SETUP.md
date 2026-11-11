@@ -6,7 +6,7 @@ All `EXPO_PUBLIC_*` variables go in a `.env` file in the project root (it is git
 
 ```bash
 # .env
-# EXPO_PUBLIC_API_URL defaults to https://balanss-production.up.railway.app (see docs/RAILWAY.md)
+# EXPO_PUBLIC_API_URL defaults to https://api.zestwell.app (see docs/RAILWAY.md)
 EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=<...>.apps.googleusercontent.com
 EXPO_PUBLIC_REVENUECAT_ANDROID_KEY=goog_<...>
 EXPO_PUBLIC_EAS_PROJECT_ID=<uuid>
