@@ -47,3 +47,18 @@ describe('copy rules', () => {
     expect(hits).toEqual([]);
   });
 });
+
+describe('brand name', () => {
+  it('the old working name "Balanss" is not shown anywhere in the app UI', () => {
+    const hits = ['app', 'src'].flatMap(files).flatMap((f) =>
+      fs
+        .readFileSync(f, 'utf8')
+        .split('\n')
+        .map((line, i) => ({ line, at: `${path.relative(ROOT, f)}:${i + 1}` }))
+        // Internal identifiers stay: the balanss:// link scheme and storage keys ('balanss.theme').
+        .filter(({ line }) => !/^\s*(\/\/|\*|\/\*)/.test(line) && /balans[su]/i.test(line.replace(/balanss:\/\/|'balanss\.[\w.]+'/g, '')))
+        .map(({ at, line }) => `${at}: ${line.trim().slice(0, 100)}`),
+    );
+    expect(hits).toEqual([]);
+  });
+});

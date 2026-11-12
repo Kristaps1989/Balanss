@@ -4,7 +4,7 @@ import { Linking, Platform } from 'react-native';
  * Open a file download. On web a temporary <a download> keeps the user on the
  * page; on Android/iOS the system browser handles the download.
  */
-export async function openDownload(url: string, filename = 'balanss-dati.json') {
+export async function openDownload(url: string, filename = 'zestwell-dati.json') {
   if (Platform.OS === 'web' && typeof document !== 'undefined') {
     const a = document.createElement('a');
     a.href = url;

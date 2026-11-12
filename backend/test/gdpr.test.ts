@@ -40,7 +40,7 @@ describe('export', () => {
     const url = downloadUrl.replace('http://api.test', '');
     const dl = await ctx.app.inject({ method: 'GET', url });
     expect(dl.statusCode).toBe(200);
-    expect(dl.headers['content-disposition']).toMatch(/^attachment; filename="balanss-dati-\d{4}-\d{2}-\d{2}\.json"$/);
+    expect(dl.headers['content-disposition']).toMatch(/^attachment; filename="zestwell-dati-\d{4}-\d{2}-\d{2}\.json"$/);
     const data = dl.json();
     expect(data.account.email).toBe(ILZE_EMAIL);
     expect(data.profile.firstName).toBe('Ilze');

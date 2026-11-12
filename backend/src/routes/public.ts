@@ -35,7 +35,7 @@ export const publicRoutes: FastifyPluginAsync = async (app) => {
     if (!userId) throw new AppError(410, 'export_unavailable', 'The export link is invalid, expired or already used');
     const data = await collectExport(db, userId, now);
     if (!data) throw new AppError(410, 'export_unavailable', 'The account no longer exists');
-    const filename = `balanss-dati-${now.toISOString().slice(0, 10)}.json`;
+    const filename = `zestwell-dati-${now.toISOString().slice(0, 10)}.json`;
     return reply
       .header('Content-Type', 'application/json; charset=utf-8')
       .header('Content-Disposition', `attachment; filename="${filename}"`)
