@@ -18,7 +18,7 @@ import { bmr } from '@shared/targets';
 
 import { secureStore } from '@/lib/storage';
 
-import { activeFromTotal, buildSyncPayload, dailyMaxByOrigin, type HcDayAggregate } from './transform';
+import { activeFromTotal, buildSyncPayload, dailyMaxByOrigin, readResilient, type HcDayAggregate } from './transform';
 import type { HealthConnector } from './types';
 
 export * from './types';
@@ -63,6 +63,26 @@ async function readAll<T extends Parameters<typeof readRecords>[0]>(type: T, sta
   return out;
 }
 
+/** Windows the last sync had to skip because the store could not return a record in them (shown in the diagnostics). */
+let lastSkipped: string[] = [];
+
+/** readAll that survives a record Health Connect cannot return (see readResilient). */
+async function readSafe<T extends Parameters<typeof readRecords>[0]>(type: T, startTime: string, endTime: string) {
+  type Rec = Awaited<ReturnType<typeof readRecords<T>>>['records'][number];
+  const { records, skipped } = await readResilient<Rec>((s, e) => readAll(type, s, e), startTime, endTime);
+  for (const k of skipped) lastSkipped.push(`${type} ${dhm(k.startTime)}–${dhm(k.endTime)}: ${k.reason}`);
+  return records;
+}
+
+/** A daily aggregate, or 0 when the store cannot compute it (the per-record totals still count). */
+async function aggregateSafe<T>(run: () => Promise<T>, pick: (r: T) => number): Promise<number> {
+  try {
+    return pick(await run());
+  } catch {
+    return 0;
+  }
+}
+
 export const health: HealthConnector = {
   source: 'health_connect',
 
@@ -91,6 +111,7 @@ export const health: HealthConnector = {
       await requestPermission(PERMISSIONS).catch(() => undefined);
       g = await granted();
     }
+    lastSkipped = [];
     const age = profile.age;
     const today = toISODate(new Date());
     const dates = lastNDates(today, days);
@@ -99,10 +120,10 @@ export const health: HealthConnector = {
 
     // Per-app daily totals: the largest one wins (see dailyMaxByOrigin).
     const [stepRecs, activeRecs, totalRecs, bmrRecs] = await Promise.all([
-      g.has('Steps') ? readAll('Steps', start, end) : [],
-      g.has('ActiveCaloriesBurned') ? readAll('ActiveCaloriesBurned', start, end) : [],
-      g.has('TotalCaloriesBurned') ? readAll('TotalCaloriesBurned', start, end) : [],
-      g.has('BasalMetabolicRate') ? readAll('BasalMetabolicRate', start, end) : [],
+      g.has('Steps') ? readSafe('Steps', start, end) : [],
+      g.has('ActiveCaloriesBurned') ? readSafe('ActiveCaloriesBurned', start, end) : [],
+      g.has('TotalCaloriesBurned') ? readSafe('TotalCaloriesBurned', start, end) : [],
+      g.has('BasalMetabolicRate') ? readSafe('BasalMetabolicRate', start, end) : [],
     ]);
     const stepsByDay = dailyMaxByOrigin(stepRecs.map((r) => ({ ...r, value: r.count })));
     const activeByDay = dailyMaxByOrigin(activeRecs.map((r) => ({ ...r, value: r.energy.inKilocalories })));
@@ -115,9 +136,9 @@ export const health: HealthConnector = {
       const from = parseISODate(d);
       const to = d === today ? new Date() : parseISODate(addDays(d, 1));
       const range = { operator: 'between' as const, startTime: from.toISOString(), endTime: to.toISOString() };
-      const aggSteps = g.has('Steps') ? (await aggregateRecord({ recordType: 'Steps', timeRangeFilter: range })).COUNT_TOTAL : 0;
+      const aggSteps = g.has('Steps') ? await aggregateSafe(() => aggregateRecord({ recordType: 'Steps', timeRangeFilter: range }), (r) => r.COUNT_TOTAL) : 0;
       const aggActive = g.has('ActiveCaloriesBurned')
-        ? (await aggregateRecord({ recordType: 'ActiveCaloriesBurned', timeRangeFilter: range })).ACTIVE_CALORIES_TOTAL.inKilocalories
+        ? await aggregateSafe(() => aggregateRecord({ recordType: 'ActiveCaloriesBurned', timeRangeFilter: range }), (r) => r.ACTIVE_CALORIES_TOTAL.inKilocalories)
         : 0;
       let activeKcal = Math.max(aggActive, activeByDay.get(d) ?? 0);
       if (activeKcal === 0) activeKcal = activeFromTotal(totalByDay.get(d) ?? 0, bmrPerDay, (to.getTime() - from.getTime()) / 86_400_000);
@@ -127,12 +148,12 @@ export const health: HealthConnector = {
     // Sleep that ended within the window may have started the evening before.
     const sleepStart = new Date(new Date(start).getTime() - 18 * 3600_000).toISOString();
     const [rhr, hrv, sleep, exercise, heartRate, weights] = await Promise.all([
-      g.has('RestingHeartRate') ? readAll('RestingHeartRate', start, end) : [],
-      g.has('HeartRateVariabilityRmssd') ? readAll('HeartRateVariabilityRmssd', start, end) : [],
-      g.has('SleepSession') ? readAll('SleepSession', sleepStart, end) : [],
-      g.has('ExerciseSession') ? readAll('ExerciseSession', start, end) : [],
-      g.has('HeartRate') ? readAll('HeartRate', start, end) : [],
-      g.has('Weight') ? readAll('Weight', start, end) : [],
+      g.has('RestingHeartRate') ? readSafe('RestingHeartRate', start, end) : [],
+      g.has('HeartRateVariabilityRmssd') ? readSafe('HeartRateVariabilityRmssd', start, end) : [],
+      g.has('SleepSession') ? readSafe('SleepSession', sleepStart, end) : [],
+      g.has('ExerciseSession') ? readSafe('ExerciseSession', start, end) : [],
+      g.has('HeartRate') ? readSafe('HeartRate', start, end) : [],
+      g.has('Weight') ? readSafe('Weight', start, end) : [],
     ]);
 
     const payload = buildSyncPayload({
@@ -179,6 +200,7 @@ export async function stepDiagnostics(): Promise<string> {
   if (!(await init())) return out.concat('Neizdevās inicializēt Health Connect.').join('\n');
   const g = await granted();
   out.push(`Atļaujas: ${[...g].sort().join(', ') || 'nav'}`);
+  if (lastSkipped.length) out.push(`Izlaisti bojāti ieraksti (${lastSkipped.length}): ${lastSkipped.slice(0, 8).join('; ')}`);
   if (!g.has('Steps')) return out.join('\n');
 
   const now = new Date();
