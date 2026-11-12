@@ -131,7 +131,7 @@ export function DevicesScreen({ mode }: { mode: 'onboarding' | 'edit' }) {
 }
 
 const styles = themed(() => StyleSheet.create({
-  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
+  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink, letterSpacing: -0.8 },
   lead: { ...type.body, color: colors.text2 },
   card: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.optionBorder, borderRadius: radius.card, padding: 18, gap: 14 },
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },

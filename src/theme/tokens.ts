@@ -79,10 +79,15 @@ export const space = {
 /** Minimum touch target (px). */
 export const hit = 44;
 
-/** Fraunces for headings, Manrope for everything else (numbers included). */
+/**
+ * One family, Manrope. Headings are semibold and set tight; the big numbers
+ * (one per screen) are light, so size carries the weight instead of boldness.
+ */
 export const fonts = {
-  heading: 'Fraunces_600SemiBold',
-  headingSemi: 'Fraunces_500Medium',
+  heading: 'Manrope_600SemiBold',
+  headingSemi: 'Manrope_500Medium',
+  /** Big numbers: 40 px and up. */
+  light: 'Manrope_300Light',
   number: 'Manrope_700Bold',
   body: 'Manrope_400Regular',
   bodyMedium: 'Manrope_500Medium',
@@ -91,14 +96,16 @@ export const fonts = {
 } as const;
 
 export const type = themed(() => ({
-  display: { fontFamily: fonts.heading, fontSize: 38, lineHeight: 44, color: colors.ink, letterSpacing: -0.6 },
-  h1: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 36, color: colors.ink, letterSpacing: -0.6 },
-  h2: { fontFamily: fonts.heading, fontSize: 22, lineHeight: 28, color: colors.ink },
+  display: { fontFamily: fonts.heading, fontSize: 38, lineHeight: 42, color: colors.ink, letterSpacing: -1.5 },
+  h1: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 36, color: colors.ink, letterSpacing: -1 },
+  h2: { fontFamily: fonts.heading, fontSize: 22, lineHeight: 28, color: colors.ink, letterSpacing: -0.5 },
   /** Card section title. */
   section: { fontFamily: fonts.bodyBold, fontSize: 17, lineHeight: 22, color: colors.ink },
   number: { fontFamily: fonts.number, fontSize: 26, lineHeight: 32, color: colors.ink, letterSpacing: -0.5 },
   /** The one main number on a screen. */
-  hero: { fontFamily: fonts.number, fontSize: 44, lineHeight: 50, color: colors.ink, letterSpacing: -1 },
+  hero: { fontFamily: fonts.light, fontSize: 68, lineHeight: 72, color: colors.ink, letterSpacing: -3 },
+  /** The main number of a card or a secondary screen. */
+  big: { fontFamily: fonts.light, fontSize: 48, lineHeight: 54, color: colors.ink, letterSpacing: -2 },
   body: { fontFamily: fonts.body, fontSize: 16, lineHeight: 22, color: colors.ink },
   bodySemi: { fontFamily: fonts.bodySemi, fontSize: 16, lineHeight: 22, color: colors.ink },
   label: { fontFamily: fonts.bodySemi, fontSize: 14, lineHeight: 18, color: colors.ink },

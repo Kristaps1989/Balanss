@@ -80,7 +80,7 @@ export default function Trends() {
 
 const styles = themed(() => StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 44, marginLeft: -10 },
-  title: { fontFamily: fonts.heading, fontSize: 24, color: colors.ink },
+  title: { fontFamily: fonts.heading, fontSize: 24, color: colors.ink, letterSpacing: -0.7 },
   card: { padding: 18, gap: 14 },
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   h2: { fontFamily: fonts.bodyBold, fontSize: 17, color: colors.ink },

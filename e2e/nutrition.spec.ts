@@ -17,8 +17,8 @@ test('home shows the seeded sample day', async ({ page }) => {
   await expect(home.getByText('kcal vēl šodien')).toBeVisible();
   await expect(page.getByTestId('kcal-line')).toHaveText('1 480 no 1 750 kcal');
   await expect(home.getByText('68 / 110 g')).toBeVisible();
-  // Calcium is estimated from the foods and marked as such.
-  await expect(home.getByLabel(/^Kalcijs, aptuveni: \d[\d ]* \/ 950 mg/)).toBeVisible();
+  // The day view keeps three macros; fibre and calcium are on Uzturs.
+  await expect(home.getByLabel(/^Olbaltumvielas: 68 \/ 110 g/)).toBeVisible();
   // Neutral fact, never a streak.
   await expect(page.getByTestId('week-logged')).toHaveText(/^Šonedēļ maltītes pierakstītas \d no 7 dienām$/);
   await expect(page.getByTestId('water-total')).toContainText('1,2 l');
@@ -48,6 +48,8 @@ test('log a meal from a photo with portion changes', async ({ page }) => {
   await signIn(page, 'ilze@piemers.lv');
   await page.getByRole('tab', { name: 'Uzturs' }).click();
   await expect(page.getByTestId('log-kcal')).toContainText('1 480');
+  // Calcium is estimated from the foods and marked as such.
+  await expect(page.getByLabel(/^Kalcijs, aptuveni: \d[\d ]* no 950 miligramiem/)).toBeVisible();
 
   await page.getByRole('button', { name: 'Foto', exact: true }).click();
   await expect(page.getByTestId('quota-label')).toContainText('no 3 analīzēm');

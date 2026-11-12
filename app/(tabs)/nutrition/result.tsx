@@ -200,7 +200,7 @@ const styles = themed(() => StyleSheet.create({
   photo: { backgroundColor: colors.avatar, overflow: 'hidden' },
   body: { paddingTop: 18, paddingHorizontal: 20, gap: 12 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
-  title: { fontFamily: fonts.heading, fontSize: 24, lineHeight: 30, color: colors.ink, flexShrink: 1 },
+  title: { fontFamily: fonts.heading, fontSize: 24, lineHeight: 30, color: colors.ink, flexShrink: 1, letterSpacing: -0.7 },
   typeBtn: {
     height: 36,
     minHeight: 36,

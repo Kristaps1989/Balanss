@@ -130,7 +130,7 @@ function Feature({ text, color }: { text: string; color: string }) {
 }
 
 const styles = themed(() => StyleSheet.create({
-  h1: { fontFamily: fonts.heading, fontSize: 32, lineHeight: 36, color: colors.ink },
+  h1: { fontFamily: fonts.heading, fontSize: 32, lineHeight: 36, color: colors.ink, letterSpacing: -1.0 },
   col: { flex: 1, borderRadius: radius.option, padding: 14, gap: 10 },
   colTitle: { fontFamily: fonts.bodyBold, fontSize: 14 },
   feature: { flex: 1, fontFamily: fonts.body, fontSize: 14, lineHeight: 19, color: colors.ink },

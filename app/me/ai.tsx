@@ -73,7 +73,7 @@ export default function AiInfo() {
 }
 
 const styles = themed(() => StyleSheet.create({
-  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
+  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink, letterSpacing: -0.8 },
   toggleCard: { padding: 18, flexDirection: 'row', alignItems: 'center', gap: 12 },
   section: { flexDirection: 'row', gap: 14, paddingHorizontal: 4 },
   body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: colors.ink },

@@ -210,8 +210,8 @@ export function PersonalityResult({ mode }: { mode: 'onboarding' | 'view' }) {
 }
 
 const styles = themed(() => StyleSheet.create({
-  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
-  h1Big: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 34, color: colors.ink },
+  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink, letterSpacing: -0.8 },
+  h1Big: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 34, color: colors.ink, letterSpacing: -0.9 },
   lead: { fontFamily: fonts.body, fontSize: 16, lineHeight: 23, color: colors.text2 },
   overline: { fontFamily: fonts.bodyBold, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', color: colors.caption },
   example: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.optionBorder, borderRadius: radius.option, paddingVertical: 12, paddingHorizontal: 14, gap: 6 },
@@ -226,7 +226,7 @@ const styles = themed(() => StyleSheet.create({
   count: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.caption },
   statement: { flex: 1, justifyContent: 'center', gap: 12, paddingHorizontal: 4 },
   ask: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.caption },
-  stText: { fontFamily: fonts.headingSemi, fontSize: 30, lineHeight: 36, color: colors.ink },
+  stText: { fontFamily: fonts.headingSemi, fontSize: 30, lineHeight: 36, color: colors.ink, letterSpacing: -0.9 },
   opt: { height: 56, borderRadius: 18, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', gap: 14, borderWidth: 1.5 },
   dotBox: { width: 22, alignItems: 'center' },
   optText: { fontFamily: fonts.bodySemi, fontSize: 16, color: colors.ink },

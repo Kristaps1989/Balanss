@@ -120,7 +120,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 const styles = themed(() => StyleSheet.create({
   over: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentText },
-  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
+  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink, letterSpacing: -0.8 },
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   stat: { flexGrow: 1, minWidth: '22%', backgroundColor: colors.card, borderRadius: 16, padding: 12, gap: 2 },
   statValue: { fontFamily: fonts.number, fontSize: 18, color: colors.ink },

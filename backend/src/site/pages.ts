@@ -13,47 +13,144 @@ export type Page = { path: string; title: string; description: string; body: () 
 const mail = `<a href="mailto:${OWNER.email}">${OWNER.email}</a>`;
 const owner = ownerLine;
 
+/** The Šodiena screen, drawn in HTML so the hero shows the product itself (sample day from CLAUDE.md). */
+function phone(): string {
+  const c = 2 * Math.PI * 92;
+  return `<div class="phone" role="img" aria-label="ZestWell ekrāns Šodiena: 270 kcal vēl šodien, olbaltumvielas 68 no 110 g, ūdens 1,2 l, 6 430 soļi, miegs 6 h 40 min">
+<div class="screen" aria-hidden="true">
+  <div class="p-status"><span>9:41</span><span>100%</span></div>
+  <div class="p-head"><div><div class="p-date">trešdiena, 11. novembris</div><div class="p-hello">Labrīt, Ilze</div></div><div class="p-avatar">I</div></div>
+  <div class="p-ring">
+    <svg width="196" height="196" viewBox="0 0 196 196"><circle cx="98" cy="98" r="92" fill="none" stroke="#1E2A23" stroke-width="6"/><circle cx="98" cy="98" r="92" fill="none" stroke="#6CCB94" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(c * 0.846).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 98 98)"/></svg>
+    <div><b>270</b><span>kcal vēl šodien</span></div>
+  </div>
+  <div class="p-macros">
+    <div><span>Olbaltumv.</span><b>68 / 110 g</b><i style="--v:62%;--c:#F29468"></i></div>
+    <div><span>Ogļhidrāti</span><b>160 / 190 g</b><i style="--v:84%;--c:#EDC060"></i></div>
+    <div><span>Tauki</span><b>52 / 60 g</b><i style="--v:87%;--c:#C29BDB"></i></div>
+  </div>
+  <div class="p-focus"><b>Šodienas fokuss</b><p>68 g olbaltumvielu jau ir, vēl 42 g. Biezpiens vakariņās dod +18 g.</p><span>Labi, pamēģināšu</span></div>
+  <div class="p-tiles">
+    <div><span>Ūdens</span><b>1,2 l</b></div>
+    <div><span>Soļi</span><b>6 430</b></div>
+    <div><span>Miegs</span><b>6 h 40</b></div>
+  </div>
+  <div class="p-tabs"><span class="on">Šodiena</span><span>Uzturs</span><span class="plus">+</span><span>Kustība</span><span>Miegs</span></div>
+</div></div>`;
+}
+
+/** Steps per hour from 06:00; the day is read at 13:10, so the hours up to 22:00 are still empty. */
+const STEP_HOURS = [8, 34, 62, 28, 22, 46, 88, 52];
+
 function home(): string {
+  const cols = Array.from({ length: 17 }, (_, i) => (i < STEP_HOURS.length ? `<i style="--h:${STEP_HOURS[i]}%"></i>` : `<i class="rest" style="--h:4%"></i>`)).join('');
   return `
-<section class="card hero">
-  <h1>Tava diena vienā skatā.</h1>
-  <p class="lead">ZestWell apvieno uzturu, kustību, pulsu un miegu vienā vienkāršā ikdienas skatā. Nofotografē maltīti, un pārējo paveiksim mēs.</p>
-  <p><a class="pill" href="${APK.url}" download>Lejupielādēt Android lietotni</a></p>
-  <p class="muted">Testa versija ${APK.version} · ${APK.sizeMb} MB · Android ${APK.minAndroid} vai jaunāka. Drīzumā Google Play, vēlāk arī App Store.</p>
-</section>
+<section class="hero"><div class="wrap">
+  <div class="hero-copy">
+    <h1>Tava diena vienā skatā.</h1>
+    <p class="lead">Uzturs, kustība, pulss un miegs vienuviet. Nofotografē maltīti, pārējais ienāk no pulksteņa, un padomi skan tavā tonī.</p>
+    <a class="btn" href="${APK.url}" download>Lejupielādēt Android lietotni</a>
+    <p class="meta">Testa versija ${APK.version}, ${APK.sizeMb} MB, Android ${APK.minAndroid} vai jaunāka. Drīzumā Google Play, vēlāk arī App Store.</p>
+  </div>
+  ${phone()}
+</div></section>
 
-<section class="focus">
-  <h2>Padomi tavā valodā</h2>
-  <p>Īss personības tests sākumā palīdz izvēlēties toni, kas tev der: plāns un skaitļi, kaut kas jauns vai maigi un bez spiediena. Tie paši dati, cits pasniegšanas veids.</p>
-</section>
+<section class="moment m-morning"><div class="wrap">
+  <div class="time">07:40<span>Rīts</span></div>
+  <div>
+    <h2>Nofotografē brokastis.</h2>
+    <p>Viens foto, un ZestWell aptuveni novērtē kalorijas, olbaltumvielas, ogļhidrātus, taukus, šķiedrvielas un kalciju. Ja kaut kas nav precīzi, izlabo un saglabā.</p>
+  </div>
+  <div class="ui">
+    <div class="plate"><svg width="150" height="150" viewBox="0 0 150 150" aria-hidden="true"><circle cx="75" cy="75" r="70" fill="#EFE9DC"/><circle cx="75" cy="75" r="58" fill="#D9BB8C"/><circle cx="62" cy="64" r="25" fill="#FAF7EF"/><g fill="#3B4A86"><circle cx="96" cy="58" r="7"/><circle cx="104" cy="74" r="7"/><circle cx="90" cy="76" r="7"/><circle cx="98" cy="92" r="7"/><circle cx="52" cy="100" r="7"/></g><path d="M70 104q10-12 22 0q-12 8-22 0z" fill="#6CCB94"/></svg></div>
+    <small>Brokastis, 07:40</small>
+    <div class="big">420<em>kcal</em></div>
+    <ul class="rows">
+      <li><span style="--c:#D16B3A">Olbaltumvielas</span><b>18 g</b></li>
+      <li><span style="--c:#B07A12">Ogļhidrāti</span><b>58 g</b></li>
+      <li><span style="--c:#8E6BA8">Tauki</span><b>11 g</b></li>
+      <li><span style="--c:#5F8B3A">Šķiedrvielas</span><b>7 g</b></li>
+      <li><span style="--c:#4E73C7">Kalcijs, aptuveni</span><b>210 mg</b></li>
+    </ul>
+  </div>
+</div></section>
 
-<div class="grid">
-  <section class="card"><h3>Maltīte ar vienu foto</h3><p>Nofotografē šķīvi, un ZestWell aptuveni novērtē kalorijas, olbaltumvielas, ogļhidrātus, taukus, šķiedrvielas un kalciju.</p></section>
-  <section class="card"><h3>Dati no pulksteņa</h3><p>Soļi, pulss, treniņi un miegs no Health Connect. Tikai lasām, nekad neko nemainām.</p></section>
-  <section class="card"><h3>Ieradumi, nevis diētas</h3><p>Progress pirmajā vietā: “68 g jau ir, vēl 42 g”. Nekādas sarkanās krāsas par pārsniegtu mērķi.</p></section>
-  <section class="card"><h3>Tavi dati ES</h3><p>Serveri Eiropas Savienībā. Eksportē vai dzēs visus savus datus jebkurā brīdī no lietotnes.</p></section>
-</div>
+<section class="moment m-day"><div class="wrap">
+  <div class="time">13:10<span>Diena</span></div>
+  <div>
+    <h2>Pulkstenis jau zina pārējo.</h2>
+    <p>Soļi, pulss, treniņi un miegs ienāk no Health Connect. Mēs tos tikai lasām un nekad neko nemainām.</p>
+  </div>
+  <div class="ui">
+    <small>Soļi šodien</small>
+    <div class="big">6 430<em>no 8 000</em></div>
+    <div class="cols">${cols}</div>
+    <div class="axis"><span>06</span><span>10</span><span>14</span><span>18</span><span>22</span></div>
+    <div class="pair"><div><small>Pulss miera stāvoklī</small><b>61</b></div><div><small>HRV</small><b>42 ms</b></div></div>
+    <small style="margin-top:18px">Dati no Health Connect</small>
+  </div>
+</div></section>
 
-<section class="card" id="instalet">
-  <h2>Kā instalēt testa versiju</h2>
-  <ol>
-    <li>Atver šo lapu Android telefonā un pieskaries <b>Lejupielādēt Android lietotni</b>.</li>
-    <li>Atver lejupielādēto failu <b>zestwell.apk</b>. Ja telefons jautā, atļauj pārlūkam instalēt nezināmas lietotnes.</li>
-    <li>Pieskaries <b>Instalēt</b>, atver ZestWell un pieslēdzies ar e-pastu.</li>
-  </ol>
-  <p class="muted">Ja telefonā jau ir agrāka ZestWell vai Balanss testa versija un instalēšana neizdodas, vispirms to atinstalē. Faila SHA-256: <code style="overflow-wrap:anywhere">${APK.sha256}</code></p>
-</section>
+<section class="moment m-evening"><div class="wrap">
+  <div class="time">18:30<span>Vakars</span></div>
+  <div>
+    <h2>Tie paši dati. Tavs tonis.</h2>
+    <p>Īss personības tests sākumā, 20 apgalvojumi, nosaka, kā ZestWell ar tevi runā: ar plānu un skaitļiem, ar kaut ko jaunu vai maigi un bez spiediena.</p>
+    <p class="note">Šis nav klīnisks vai diagnostisks tests. Toni vari mainīt un profilu dzēst jebkurā brīdī.</p>
+  </div>
+  <div class="tones">
+    <div class="tone on"><b>Plāns un skaitļi</b><p>68 g olbaltumvielu jau ir, vēl 42 g. Plāns: biezpiens vakariņās (+18 g), vista rīt pusdienās (+30 g).</p></div>
+    <div class="tone"><b>Dažādība un jaunais</b><p>Ideja šodienai: lēcu zupa ar ciedru riekstiem. Tā papildinās šķiedrvielas, un būs kaut kas jauns.</p></div>
+    <div class="tone"><b>Maigi, bez spiediena</b><p>Miegs bija īsāks, tas ir normāli. Šodien bez spiediena. Ja sanāk, 15 minūšu pastaiga.</p></div>
+  </div>
+</div></section>
 
-<section class="card">
-  <h2>Svarīgi</h2>
-  <p>ZestWell ir ikdienas ieradumu pavadonis, nevis medicīniska ierīce. Tas nesniedz diagnozes vai ārstēšanas ieteikumus. Ja tev ir veselības stāvoklis, mērķus un uzturu pārrunā ar ārstu.</p>
-  <p class="muted">Jautājumi? Raksti ${mail}.</p>
-</section>`;
+<section class="moment m-night"><div class="wrap">
+  <div class="time">23:00<span>Nakts</span></div>
+  <div>
+    <h2>Laiks gulēt, kad tas der tev.</h2>
+    <p>Vakarā ZestWell atgādina par tavu miega logu. No rīta redzi, cik gulēji un kā dalījās dziļais, REM un vieglais miegs.</p>
+  </div>
+  <div class="ui">
+    <small>Pagājušajā naktī</small>
+    <div class="big">6 h 40<em>min</em></div>
+    <div class="stages"><i style="flex:65;background:#7486D6"></i><i style="flex:80;background:#9AA9EC"></i><i style="flex:255;background:#C9D1F5"></i></div>
+    <div class="legend"><span style="--c:#7486D6">Dziļais 1 h 05</span><span style="--c:#9AA9EC">REM 1 h 20</span><span style="--c:#C9D1F5">Vieglais 4 h 15</span></div>
+    <div class="window"><small>Miega logs šovakar</small><b>23:00–23:30</b></div>
+  </div>
+</div></section>
+
+<section class="promise"><div class="wrap">
+  <h2>Ieradumi, nevis diētas.</h2>
+  <p class="said">“68 g jau ir, vēl 42 g.”</p>
+  <p class="blurb">Tā ZestWell runā par tavu dienu: vispirms tas, kas jau izdarīts. Nekādas sarkanās krāsas par pārsniegtu mērķi.</p>
+  <div class="trust">
+    <div><h3>Tavi dati paliek ES</h3><p>Datubāze, foto un serveris atrodas Eiropas Savienībā.</p></div>
+    <div><h3>Bez reklāmām un izsekošanas</h3><p>Lietotnē nav reklāmu un analītikas rīku. Datus nepārdodam.</p></div>
+    <div><h3>Eksportē vai dzēs jebkurā brīdī</h3><p>Visus savus datus vari saņemt failā vai dzēst no lietotnes.</p></div>
+  </div>
+</div></section>
+
+<section class="install" id="instalet"><div class="wrap">
+  <div>
+    <h2>Izmēģini testa versiju.</h2>
+    <a class="btn dark" href="${APK.url}" download>Lejupielādēt Android lietotni</a>
+    <p class="meta">Versija ${APK.version}, ${APK.sizeMb} MB, Android ${APK.minAndroid} vai jaunāka. Jautājumi? Raksti ${mail}.</p>
+  </div>
+  <div>
+    <ol class="steps">
+      <li><span>Atver šo lapu Android telefonā un pieskaries <b>Lejupielādēt Android lietotni</b>.</span></li>
+      <li><span>Atver lejupielādēto failu <b>zestwell.apk</b>. Ja telefons jautā, atļauj pārlūkam instalēt nezināmas lietotnes.</span></li>
+      <li><span>Pieskaries <b>Instalēt</b>, atver ZestWell un pieslēdzies ar <span class="nb">e-pastu</span>.</span></li>
+    </ol>
+    <p class="sha">Ja telefonā jau ir agrāka ZestWell vai Balanss testa versija un instalēšana neizdodas, vispirms to atinstalē. Faila SHA-256: <code>${APK.sha256}</code></p>
+  </div>
+</div></section>`;
 }
 
 function privacy(): string {
   return `
-<article class="card">
+<article>
 <h1>Privātuma politika</h1>
 <p class="muted">Spēkā no ${POLICY_DATE}.</p>
 <p>Šī politika skaidro, kādus datus apstrādā lietotne ZestWell un vietne zestwell.app, kāpēc, cik ilgi un kādas ir tavas tiesības. Daļa datu (veselības dati un personības testa rezultāti) ir īpašu kategoriju dati saskaņā ar Vispārīgo datu aizsardzības regulu (VDAR), tāpēc tos apstrādājam tikai ar tavu skaidru piekrišanu un tikai tik, cik vajag lietotnes darbībai.</p>
@@ -147,7 +244,7 @@ ${table(
 
 function terms(): string {
   return `
-<article class="card">
+<article>
 <h1>Lietošanas noteikumi</h1>
 <p class="muted">Spēkā no ${POLICY_DATE}.</p>
 <p>Šie noteikumi ir vienošanās starp tevi un ${owner()} (“mēs”) par lietotnes ZestWell lietošanu. Lietojot lietotni, tu piekrīti šiem noteikumiem un <a href="/privatums">privātuma politikai</a>.</p>
@@ -194,7 +291,7 @@ function terms(): string {
 
 function deleteAccount(): string {
   return `
-<article class="card">
+<article>
 <h1>Konta un datu dzēšana</h1>
 <p class="lead">Savu ZestWell kontu un visus datus vari dzēst jebkurā brīdī. Tas notiek uzreiz un nav atsaucams.</p>
 
@@ -231,7 +328,7 @@ function deleteAccount(): string {
 
 function support(): string {
   return `
-<article class="card">
+<article>
 <h1>Atbalsts</h1>
 <p class="lead">Raksti mums: ${mail}. Parasti atbildam dažu darba dienu laikā.</p>
 
@@ -259,7 +356,7 @@ function support(): string {
 
 export function notFoundBody(): string {
   return `
-<section class="card">
+<section>
 <h1>Šāda lapa nav atrasta</h1>
 <p>Iespējams, saite ir novecojusi. <a href="/">Uz sākumu</a></p>
 </section>`;

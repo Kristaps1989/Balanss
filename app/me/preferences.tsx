@@ -108,7 +108,7 @@ export default function Preferences() {
 }
 
 const styles = themed(() => StyleSheet.create({
-  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
+  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink, letterSpacing: -0.8 },
   label: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   opt: { width: '47%', flexGrow: 1, gap: 2 },

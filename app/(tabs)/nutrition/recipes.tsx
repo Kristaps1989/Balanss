@@ -116,7 +116,7 @@ function RecipeCard({ recipe, date }: { recipe: Recipe; date: string }) {
 }
 
 const styles = themed(() => StyleSheet.create({
-  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
+  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink, letterSpacing: -0.8 },
   card: { padding: 18, gap: 12 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   why: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.moveDeep },

@@ -31,7 +31,7 @@ export function magicLinkCopy(mail: MagicLinkEmail) {
 <style>@media (prefers-color-scheme:dark){body.b{background:#121513!important;color:#F2F1EC!important}.c{background:#1C201D!important}.t2{color:#B8BCB6!important}.l{color:#7FD3A2!important}.btn{background:#6CCB94!important;color:#0E1A13!important}}</style></head>
 <body class="b" style="font-family:Manrope,Arial,sans-serif;background:#F6F2EA;color:#1F2420;padding:24px">
 <div class="c" style="max-width:480px;margin:0 auto;background:#FFFFFF;border-radius:24px;padding:28px">
-<h1 style="font-family:Fraunces,Georgia,serif;font-size:24px;margin:0 0 12px">Pieslēgšanās ZestWell</h1>
+<h1 style="letter-spacing:-.02em;font-size:24px;margin:0 0 12px">Pieslēgšanās ZestWell</h1>
 <p style="font-size:16px;line-height:1.5;margin:0 0 20px">Atver šo saiti telefonā, lai pieslēgtos.</p>
 <p style="margin:0 0 20px"><a class="btn" href="${mail.webLink}" style="display:inline-block;background:#2F6B4F;color:#FFFFFF;text-decoration:none;font-weight:600;padding:14px 24px;border-radius:28px">Pieslēgties</a></p>
 <p class="t2" style="font-size:14px;line-height:1.5;color:#525852;margin:0 0 8px">Ja poga nestrādā, atver šo saiti: <a class="l" href="${mail.webLink}" style="color:#2A6148">${mail.webLink}</a></p>

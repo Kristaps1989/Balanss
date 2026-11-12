@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync, FastifyReply } from 'fastify';
 
-import { faviconSvg, layout } from './layout';
+import { SITE_FONTS } from './fonts';
+import { FONT_WEIGHTS, faviconSvg, layout } from './layout';
 import { PAGES, notFoundBody } from './pages';
 
 /**
@@ -12,8 +13,9 @@ export function siteHosts(webUrl: string): { host: string } {
   return { host: new URL(webUrl).hostname };
 }
 
-/** Our own CSP for the static pages: no scripts at all, inline styles and inline SVG only. */
-const CSP = "default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
+/** Our own CSP for the static pages: no scripts at all, inline styles and inline SVG, fonts from this host only. */
+const CSP =
+  "default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
 
 function html(reply: FastifyReply, body: string, status = 200) {
   return reply
@@ -36,6 +38,13 @@ export const siteRoutes: FastifyPluginAsync = async (app) => {
   for (const page of PAGES) {
     const rendered = layout({ ...page, webUrl, body: page.body() });
     app.get(page.path, onSite, async (_req, reply) => html(reply, rendered));
+  }
+
+  for (const weight of FONT_WEIGHTS) {
+    const font = Buffer.from(SITE_FONTS[weight], 'base64');
+    app.get(`/fonts/manrope-${weight}.woff2`, onSite, async (_req, reply) =>
+      reply.header('Content-Type', 'font/woff2').header('Cache-Control', 'public, max-age=31536000, immutable').send(font),
+    );
   }
 
   const favicon = faviconSvg();

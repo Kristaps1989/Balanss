@@ -304,8 +304,8 @@ function Row({ label, icon, onPress, danger, href }: { label: string; icon: 'dow
 const styles = themed(() => StyleSheet.create({
   head: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   avatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.avatar, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontFamily: fonts.heading, fontSize: 24, color: colors.ink },
-  name: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
+  avatarText: { fontFamily: fonts.heading, fontSize: 24, color: colors.ink, letterSpacing: -0.7 },
+  name: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink, letterSpacing: -0.8 },
   card: { padding: 18, gap: 14 },
   cardHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' },
   toneLink: {

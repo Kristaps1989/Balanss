@@ -205,7 +205,7 @@ function GoalsForm({ mode, me }: { mode: 'onboarding' | 'edit'; me: Me }) {
 }
 
 const styles = themed(() => StyleSheet.create({
-  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
+  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink, letterSpacing: -0.8 },
   label: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
   goal: { borderRadius: radius.option, borderWidth: 1.5 },
   goalBtn: { minHeight: 64, paddingVertical: 12, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 14 },

@@ -7,10 +7,10 @@
  * (signed with the private upload key via android/keystore.properties, never the debug key).
  */
 export const ANDROID_RELEASE = {
-  version: '0.2.2',
+  version: '0.3.0',
   sizeMb: 57,
   /** SHA-256 of the published APK, so testers can check the file. */
-  sha256: '802f3c80ab202226bf30504d7d255acb23de073506f555bb6520d5979be9f625',
+  sha256: '4eac4ebf03ba5b61d25c0e1f0ab942b0fd984587350c67fab9a7445b5e64a4f5',
   minAndroid: '8.0',
   url: 'https://github.com/Kristaps1989/Balanss/releases/latest/download/zestwell.apk',
 } as const;

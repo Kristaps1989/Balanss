@@ -144,7 +144,7 @@ export default function Login() {
 
 const styles = themed(() => StyleSheet.create({
   hero: { alignItems: 'center', gap: 12, paddingTop: 12 },
-  title: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 34, color: colors.ink, textAlign: 'center', marginTop: 4 },
+  title: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 34, color: colors.ink, textAlign: 'center', marginTop: 4, letterSpacing: -0.9 },
   sub: { fontFamily: fonts.body, fontSize: 16, lineHeight: 23, color: colors.text2, textAlign: 'center', maxWidth: 300 },
   or: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 4 },
   line: { flex: 1, height: 1, backgroundColor: colors.inputBorder },
