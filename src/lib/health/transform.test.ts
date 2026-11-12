@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { activeFromTotal, buildSyncPayload, dailyMaxByOrigin, deviceName, estimateRestingHr, hrZones, sanitizeSyncPayload, sleepNight } from './transform';
+import { activeFromTotal, buildSyncPayload, dailyMaxByOrigin, deviceName, estimateRestingHr, hrZones, readResilient, sanitizeSyncPayload, sleepNight } from './transform';
 
 const iso = (d: string, hm: string) => new Date(`${d}T${hm}:00`).toISOString();
 
@@ -149,5 +149,53 @@ describe('sanitizeSyncPayload', () => {
     expect(out.workouts[1]).toMatchObject({ avgHr: null, zones: { minutes: [5, 5, 1440, 0, 0] } });
     expect(out.workouts[1]!.device).toHaveLength(60);
     expect(out.weights).toEqual([{ date: '2026-11-12', kg: 82.4 }]);
+  });
+});
+
+describe('readResilient', () => {
+  const H = 3_600_000;
+  const t0 = Date.parse('2026-11-01T00:00:00.000Z');
+  const iso = (h: number) => new Date(t0 + h * H).toISOString();
+  // One record every 6 hours over 14 days; the store cannot return anything from a window that contains the bad one.
+  const all = Array.from({ length: 56 }, (_, i) => ({ at: t0 + i * 6 * H + H / 2, metadata: { id: `r${i}` } }));
+  const BAD = t0 + 100 * H + H / 2;
+  const store = (failing: boolean) => async (s: string, e: string) => {
+    const [from, to] = [Date.parse(s), Date.parse(e)];
+    if (failing && BAD >= from && BAD < to) throw new Error('startTime must be before endTime.');
+    return all.filter((r) => r.at >= from && r.at < to);
+  };
+
+  it('returns everything in one read when nothing is wrong', async () => {
+    const out = await readResilient(store(false), iso(0), iso(336));
+    expect(out.records).toHaveLength(56);
+    expect(out.skipped).toEqual([]);
+  });
+
+  it('one unreadable record costs at most an hour of data, not the whole sync', async () => {
+    const out = await readResilient(store(true), iso(0), iso(336));
+    expect(out.skipped).toHaveLength(1);
+    const k = out.skipped[0]!;
+    expect(Date.parse(k.endTime) - Date.parse(k.startTime)).toBeLessThanOrEqual(H);
+    expect(Date.parse(k.startTime)).toBeLessThanOrEqual(BAD);
+    expect(Date.parse(k.endTime)).toBeGreaterThan(BAD);
+    expect(k.reason).toContain('startTime must be before endTime');
+    // Every record outside the skipped hour is there, once.
+    const lost = all.filter((r) => r.at >= Date.parse(k.startTime) && r.at < Date.parse(k.endTime)).length;
+    expect(out.records).toHaveLength(56 - lost);
+    expect(new Set(out.records.map((r) => r.metadata.id)).size).toBe(out.records.length);
+  });
+
+  it('does not return a record twice when both halves of a split contain it', async () => {
+    const spanning = { metadata: { id: 'day-block' } };
+    let calls = 0;
+    const out = await readResilient(
+      async () => {
+        if (calls++ === 0) throw new Error('boom');
+        return [spanning];
+      },
+      iso(0),
+      iso(48),
+    );
+    expect(out.records).toEqual([spanning]);
   });
 });

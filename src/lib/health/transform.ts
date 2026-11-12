@@ -307,3 +307,49 @@ export function estimateRestingHr(samples: { time: string; beatsPerMinute: numbe
   }
   return out;
 }
+
+/**
+ * Reads a time range even when the health store holds a record it cannot return. Health
+ * Connect fails the whole read with "startTime must be before endTime" when one stored
+ * record has a zero or negative length (some watch apps write those for sleep stages and
+ * workouts). On a failure the range is halved and each half read again, down to `minSpanMs`;
+ * only the smallest window around the bad record is skipped (reported in `skipped`), and
+ * everything else, steps included, still arrives. Records are de-duplicated by `metadata.id`
+ * because one that spans a split point is returned by both halves.
+ */
+export async function readResilient<R extends { metadata?: { id?: string } }>(
+  read: (startTime: string, endTime: string) => Promise<R[]>,
+  startTime: string,
+  endTime: string,
+  minSpanMs = 3_600_000,
+): Promise<{ records: R[]; skipped: { startTime: string; endTime: string; reason: string }[] }> {
+  const skipped: { startTime: string; endTime: string; reason: string }[] = [];
+  const seen = new Set<string>();
+  const records: R[] = [];
+  const add = (list: R[]) => {
+    for (const r of list) {
+      const id = r.metadata?.id;
+      if (id) {
+        if (seen.has(id)) continue;
+        seen.add(id);
+      }
+      records.push(r);
+    }
+  };
+  const walk = async (from: number, to: number): Promise<void> => {
+    if (to <= from) return;
+    try {
+      add(await read(new Date(from).toISOString(), new Date(to).toISOString()));
+    } catch (err) {
+      if (to - from <= minSpanMs) {
+        skipped.push({ startTime: new Date(from).toISOString(), endTime: new Date(to).toISOString(), reason: err instanceof Error ? err.message : 'unknown' });
+        return;
+      }
+      const mid = from + Math.floor((to - from) / 2);
+      await walk(from, mid);
+      await walk(mid, to);
+    }
+  };
+  await walk(new Date(startTime).getTime(), new Date(endTime).getTime());
+  return { records, skipped };
+}
