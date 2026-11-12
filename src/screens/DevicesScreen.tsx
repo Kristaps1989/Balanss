@@ -10,7 +10,7 @@ import { BackButton, StepHeader } from '@/components/Header';
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { health } from '@/lib/health';
-import { syncHealth, syncProfile } from '@/lib/services';
+import { lastSyncError, syncHealth, syncProfile } from '@/lib/services';
 import { colors, fonts, radius, type, themed } from '@/theme';
 
 /** Pievieno savu pulksteni (prototype: Onb-Device.dc.html). */
@@ -31,9 +31,10 @@ export function DevicesScreen({ mode }: { mode: 'onboarding' | 'edit' }) {
         setState('denied');
         return;
       }
-      await syncHealth(qc, syncProfile(me.data?.profile), true);
+      const synced = await syncHealth(qc, syncProfile(me.data?.profile), true);
       await me.refetch();
-      setState('idle');
+      // Permissions are given but nothing reached the server: say so instead of looking connected.
+      setState(synced || !lastSyncError() ? 'idle' : 'error');
     } catch {
       setState('error');
     }
@@ -92,7 +93,14 @@ export function DevicesScreen({ mode }: { mode: 'onboarding' | 'edit' }) {
             <View style={{ gap: 8 }}>
               <Button label="Savienot" size="md" onPress={connect} loading={state === 'busy'} testID="connect-health" />
               {state === 'denied' && <Text style={styles.warn}>Atļaujas netika dotas. Vari mēģināt vēlreiz vai turpināt bez pulksteņa.</Text>}
-              {state === 'error' && <Text style={styles.warn}>Neizdevās savienot. Mēģini vēlreiz.</Text>}
+              {state === 'error' && (
+                <Text style={styles.warn} testID="connect-error">
+                  Neizdevās savienot. Mēģini vēlreiz.{lastSyncError() ? ` (${lastSyncError()})` : ''}
+                </Text>
+              )}
+              {mode === 'edit' && state === 'error' && (
+                <Button label="Diagnostika" variant="light" size="sm" onPress={() => router.push('/me/health-debug')} style={{ alignSelf: 'flex-start' }} />
+              )}
             </View>
           ))}
       </View>

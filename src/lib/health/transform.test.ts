@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { activeFromTotal, buildSyncPayload, dailyMaxByOrigin, deviceName, estimateRestingHr, hrZones, sleepNight } from './transform';
+import { activeFromTotal, buildSyncPayload, dailyMaxByOrigin, deviceName, estimateRestingHr, hrZones, sanitizeSyncPayload, sleepNight } from './transform';
 
 const iso = (d: string, hm: string) => new Date(`${d}T${hm}:00`).toISOString();
 
@@ -116,5 +116,38 @@ describe('Samsung Health and multi-source data', () => {
     const withRecord = buildSyncPayload({ ...base, restingHr: [{ time: iso('2026-10-04', '07:00'), value: 58 }] });
     expect(withRecord.days[0].restingHr).toBe(58);
     expect(withRecord.days[0].hrvMs).toBeNull();
+  });
+});
+
+describe('sanitizeSyncPayload', () => {
+  const day = { date: '2026-11-12', steps: 17_204, activeKcal: 512, restingHr: 61, hrvMs: 42 };
+  const night = { date: '2026-11-12', bedtime: '23:10', wakeTime: '06:40', totalMin: 450, deepMin: 70, remMin: 90, lightMin: 290, awakeMin: 12 };
+  const workout = { externalId: 'w1', type: 'walk' as const, startedAt: '2026-11-12T08:00:00.000Z', durationMin: 40, kcal: null, avgHr: 104, zones: null, device: 'Galaxy Watch7' };
+  const base = { source: 'health_connect' as const, devices: ['Galaxy Watch7'], days: [day], nights: [night], workouts: [workout], weights: [{ date: '2026-11-12', kg: 82.4 }] };
+
+  it('leaves a normal upload unchanged', () => {
+    expect(sanitizeSyncPayload(base)).toEqual(base);
+  });
+
+  it('one odd record no longer blocks the steps: out-of-range values are dropped or clamped', () => {
+    const out = sanitizeSyncPayload({
+      ...base,
+      devices: ['Galaxy Watch7', '  ', 'x'.repeat(80), ...Array.from({ length: 12 }, (_, i) => `Ierīce ${i}`)],
+      days: [{ ...day, restingHr: 12, hrvMs: 740 }, { date: '2026-11-11', steps: 950_000, activeKcal: Number.NaN, restingHr: null, hrvMs: null }],
+      nights: [night, { ...night, date: '2026-11-11', totalMin: 4000 }, { ...night, date: '2026-11-10', totalMin: 0 }],
+      workouts: [workout, { ...workout, externalId: 'w2', durationMin: 4320 }, { ...workout, externalId: 'w3', avgHr: 400, zones: { minutes: [5, 5, 2000, 0, -3] }, device: 'y'.repeat(90) }],
+      weights: [{ date: '2026-11-12', kg: 82.4 }, { date: '2026-11-11', kg: 4 }],
+    });
+    expect(out.devices).toHaveLength(10);
+    expect(out.devices.every((d) => d.length >= 1 && d.length <= 60)).toBe(true);
+    expect(out.days).toEqual([
+      { ...day, restingHr: null, hrvMs: null },
+      { date: '2026-11-11', steps: 200_000, activeKcal: 0, restingHr: null, hrvMs: null },
+    ]);
+    expect(out.nights.map((n) => n.date)).toEqual(['2026-11-12']);
+    expect(out.workouts.map((w) => w.externalId)).toEqual(['w1', 'w3']);
+    expect(out.workouts[1]).toMatchObject({ avgHr: null, zones: { minutes: [5, 5, 1440, 0, 0] } });
+    expect(out.workouts[1]!.device).toHaveLength(60);
+    expect(out.weights).toEqual([{ date: '2026-11-12', kg: 82.4 }]);
   });
 });

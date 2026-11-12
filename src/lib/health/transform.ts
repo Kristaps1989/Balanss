@@ -194,13 +194,55 @@ export function buildSyncPayload(input: HcInput): HealthSyncRequest {
 
   const weights = [...byDate(input.weights).entries()].map(([date, list]) => ({ date, kg: Math.round(list[list.length - 1].value * 10) / 10 }));
 
-  return {
+  return sanitizeSyncPayload({
     source: 'health_connect',
     devices: [...devices],
     days,
     nights: [...nightsByDate.values()],
     workouts,
     weights,
+  });
+}
+
+const within = (v: number, lo: number, hi: number) => Number.isFinite(v) && v >= lo && v <= hi;
+const clamp = (v: number, lo: number, hi: number) => (Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : lo);
+const DAY_MIN = 1440;
+
+/**
+ * Keeps the upload inside what POST /health/sync accepts. The server rejects the whole
+ * request for one out-of-range value, so a single odd record from a watch (a 3-day
+ * "workout", an HRV spike, a long device name) would otherwise stop every number,
+ * steps included, from arriving. Implausible values are dropped or clamped instead.
+ */
+export function sanitizeSyncPayload(p: HealthSyncRequest): HealthSyncRequest {
+  const min = (v: number) => Math.round(clamp(v, 0, DAY_MIN));
+  return {
+    source: p.source,
+    devices: [...new Set(p.devices.map((d) => d.trim().slice(0, 60)).filter(Boolean))].slice(0, 10),
+    days: p.days.slice(-120).map((d) => ({
+      date: d.date,
+      steps: Math.round(clamp(d.steps, 0, 200_000)),
+      activeKcal: Math.round(clamp(d.activeKcal, 0, 20_000)),
+      restingHr: d.restingHr !== null && within(d.restingHr, 20, 250) ? Math.round(d.restingHr) : null,
+      hrvMs: d.hrvMs !== null && within(d.hrvMs, 0, 500) ? d.hrvMs : null,
+    })),
+    nights: p.nights
+      .filter((n) => within(n.totalMin, 1, DAY_MIN))
+      .slice(-120)
+      .map((n) => ({ ...n, totalMin: min(n.totalMin), deepMin: min(n.deepMin), remMin: min(n.remMin), lightMin: min(n.lightMin), awakeMin: min(n.awakeMin) })),
+    workouts: p.workouts
+      .filter((w) => within(w.durationMin, 0, DAY_MIN) && !Number.isNaN(Date.parse(w.startedAt)))
+      .slice(-500)
+      .map((w) => ({
+        ...w,
+        externalId: (w.externalId || w.startedAt).slice(0, 200),
+        durationMin: Math.round(w.durationMin),
+        kcal: w.kcal !== null && within(w.kcal, 0, 20_000) ? w.kcal : null,
+        avgHr: w.avgHr !== null && within(w.avgHr, 20, 250) ? Math.round(w.avgHr) : null,
+        zones: w.zones ? { minutes: w.zones.minutes.map(min) as [number, number, number, number, number] } : null,
+        device: w.device ? w.device.trim().slice(0, 60) : null,
+      })),
+    weights: (p.weights ?? []).filter((w) => within(w.kg, 30, 350)).slice(-120),
   };
 }
 
