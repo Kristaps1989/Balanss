@@ -8,7 +8,7 @@ import { Screen } from '@/components/Screen';
 import { Loading } from '@/components/States';
 import { formatNumber } from '@/lib/format';
 import { health } from '@/lib/health';
-import { syncHealth, syncProfile } from '@/lib/services';
+import { lastSyncError, syncHealth, syncProfile } from '@/lib/services';
 import { useToday } from '@/lib/today';
 import { colors, fonts, radius, type, themed } from '@/theme';
 
@@ -24,8 +24,10 @@ export default function HealthDebug() {
   const report = useQuery({
     queryKey: ['health-diagnostics'],
     queryFn: async () => {
-      await syncHealth(qc, syncProfile(me.data?.profile), true);
-      return health.diagnostics();
+      const ok = await syncHealth(qc, syncProfile(me.data?.profile), true);
+      const err = lastSyncError();
+      const line = ok ? 'Sinhronizācija: izdevās' : err ? `Sinhronizācija NEIZDEVĀS: ${err}` : 'Sinhronizācija: nav ko sūtīt (nav atļauju vai Health Connect nav pieejams)';
+      return `${line}\n${await health.diagnostics()}`;
     },
     staleTime: 0,
     gcTime: 0,

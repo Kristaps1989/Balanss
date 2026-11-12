@@ -175,7 +175,7 @@ export function PersonalityResult({ mode }: { mode: 'onboarding' | 'view' }) {
       footer={
         mode === 'onboarding' ? (
           <BottomBar>
-            <Button label="Sākt lietot Balansu" variant="accent" onPress={() => finish.mutate(undefined, { onSuccess: () => router.replace('/') })} loading={finish.isPending} testID="start-app" />
+            <Button label="Sākt lietot ZestWell" variant="accent" onPress={() => finish.mutate(undefined, { onSuccess: () => router.replace('/') })} loading={finish.isPending} testID="start-app" />
           </BottomBar>
         ) : undefined
       }>

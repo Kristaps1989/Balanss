@@ -2,7 +2,7 @@ import { focusManager, useQueryClient, type QueryClient } from '@tanstack/react-
 import { useCallback, useEffect, useState } from 'react';
 import { AppState, Platform } from 'react-native';
 
-import type { Profile } from '@/api';
+import { ApiError, type Devices, type Profile } from '@/api';
 import { useMe } from '@/api/hooks';
 
 import { health, type SyncProfile } from './health';
@@ -16,6 +16,23 @@ export const syncProfile = (p?: Profile | null): SyncProfile =>
 
 let lastSync = 0;
 let running: Promise<boolean> | null = null;
+let lastError: string | null = null;
+
+/** Why the last sync failed (shown on Ierīces and in the diagnostics), or null after a success. */
+export const lastSyncError = () => lastError;
+
+/**
+ * Sync when the account is connected, and also when it has never been connected or
+ * disconnected (`source` still empty): the server only marks an account connected after
+ * its first successful upload, so waiting for that flag would never retry a first sync
+ * that failed. Without Health Connect permissions the sync is a no-op.
+ */
+export const shouldSync = (d?: Devices | null) => !!d && health.source !== null && ((d.connected && d.source === health.source) || d.source === null);
+
+function describe(err: unknown): string {
+  if (err instanceof ApiError) return `serveris atbildēja ${err.status} (${err.code})`;
+  return err instanceof Error ? err.message.slice(0, 200) : 'nezināma kļūda';
+}
 
 /**
  * Reads Health Connect and uploads the last 14 days. Throttled to every 30 min unless `force`
@@ -28,10 +45,12 @@ export async function syncHealth(qc: QueryClient, profile: SyncProfile, force = 
   running = health
     .sync(14, profile)
     .then(async (ok) => {
+      lastError = null;
       if (ok) await qc.invalidateQueries({ predicate: (q) => ['day', 'movement', 'sleep', 'me'].includes(String(q.queryKey[0])) });
       return ok;
     })
-    .catch(() => {
+    .catch((err: unknown) => {
+      lastError = describe(err);
       lastSync = 0; // retry on next foreground
       return false;
     })
@@ -46,7 +65,7 @@ export function useHealthRefresh(refetch: () => Promise<unknown>) {
   const qc = useQueryClient();
   const me = useMe();
   const [refreshing, setRefreshing] = useState(false);
-  const connected = !!me.data?.devices.connected && me.data.devices.source === health.source;
+  const connected = shouldSync(me.data?.devices);
   const profile = me.data?.profile;
   const refresh = useCallback(async () => {
     setRefreshing(true);
@@ -74,7 +93,7 @@ if (Platform.OS !== 'web') {
 export function useAppServices(active: boolean) {
   const qc = useQueryClient();
   const me = useMe(active);
-  const connected = !!me.data?.devices.connected && me.data.devices.source === health.source;
+  const connected = shouldSync(me.data?.devices);
   const profile = me.data?.profile;
   const wantsPush = !!me.data && Object.entries(me.data.reminders).some(([k, v]) => k !== 'frequency' && k !== 'sleepLeadMin' && v === true);
 

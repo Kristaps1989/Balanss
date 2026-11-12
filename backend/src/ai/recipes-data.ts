@@ -318,7 +318,7 @@ export const CURATED_RECIPES: CuratedRecipe[] = [
       { name: 'Ogas', amount: '80 g' },
       { name: 'Ķirbju sēklas', amount: '20 g' },
     ],
-    steps: ['Liec jogurtu bļodā, pievieno ogas un pārkaisi ķirbju sēklas.'],
+    steps: ['Liec sojas jogurtu bļodā, pievieno ogas un pārkaisi ķirbju sēklas.'],
     perServing: n(260, 14, 20, 13, 6),
     tags: ['5 min', 'vegāns', 'bez glutēna'],
   },

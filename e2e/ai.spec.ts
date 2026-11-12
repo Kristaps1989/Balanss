@@ -54,7 +54,8 @@ test('Pro: recipes respect a vegan diet and can be logged as a meal', async ({ p
     const n = await cards.count();
     expect(n).toBeGreaterThan(0);
     for (let i = 0; i < n; i++) await cards.nth(i).click();
-    const text = (await list.innerText()).toLowerCase();
+    // Plant-based versions are fine (the afternoon snack slot offers "Sojas jogurts").
+    const text = (await list.innerText()).toLowerCase().replace(/(sojas|auzu|kokosriekstu|mandeļu) (jogurt|pien)\S*/g, '');
     for (const banned of ['vista', 'gaļa', 'cūkgaļ', 'tītar', 'lasis', 'zivs', 'biezpien', 'jogurt', 'siers', 'piens', 'olas', 'medus']) {
       expect(text, `vegan recipes must not contain "${banned}"`).not.toContain(banned);
     }
