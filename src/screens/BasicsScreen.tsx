@@ -116,7 +116,7 @@ function BasicsForm({ mode, initial }: { mode: 'onboarding' | 'edit'; initial: N
 }
 
 const styles = themed(() => StyleSheet.create({
-  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
+  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink, letterSpacing: -0.8 },
   lead: { ...type.body, color: colors.text2 },
   label: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink },
   input: {

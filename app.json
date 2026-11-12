@@ -2,7 +2,7 @@
   "expo": {
     "name": "ZestWell",
     "slug": "balanss",
-    "version": "0.2.2",
+    "version": "0.3.0",
     "scheme": "balanss",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

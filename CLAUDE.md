@@ -45,8 +45,10 @@ Bottom tab bar: Šodiena · Uzturs · (+) · Kustība · Miegs — five equal sl
 - **Dark is the default** (warm near-black `#121513`, cards `#1C201D`); light is cream `#F6F2EA` with white cards. Es → Izskats: Tumšs / Gaišs / Kā tālrunī.
 - Brand forest green (dark: mint `#6CCB94`, light `#2F6B4F`); lime `#CFE884` for the daily focus card; coral accent. One colour per nutrient: kcal green, protein coral, carbs amber, fat plum, fibre leaf green, calcium blue, water blue, steps teal.
 - Logo: lime citrus slice with a leaf on forest green. Colours in `src/theme/brand.ts`; `python scripts/make_logo.py <out>` renders every icon/splash size (copy `out/assets/*` to `assets/` and `out/res/*` to `android/app/src/main/res/`).
-- Fonts: **Fraunces** (headings), **Manrope** (everything else, numbers included). `@expo-google-fonts/*`.
-- One main number per screen, few frames (cards have no border), lots of air. Charts thin and rounded: one kcal ring, 4 px bars, 10 px columns.
+- Fonts: **Manrope only** (`@expo-google-fonts/manrope`). Headings semibold and tight (letter-spacing about −3% of the size); the big numbers (40 px and up) are **Light** (`fonts.light`, `type.hero`, `type.big`). No serif.
+- One main number per screen, few frames (cards have no border), lots of air. Charts thin and rounded: one kcal ring (7 px, straight on the background, no card), 3–4 px bars, 10 px columns.
+- Šodiena shows the ring, three macros in one row, the lime focus card and three tiles (Ūdens, Soļi, Miegs). Fibre and calcium are on Uzturs. The + in the tab bar is a flat lime disc.
+- Website (`backend/src/site/`): same typeface, served from our own host (`fonts.ts`, regenerate with `python scripts/make_site_fonts.py`). The home page follows one day; its section colours are fixed, text pages follow light/dark.
 - Never red or "bad" for over target; copy is progress first ("68 g jau ir, vēl 42 g") — enforced by `src/lib/copy-rules.test.ts`. Touch targets ≥ 44 px. No emoji in UI.
 - Calcium is estimated from the photo/food tables and always labelled "aptuveni".
 

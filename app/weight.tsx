@@ -55,6 +55,6 @@ export default function WeightSheet() {
 
 const styles = themed(() => StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 20 },
-  value: { fontFamily: fonts.number, fontSize: 48, lineHeight: 54, color: colors.ink },
+  value: { fontFamily: fonts.light, fontSize: 56, lineHeight: 62, color: colors.ink, letterSpacing: -2.2 },
   error: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accentDeep },
 }));

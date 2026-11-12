@@ -157,12 +157,12 @@ function WorkoutRow({ w, today }: { w: Workout; today: string }) {
 
 const styles = themed(() => StyleSheet.create({
   card: { padding: 18, gap: 12 },
-  stepsHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
-  huge: { fontFamily: fonts.number, fontSize: 36, lineHeight: 42, color: colors.ink },
+  stepsHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 4 },
+  huge: { fontFamily: fonts.light, fontSize: 52, lineHeight: 58, color: colors.ink, letterSpacing: -2 },
   unit: { fontFamily: fonts.body, fontSize: 15, color: colors.text2 },
   half: { flex: 1, padding: 16, gap: 6, borderRadius: 22 },
   small: { fontFamily: fonts.body, fontSize: 13, color: colors.text2 },
-  mid: { fontFamily: fonts.number, fontSize: 28, color: colors.ink },
+  mid: { fontFamily: fonts.bodySemi, fontSize: 30, color: colors.ink, letterSpacing: -1 },
   unitSm: { fontFamily: fonts.body, fontSize: 13, color: colors.text2 },
   list: { paddingVertical: 8, paddingHorizontal: 18 },
   listHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 6, paddingBottom: 6 },

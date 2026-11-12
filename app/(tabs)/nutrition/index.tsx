@@ -203,7 +203,7 @@ const styles = themed(() => StyleSheet.create({
   dayLabel: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.ink, minWidth: 52, textAlign: 'center' },
   summary: { paddingVertical: 16, paddingHorizontal: 18, gap: 12 },
   summaryTop: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  kcal: { fontFamily: fonts.number, fontSize: 28, color: colors.ink },
+  kcal: { fontFamily: fonts.light, fontSize: 44, lineHeight: 50, color: colors.ink, letterSpacing: -1.8 },
   kcalTarget: { fontFamily: fonts.body, fontSize: 15, color: colors.text2 },
   macros: { flexDirection: 'row', gap: 8 },
   macroLabel: { fontFamily: fonts.body, fontSize: 12, color: colors.text2 },

@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router, type Href } from 'expo-router';
-import type { ReactNode } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { api, type Day, type Meal, type Me, type Progress, type Tip, type TipFocus, type ToneStyle, type WeeklyQuestion } from '@/api';
@@ -56,7 +55,7 @@ function HomeContent({ date, me, day, refreshing, onRefresh }: { date: string; m
   const focus = tip.data?.angle ?? null;
 
   return (
-    <Screen refreshing={refreshing} onRefresh={onRefresh} testID="home" gap={18}>
+    <Screen refreshing={refreshing} onRefresh={onRefresh} testID="home" gap={22}>
       <View style={styles.header}>
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={styles.date}>{longDate(now)}</Text>
@@ -74,9 +73,9 @@ function HomeContent({ date, me, day, refreshing, onRefresh }: { date: string; m
 
       <TipCard date={date} tip={tip.data} pending={tip.isPending} tone={me.tone} />
 
-      <MealsSection meals={day.meals} />
-
       <RowsCard date={date} day={day} focus={focus} />
+
+      <MealsSection meals={day.meals} />
 
       <WeeklyQuestionCard date={date} />
 
@@ -104,43 +103,37 @@ function TodayCard({ day, focus }: { day: Day; focus: TipFocus | null }) {
   const hero = care || left < 0 ? formatNumber(n.kcal.value) : formatNumber(left);
   const heroCaption = care ? 'Šodien apēsts' : left < 0 ? 'kcal šodien' : 'kcal vēl šodien';
   return (
-    <Card style={styles.today}>
-      <View style={styles.ringRow}>
-        <ProgressRing size={164} stroke={10} progress={n.kcal.value / n.kcal.target} color={colors.kcal} trackColor={colors.kcalTrack} animate>
-          <Text style={type.hero} testID="kcal-hero">
-            {hero}
-          </Text>
-          <Text style={styles.heroCaption}>{heroCaption}</Text>
-        </ProgressRing>
-      </View>
+    <View style={styles.today}>
+      <ProgressRing size={232} stroke={7} progress={n.kcal.value / n.kcal.target} color={colors.kcal} trackColor={colors.kcalTrack} animate>
+        <Text style={type.hero} testID="kcal-hero">
+          {hero}
+        </Text>
+        <Text style={styles.heroCaption}>{heroCaption}</Text>
+      </ProgressRing>
       <Text style={styles.eaten} testID="kcal-line">
         {care ? 'Galvenais — regulāras maltītes un pietiekami daudz atpūtas.' : `${formatNumber(n.kcal.value)} no ${formatNumber(n.kcal.target)} kcal`}
       </Text>
-      <View style={styles.bars}>
-        <Bar label="Olbaltumvielas" p={n.proteinG} unit="g" color={colors.protein} track={colors.proteinTrack} focused={focus === 'protein'} />
-        <Bar label="Ogļhidrāti" p={n.carbsG} unit="g" color={colors.carbs} track={colors.carbsTrack} />
-        <Bar label="Tauki" p={n.fatG} unit="g" color={colors.fat} track={colors.fatTrack} />
-        <Bar label="Šķiedrvielas" p={n.fibreG} unit="g" color={colors.fibre} track={colors.fibreTrack} focused={focus === 'fibre'} />
-        <Bar label="Kalcijs" hint="aptuveni" p={n.calciumMg} unit="mg" color={colors.calcium} track={colors.calciumTrack} />
+      {/* Fibre and calcium live on Uzturs; the day view keeps the three macros. */}
+      <View style={styles.macros}>
+        <Macro label="Olbaltumvielas" short="Olbaltumv." p={n.proteinG} color={colors.protein} track={colors.proteinTrack} focused={focus === 'protein'} />
+        <Macro label="Ogļhidrāti" p={n.carbsG} color={colors.carbs} track={colors.carbsTrack} />
+        <Macro label="Tauki" p={n.fatG} color={colors.fat} track={colors.fatTrack} />
       </View>
-    </Card>
+    </View>
   );
 }
 
-function Bar({ label, hint, p, unit, color, track, focused }: { label: string; hint?: string; p: Progress; unit: string; color: string; track: string; focused?: boolean }) {
-  const value = `${formatNumber(Math.round(p.value))} / ${formatNumber(p.target)} ${unit}`;
+function Macro({ label, short, p, color, track, focused }: { label: string; short?: string; p: Progress; color: string; track: string; focused?: boolean }) {
+  const value = `${formatNumber(Math.round(p.value))} / ${formatNumber(p.target)} g`;
   return (
-    <View style={styles.bar} accessible accessibilityLabel={`${label}${hint ? `, ${hint}` : ''}: ${value}${focused ? ', šodienas fokuss' : ''}`}>
-      <View style={styles.barHead}>
-        <View style={styles.barLabelRow}>
-          <View style={[styles.dot, { backgroundColor: color }]} />
-          <Text style={[styles.barLabel, focused && styles.barLabelFocus]}>{label}</Text>
-          {hint ? <Text style={styles.barHint}>{hint}</Text> : null}
-          {focused ? <Text style={styles.focusTag}>fokuss</Text> : null}
-        </View>
-        <Text style={[styles.barValue, focused && { color: colors.ink }]}>{value}</Text>
-      </View>
-      <ProgressBar progress={p.value / p.target} color={color} trackColor={track} />
+    <View style={styles.macro} accessible accessibilityLabel={`${label}: ${value}${focused ? ', šodienas fokuss' : ''}`}>
+      <Text style={[styles.macroLabel, focused && styles.macroLabelFocus]} numberOfLines={1}>
+        {short ?? label}
+      </Text>
+      <Text style={styles.macroValue} numberOfLines={1} adjustsFontSizeToFit>
+        {value}
+      </Text>
+      <ProgressBar progress={p.value / p.target} color={color} trackColor={track} height={3} />
     </View>
   );
 }
@@ -310,34 +303,101 @@ function RowsCard({ date, day, focus }: { date: string; day: Day; focus: TipFocu
   const w = day.nutrition.waterMl;
   const steps = day.movement.steps;
   return (
-    <Card style={styles.list}>
-      <View style={[styles.row, focus === 'water' && styles.rowFocus]}>
-        <RowIcon icon="drop" color={colors.water} />
-        <View style={{ flex: 1 }}>
-          <Text style={styles.rowTitle}>Ūdens</Text>
-          <Text style={styles.rowMeta} testID="water-total">
-            {litres(w.value)} no {litres(w.target)}
-          </Text>
-        </View>
-        <Pressable
-          onPress={() => water.mutate(GLASS_ML)}
-          accessibilityRole="button"
-          accessibilityLabel={`Pievienot ${GLASS_ML} ml ūdens`}
-          testID="water-add"
-          style={({ pressed }) => [styles.waterAdd, pressed && { opacity: 0.8 }]}>
-          <Icon name="plus" color={colors.waterDeep} size={16} strokeWidth={2.4} />
-          <Text style={styles.waterAddText}>{GLASS_ML} ml</Text>
-        </Pressable>
+    <View style={styles.tiles}>
+      <Tile
+        icon="drop"
+        color={colors.water}
+        title="Ūdens"
+        value={litres(w.value)}
+        valueTestID="water-total"
+        sub={`+ ${GLASS_ML} ml`}
+        subColor={colors.waterDeep}
+        focused={focus === 'water'}
+        onPress={() => water.mutate(GLASS_ML)}
+        role="button"
+        label={`Ūdens: ${litres(w.value)} no ${litres(w.target)}. Pievienot ${GLASS_ML} ml`}
+        testID="water-add"
+      />
+      <Tile
+        icon="movement"
+        color={colors.steps}
+        title="Soļi"
+        value={formatNumber(steps.value)}
+        sub={`no ${formatNumber(steps.target)}`}
+        focused={focus === 'steps'}
+        onPress={() => router.navigate('/movement')}
+        role="link"
+        label={`Soļi: ${formatNumber(steps.value)} no ${formatNumber(steps.target)}`}
+      />
+      <Tile
+        icon="sleep"
+        color={colors.sleepRem}
+        title="Miegs"
+        value={day.sleep ? duration(day.sleep.totalMin) : '—'}
+        sub={day.sleep ? 'šonakt' : 'vēl nav datu'}
+        focused={focus === 'sleep'}
+        onPress={() => router.navigate('/sleep')}
+        role="link"
+        label={day.sleep ? `Miegs: ${duration(day.sleep.totalMin)}` : 'Miegs: vēl nav datu'}
+      />
+    </View>
+  );
+}
+
+/** One of the three day tiles. The whole tile is the touch target; water adds a glass in one tap. */
+function Tile({
+  icon,
+  color,
+  title,
+  value,
+  valueTestID,
+  sub,
+  subColor,
+  focused,
+  onPress,
+  role,
+  label,
+  testID,
+}: {
+  icon: IconName;
+  color: string;
+  title: string;
+  value: string;
+  valueTestID?: string;
+  sub: string;
+  subColor?: string;
+  focused?: boolean;
+  onPress: () => void;
+  role: 'button' | 'link';
+  label: string;
+  testID?: string;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole={role}
+      accessibilityLabel={label}
+      testID={testID}
+      style={({ pressed }) => [styles.tile, focused && styles.tileFocus, pressed && { opacity: 0.8 }]}>
+      <View style={styles.tileHead}>
+        <Icon name={icon} color={color} size={18} />
+        <Text style={styles.tileTitle}>{title}</Text>
       </View>
-      <View style={styles.rowDivider} />
-      <LinkRow icon="movement" color={colors.steps} title="Soļi" href="/movement" focused={focus === 'steps'}>
-        {formatNumber(steps.value)} no {formatNumber(steps.target)}
-      </LinkRow>
-      <View style={styles.rowDivider} />
-      <LinkRow icon="sleep" color={colors.sleepRem} title="Miegs" href="/sleep" focused={focus === 'sleep'}>
-        {day.sleep ? duration(day.sleep.totalMin) : 'Vēl nav datu'}
-      </LinkRow>
-    </Card>
+      {/* A trailing "min" is set small, so "6 h 40 min" fits a third of the screen. */}
+      <Text style={styles.tileValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} testID={valueTestID}>
+        {/\smin$/.test(value) ? (
+          <>
+            {value.slice(0, -4)}
+            <Text style={styles.tileUnit}> min</Text>
+          </>
+        ) : (
+          value
+        )}
+      </Text>
+      <Text style={[styles.tileSub, subColor ? { color: subColor, fontFamily: fonts.bodySemi } : null]} numberOfLines={1}>
+        {sub}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -346,22 +406,6 @@ function RowIcon({ icon, color }: { icon: IconName; color: string }) {
     <View style={styles.rowIcon}>
       <Icon name={icon} color={color} size={20} />
     </View>
-  );
-}
-
-function LinkRow({ icon, color, title, href, focused, children }: { icon: IconName; color: string; title: string; href: Href; focused?: boolean; children: ReactNode }) {
-  return (
-    <Pressable
-      onPress={() => router.navigate(href)}
-      accessibilityRole="link"
-      style={({ pressed }) => [styles.row, focused && styles.rowFocus, pressed && { opacity: 0.8 }]}>
-      <RowIcon icon={icon} color={color} />
-      <View style={{ flex: 1 }}>
-        <Text style={styles.rowTitle}>{title}</Text>
-        <Text style={styles.rowMeta}>{children}</Text>
-      </View>
-      <Icon name="chevron" color={colors.caption} size={20} />
-    </Pressable>
   );
 }
 
@@ -491,29 +535,25 @@ const styles = themed(() =>
     header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 2, paddingTop: 4 },
     date: { fontFamily: fonts.bodySemi, fontSize: 14, lineHeight: 18, color: colors.caption },
 
-    today: { padding: space.xxl, gap: 18 },
-    ringRow: { alignItems: 'center', paddingTop: 4 },
-    heroCaption: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.text2, marginTop: -2 },
-    eaten: { fontFamily: fonts.body, fontSize: 15, lineHeight: 21, color: colors.text2, textAlign: 'center', marginTop: -6 },
-    bars: { gap: 14 },
-    bar: { gap: 7 },
-    barHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 },
-    barLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 7, flexShrink: 1 },
+    // The ring sits straight on the screen background: no card around the main number.
+    today: { alignItems: 'center', gap: 14, paddingTop: 6 },
+    heroCaption: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.text2 },
+    eaten: { fontFamily: fonts.body, fontSize: 15, lineHeight: 21, color: colors.text2, textAlign: 'center' },
+    macros: { flexDirection: 'row', gap: 16, alignSelf: 'stretch', paddingTop: 10, paddingHorizontal: 2 },
+    macro: { flex: 1, gap: 4 },
+    macroLabel: { fontFamily: fonts.body, fontSize: 13, color: colors.text2 },
+    macroLabelFocus: { fontFamily: fonts.bodyBold, color: colors.ink },
+    macroValue: { fontFamily: fonts.bodySemi, fontSize: 16, lineHeight: 22, color: colors.ink, marginBottom: 4 },
     dot: { width: 8, height: 8, borderRadius: 4 },
-    barLabel: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.text2 },
-    barLabelFocus: { fontFamily: fonts.bodyBold, color: colors.ink },
-    barHint: { fontFamily: fonts.body, fontSize: 12, color: colors.caption },
-    focusTag: {
-      fontFamily: fonts.bodyBold,
-      fontSize: 11,
-      color: colors.onLime,
-      backgroundColor: colors.lime,
-      paddingHorizontal: 7,
-      paddingVertical: 1,
-      borderRadius: 8,
-      overflow: 'hidden',
-    },
-    barValue: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.text2 },
+
+    tiles: { flexDirection: 'row', gap: 10 },
+    tile: { flex: 1, minHeight: 104, backgroundColor: colors.card, borderRadius: 22, padding: 14, gap: 2 },
+    tileFocus: { backgroundColor: colors.accentSoft },
+    tileHead: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+    tileTitle: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.text2 },
+    tileValue: { fontFamily: fonts.bodySemi, fontSize: 20, lineHeight: 26, color: colors.ink, letterSpacing: -0.5 },
+    tileUnit: { fontFamily: fonts.bodyMedium, fontSize: 13, letterSpacing: 0, color: colors.text2 },
+    tileSub: { fontFamily: fonts.body, fontSize: 12, lineHeight: 16, color: colors.caption },
 
     tip: { backgroundColor: colors.lime, borderRadius: radius.card, padding: space.card, gap: 10 },
     tipHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
@@ -535,7 +575,6 @@ const styles = themed(() =>
     list: { paddingVertical: 4, paddingHorizontal: space.lg },
     emptyMeals: { gap: 12 },
     row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingVertical: 8 },
-    rowFocus: { marginHorizontal: -8, paddingHorizontal: 8, borderRadius: 14, backgroundColor: colors.accentSoft },
     rowDivider: { height: 1, backgroundColor: colors.divider },
     rowIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: colors.chip, alignItems: 'center', justifyContent: 'center' },
     rowTitle: { fontFamily: fonts.bodySemi, fontSize: 15, lineHeight: 20, color: colors.ink },
@@ -543,16 +582,6 @@ const styles = themed(() =>
     rowValue: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.ink },
     thumb: { width: 48, height: 48, borderRadius: 14 },
     thumbEmpty: { backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
-    waterAdd: {
-      height: hit,
-      paddingHorizontal: 14,
-      borderRadius: 22,
-      backgroundColor: colors.waterSoft,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    waterAddText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.waterDeep },
 
     more: { backgroundColor: colors.card, borderRadius: radius.card, paddingHorizontal: space.lg, paddingVertical: 4 },
     cardKicker: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.accentDeep },

@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, G, Path, Rect, Text as SvgText } from 'react-native-svg';
-
 import { brand, colors, fonts, themed } from '@/theme';
 
 /**
@@ -39,32 +38,26 @@ export function Wordmark() {
   );
 }
 
-/** Welcome: the day ring with water, sleep and movement chips. */
+/** Welcome: the same thin day ring and light number the user will see on Šodiena. */
 export function DayIllustration({ size = 300 }: { size?: number }) {
+  const c = 2 * Math.PI * 138;
   return (
     <Svg width={size} height={size} viewBox="0 0 300 300" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <Circle cx={150} cy={150} r={138} fill={colors.accentSoft} />
-      <Circle cx={150} cy={150} r={78} fill="none" stroke={colors.kcalTrack} strokeWidth={18} />
+      <Circle cx={150} cy={150} r={138} fill="none" stroke={colors.kcalTrack} strokeWidth={8} />
       <G rotation={-90} origin="150, 150">
-        <Circle cx={150} cy={150} r={78} fill="none" stroke={colors.accent} strokeWidth={18} strokeLinecap="round" strokeDasharray="390 490" />
+        <Circle cx={150} cy={150} r={138} fill="none" stroke={colors.accent} strokeWidth={8} strokeLinecap="round" strokeDasharray={`${c * 0.846} ${c}`} />
       </G>
-      <SvgText x={150} y={146} textAnchor="middle" fontSize={34} fontWeight="700" fontFamily={fonts.number} fill={colors.ink}>
-        1 480
+      <SvgText x={150} y={168} textAnchor="middle" fontSize={84} fontFamily={fonts.light} letterSpacing={-4} fill={colors.ink}>
+        270
       </SvgText>
-      <SvgText x={150} y={172} textAnchor="middle" fontSize={14} fontFamily={fonts.bodyMedium} fill={colors.caption}>
-        no 1 750 kcal
+      <SvgText x={150} y={198} textAnchor="middle" fontSize={16} fontFamily={fonts.bodyMedium} fill={colors.text2}>
+        kcal vēl šodien
       </SvgText>
-      <Rect x={222} y={48} width={58} height={58} rx={18} fill={colors.card} />
-      <Path d="M251 62s12 13 12 22a12 12 0 0 1-24 0c0-9 12-22 12-22z" fill={colors.waterSoft} stroke={colors.water} strokeWidth={2} />
-      <Rect x={22} y={196} width={58} height={58} rx={18} fill={colors.card} />
-      <Path d="M62 232a14 14 0 1 1-17-18 11 11 0 0 0 17 18z" fill={colors.proteinTrack} stroke={colors.protein} strokeWidth={2} />
-      <Rect x={206} y={214} width={66} height={40} rx={14} fill={colors.card} />
-      <Path d="M216 236h9l5-10 7 18 5-8h20" fill="none" stroke={colors.steps} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   );
 }
 
 const styles = themed(() => StyleSheet.create({
   word: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  wordText: { fontFamily: fonts.heading, fontSize: 22, color: colors.ink },
+  wordText: { fontFamily: fonts.heading, fontSize: 22, color: colors.ink, letterSpacing: -0.7 },
 }));

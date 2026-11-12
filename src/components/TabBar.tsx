@@ -61,7 +61,7 @@ function AddButton() {
         accessibilityLabel="Pievienot"
         testID="tab-add"
         style={({ pressed }) => [styles.add, pressed && { transform: [{ scale: 0.95 }] }]}>
-        <Icon name="plus" color={colors.onAccent} size={26} strokeWidth={2.4} />
+        <Icon name="plus" color={colors.onLime} size={26} strokeWidth={2.2} />
       </Pressable>
     </View>
   );
@@ -71,10 +71,10 @@ const styles = themed(() => StyleSheet.create({
   bar: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: colors.card,
-    borderTopWidth: 1,
+    backgroundColor: colors.bg,
+    borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.navBorder,
-    paddingTop: 6,
+    paddingTop: 8,
     paddingHorizontal: 8,
   },
   slot: {
@@ -88,19 +88,12 @@ const styles = themed(() => StyleSheet.create({
   label: { fontFamily: fonts.bodySemi, fontSize: 11, lineHeight: 14 },
   labelActive: { fontFamily: fonts.bodyBold },
   add: {
-    width: 60,
-    height: 60,
-    marginTop: -24,
-    borderRadius: 30,
-    borderWidth: 4,
-    borderColor: colors.bg,
-    backgroundColor: colors.accent,
+    // Flat lime disc inside the bar: the one bright thing on every screen.
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.lime,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.accent,
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 6,
   },
 }));

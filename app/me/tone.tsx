@@ -105,7 +105,7 @@ function Option({ selected, onPress, title, hint }: { selected: boolean; onPress
 }
 
 const styles = themed(() => StyleSheet.create({
-  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink },
+  h1: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 32, color: colors.ink, letterSpacing: -0.8 },
   card: { backgroundColor: colors.card, borderRadius: radius.card, padding: 18, gap: 6 },
   cardHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
   chip: { height: 28, paddingHorizontal: 12, borderRadius: 14, justifyContent: 'center' },

@@ -89,5 +89,5 @@ const styles = themed(() => StyleSheet.create({
   fill: { height: 6, backgroundColor: colors.ink },
   count: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.caption },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 36, color: colors.ink, letterSpacing: -0.6 },
+  title: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 36, color: colors.ink, letterSpacing: -0.9 },
 }));

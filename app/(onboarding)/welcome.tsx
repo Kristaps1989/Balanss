@@ -38,7 +38,7 @@ const styles = themed(() =>
     top: { height: 44, marginTop: 12, paddingHorizontal: 24, flexDirection: 'row', alignItems: 'center' },
     art: { flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 280 },
     copy: { gap: 12, paddingHorizontal: 24, paddingBottom: 28 },
-    title: { fontFamily: fonts.heading, fontSize: 32, lineHeight: 36, color: colors.ink },
+    title: { fontFamily: fonts.heading, fontSize: 32, lineHeight: 36, color: colors.ink, letterSpacing: -1.0 },
     body: { fontFamily: fonts.body, fontSize: 17, lineHeight: 25, color: colors.text2 },
     small: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.caption },
     bottom: { paddingHorizontal: 24, paddingBottom: 24 },

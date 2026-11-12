@@ -39,7 +39,7 @@ function page(token: string | null, config: Config): string {
 @media (prefers-color-scheme:dark){:root{--bg:#121513;--card:#1C201D;--ink:#F2F1EC;--text2:#B8BCB6;--link:#7FD3A2;--btn:#6CCB94;--on-btn:#0E1A13}}
 body{margin:0;font-family:Manrope,Arial,sans-serif;background:var(--bg);color:var(--ink);padding:24px 16px}
 main{max-width:480px;margin:0 auto;background:var(--card);border-radius:24px;padding:28px}
-h1{font-family:Fraunces,Georgia,serif;font-size:24px;margin:0 0 12px}p{font-size:16px;line-height:1.5;margin:0 0 20px}.small{font-size:14px;color:var(--text2);margin:0 0 8px}
+h1{letter-spacing:-.02em;font-size:24px;margin:0 0 12px}p{font-size:16px;line-height:1.5;margin:0 0 20px}.small{font-size:14px;color:var(--text2);margin:0 0 8px}
 a{color:var(--link)}.btn{display:inline-block;min-height:44px;box-sizing:border-box;background:var(--btn);color:var(--on-btn);text-decoration:none;font-weight:600;padding:14px 24px;border-radius:28px}</style>
 </head><body><main>${body}</main></body></html>`;
 }
